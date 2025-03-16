@@ -72,11 +72,10 @@ let kernel_theorem = Pi (Pi (Real, ("x", Real), Pi (Real, ("y", Real)), ("B",
       Pi (Pi (Real, ("y", Real)), ("psi",
         Id (Real,
           App (App (Var "B", Var "phi"), Var "psi"),
-          App (Var "K", Lam (Real, ("x", Lam (Real, ("y", RealOps (RMul, App (Var "phi", Var "x"), App (Var "psi", Var "y")))))))
-        ))
-      ))
-    ))
-  ))
+          App (Var "K", Lam (Real, ("x",
+                        Lam (Real, ("y",
+            RealOps (RMul, App (Var "phi", Var "x"),
+                           App (Var "psi", Var "y")))))))))))))))
 ```
 
 Proof. Classical, relies on nuclear space properties of 𝐷: define 𝐾(𝑓)=𝐵(𝑓(⋅,0),𝑓(0,⋅)), extend by density and continuity. 
@@ -86,12 +85,16 @@ Verification: 𝐵(𝜙,𝜓)=⟨𝐾,𝜙⊗𝜓⟩ externally tested.
 let proof_kernel = Lam (Pi (Real, ("x", Real), Pi (Real, ("y", Real)), ("B",
   Pair (
     "K", Lam (Pi (Real, ("x", Pi (Real, ("y", Real))), ("f",
-      App (Var "B", Lam (Real, ("x", App (Var "f", Var "x", zero))), Lam (Real, ("y", App (Var "f", zero, Var "y")))))),
+      App (Var "B", Lam (Real, ("x", App (Var "f", Var "x", zero))),
+                    Lam (Real, ("y", App (Var "f", zero, Var "y")))))),
     Pi (Pi (Real, ("x", Real)), ("phi",
       Pi (Pi (Real, ("y", Real)), ("psi",
         Refl (Id (Real,
           App (App (Var "B", Var "phi"), Var "psi"),
-          App (Var "K", Lam (Real, ("x", Lam (Real, ("y", RealOps (RMul, App (Var "phi", Var "x"), App (Var "psi", Var "y")))))))
+          App (Var "K", Lam (Real, ("x",
+                        Lam (Real, ("y",
+           RealOps (RMul, App (Var "phi", Var "x"),
+                          App (Var "psi", Var "y")))))))
         ))
       ))
     )
