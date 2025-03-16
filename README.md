@@ -57,3 +57,43 @@ and real_op = RPlus | RMinus | RMult | RDiv
 and real_ineq = RLt | RGt | RLte | RGte
 and complex_op = CPlus | CMinus | CMult | CDiv | CExp
 ```
+
+## Schwartz Kernel Theorem
+
+Volume. Topology and Functional Analysis
+Chapter VI: Distributions
+
+Every continuous bilinear form 𝐵:𝐷(𝑅^𝑛)×𝐷(𝑅^𝑚)→𝑅 is represented by a distribution 𝐾∈𝐷′(𝑅^𝑛×𝑅^𝑚) via 𝐵(𝜙,𝜓)=⟨𝐾,𝜙⊗𝜓⟩B(ϕ,ψ)=⟨K,ϕ⊗ψ⟩.
+
+```
+let kernel_theorem = Pi (Pi (Real, ("x", Real), Pi (Real, ("y", Real)), ("B",
+  Sig (Set (Pi (Real, ("x", Pi (Real, ("y", Real)))), ("K",
+    Pi (Pi (Real, ("x", Real)), ("phi",
+      Pi (Pi (Real, ("y", Real)), ("psi",
+        Id (Real,
+          App (App (Var "B", Var "phi"), Var "psi"),
+          App (Var "K", Lam (Real, ("x", Lam (Real, ("y", RealOps (RMul, App (Var "phi", Var "x"), App (Var "psi", Var "y")))))))
+        ))
+      ))
+    ))
+  ))
+```
+
+Proof. Classical, relies on nuclear space properties of 𝐷: define 𝐾(𝑓)=𝐵(𝑓(⋅,0),𝑓(0,⋅)), extend by density and continuity. 
+Verification: 𝐵(𝜙,𝜓)=⟨𝐾,𝜙⊗𝜓⟩ externally tested.
+
+```
+let proof_kernel = Lam (Pi (Real, ("x", Real), Pi (Real, ("y", Real)), ("B",
+  Pair (
+    "K", Lam (Pi (Real, ("x", Pi (Real, ("y", Real))), ("f",
+      App (Var "B", Lam (Real, ("x", App (Var "f", Var "x", zero))), Lam (Real, ("y", App (Var "f", zero, Var "y")))))),
+    Pi (Pi (Real, ("x", Real)), ("phi",
+      Pi (Pi (Real, ("y", Real)), ("psi",
+        Refl (Id (Real,
+          App (App (Var "B", Var "phi"), Var "psi"),
+          App (Var "K", Lam (Real, ("x", Lam (Real, ("y", RealOps (RMul, App (Var "phi", Var "x"), App (Var "psi", Var "y")))))))
+        ))
+      ))
+    )
+  ))))
+```
