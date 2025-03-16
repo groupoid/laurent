@@ -4,6 +4,8 @@ Laurent Schwartz: Analytical Type Theory
 Type Theory for mechanical formalization of Théorie des
 Distributions and Analys Mathematique by Laurent Schwartz.
 
+<img src="https://laurent.groupoid.space/img/laurent.jpg" widht=600>
+
 Type systems in mathematics and computer science provide
 a structured way to formalize proofs and computations.
 In this article, we present a minimal type system,
