@@ -240,77 +240,113 @@ For a Banach space 𝑋, there’s a bijection between closed subspaces of 𝑋 
 This bijection applies to closed subspaces (vector spaces), not arbitrary closed sets (e.g., singletons, bounded sets).
 
 ```
-let continuous K f = Pi (Real, ("x",
-  Pi (Real, ("eps",
-    And (RealIneq (RGt, Var "eps", zero),
-      Sig (Real, ("delta",
-        And (RealIneq (RGt, Var "delta", zero),
-          Pi (Real, ("y",
-            If (RealIneq (RLt, abs (RealOps (RMinus, Var "x", Var "y")), Var "delta"),
-                RealIneq (RLt, abs (RealOps (RMinus, App (Var "f", Var "x"), App (Var "f", Var "y"))), Var "eps"),
-                Bool)))))))))
-))
-let C K = Set (Pi (Var "K", ("x", Real)), ("f", continuous (Var "K") (Var "f")))
-let uniform_norm K f = Sig (Real, ("M",
-  And (
-    Pi (Real, ("x", RealIneq (RLte, abs (App (Var "f", Var "x")), Var "M"))),
-    Pi (Real, ("eps", And (RealIneq (RGt, Var "eps", zero),
-      Sig (Real, ("x0", RealIneq (RGte, abs (App (Var "f", Var "x0")), RealOps (RMinus, Var "M", Var "eps"))))))))
-  ))
-))
+let banach_space x = And (
+  normed_space (Var "x"),
+  Pi (Seq (Var "x"), ("xn",
+    If (cauchy (Var "xn", Var "x"),
+        Sig (Var "x", ("l", Limit (Nat, Var "xn", Var "l"))),
+        Bool)))
+)
+
+let normed_space x = And (
+  Pi (Var "x", ("a", Pi (Var "x", ("b",
+    RealIneq (RLte, norm (RealOps (RPlus, Var "a", Var "b")), RealOps (RPlus, norm (Var "a"), norm (Var "b"))))))),
+  Pi (Real, ("c", Pi (Var "x", ("a",
+    Id (Real, norm (RealOps (RMult, Var "c", Var "a")), RealOps (RMult, abs (Var "c"), norm (Var "a")))))))
+)
+
+let cauchy xn x = Pi (Real, ("eps",
+  And (RealIneq (RGt, Var "eps", zero),
+    Sig (Nat, ("N",
+      Pi (Nat, ("m", Pi (Nat, ("n",
+        If (And (RealIneq (RGt, Var "m", Var "N"), RealIneq (RGt, Var "n", Var "N")),
+            RealIneq (RLt, norm (RealOps (RMinus, App (Var "xn", Var "m"), 
+                    App (Var "xn", Var "n"))), Var "eps"), Bool)))))))))
+
+let norm a = Sup (Lam (Real, ("r", RealIneq (RLte, abs (Var "a"), Var "r"))))
 ```
 
 M(K)=C(K)^*.
 
 ```
-let dual_C K = Set (Pi (C (Var "K"), ("f", Real)), ("phi",
+let dual_space x = Set (Pi (Var "x", ("a", Real)), ("phi",
   And (
-    Pi (C (Var "K"), ("f", Pi (C (Var "K"), ("g",
-      Id (Real, App (Var "phi", RealOps (RPlus, Var "f", Var "g")),
-                RealOps (RPlus, App (Var "phi", Var "f"), App (Var "phi", Var "g"))))))),
-    Pi (Real, ("a", Pi (C (Var "K"), ("f",
-      Id (Real, App (Var "phi", RealOps (RMul, Var "a", Var "f")),
-                RealOps (RMul, Var "a", App (Var "phi", Var "f")))))))
-  ))
-))
-```
+    linear (Var "phi"),
+    bounded (Var "phi")
+  )))
 
-```
-let annihilator K A = Set (dual_C (Var "K"), ("phi",
-  Pi (C (Var "K"), ("f",
-    If (App (Var "A", Var "f"), Id (Real, App (Var "phi", Var "f"), zero), Bool)))))
-```
-
-```
-let pre_annihilator K B = Set (C (Var "K"), ("f",
-  Pi (dual_C (Var "K"), ("phi",
-    If (App (Var "B", Var "phi"), Id (Real, App (Var "phi", Var "f"), zero), Bool)))))
-```
-
-```
-let closed_subspace_C K F = And (
-  Pi (C (Var "K"), ("f", Pi (C (Var "K"), ("g",
-    If (And (App (Var "F", Var "f"), App (Var "F", Var "g")),
-        App (Var "F", RealOps (RPlus, Var "f", Var "g")), Bool)))),
-  Pi (Seq (C (Var "K")), ("fn",
-    Pi (C (Var "K"), ("f",
-      If (And (
-            Pi (Nat, ("n", App (Var "F", App (Var "fn", Var "n")))),
-            Limit (Nat, Lam (Nat, ("n",
-              App (uniform_norm (Var "K"), Lam (Real, ("x",
-                RealOps (RMinus, App (App (Var "fn", Var "n"), Var "x"), App (Var "f", Var "x"))))), zero))),
-          App (Var "F", Var "f"),
-          Bool)))))
-))
-```
-
-```
-let bijection_theorem K = And (
-  Pi (Set (C (Var "K")), ("A",
-    If (closed_subspace_C (Var "K") (Var "A"),
-        closed_subspace_C (Var "K") (pre_annihilator (Var "K") (annihilator (Var "K") (Var "A"))), Bool))),
-  Pi (Set (dual_C (Var "K")), ("B",
-    If (closed_subspace_C (Var "K") (Var "B"),
-        closed_subspace_C (Var "K") (annihilator (Var "K") (pre_annihilator (Var "K") (Var "B"))), Bool))))
+let linear phi = And (
+  Pi (Var "x", ("a", Pi (Var "x", ("b",
+    Id (Real, App (Var "phi", RealOps (RPlus, Var "a", Var "b")),
+              RealOps (RPlus, App (Var "phi", Var "a"), App (Var "phi", Var "b")))))),
+  Pi (Real, ("c", Pi (Var "x", ("a",
+    Id (Real, App (Var "phi", RealOps (RMult, Var "c", Var "a")),
+              RealOps (RMult, Var "c", App (Var "phi", Var "a")))))))
 )
+
+let bounded phi = Sig (Real, ("M",
+  And (RealIneq (RGt, Var "M", zero),
+    Pi (Var "x", ("a", RealIneq (RLte, abs (App (Var "phi", Var "a")),
+                       RealOps (RMult, Var "M", norm (Var "a"))))))))
+```
+
+```
+let annihilator x s = Set (dual_space (Var "x"), ("phi",
+  Pi (Var "s", ("a", Id (Real, App (Var "phi", Var "a"), zero)))))
+
+let pre_annihilator x s = Set (Var "x", ("a",
+  Pi (dual_space (Var "x"), ("phi",
+    If (App (Var "s", Var "phi"),
+      Id (Real, App (Var "phi", Var "a"), zero), Bool)))))
+```
+
+```
+let closed_subspace x s = And (
+  subspace (Var "x", Var "s"),
+  Id (Set (Var "x"), Var "s", Closure (Var "s")))
+
+let subspace x s = And (
+  Pi (Var "s", ("a", Pi (Var "s", ("b",
+    App (Var "s", RealOps (RPlus, Var "a", Var "b")))))),
+  Pi (Real, ("c", Pi (Var "s", ("a",
+    App (Var "s", RealOps (RMult, Var "c", Var "a")))))))
+```
+
+```
+let bijection_theorem = Pi (Set Real, ("X",
+  If (banach_space (Var "X"),
+    And (
+      Pi (Set (Var "X"), ("A",
+        If (closed_subspace (Var "X", Var "A"),
+            Id (Set (Var "X"), Var "A", pre_annihilator (Var "X", 
+                    annihilator (Var "X", Var "A"))), Bool))),
+      Pi (Set (dual_space (Var "X")), ("B",
+        If (closed_subspace (dual_space (Var "X"), Var "B"),
+            Id (Set (dual_space (Var "X")), Var "B", annihilator (Var "X",
+                    pre_annihilator (Var "X", Var "B"))), Bool))))), Bool)))
+```
+
+```
+let proof_bijection_theorem = Lam (Set Real, ("X",
+  If (Refl (banach_space (Var "X")),
+    Pair (
+      "fwd", Lam (Set (Var "X"), ("A",
+        If (Refl (closed_subspace (Var "X", Var "A")),
+          Pair ("sub", Refl (subspace (Var "X", pre_annihilator (Var "X", annihilator (Var "X", Var "A")))),
+            Pair ("closed", Refl (Id (Set (Var "X"), 
+                Closure (pre_annihilator (Var "X", annihilator (Var "X", Var "A"))),
+                pre_annihilator (Var "X", annihilator (Var "X", Var "A")))),
+              Refl (Id (Set (Var "X"), Var "A", pre_annihilator (Var "X",
+                    annihilator (Var "X", Var "A")))))), Bool))),
+      Lam (Set (dual_space (Var "X")), ("B",
+        If (Refl (closed_subspace (dual_space (Var "X"), Var "B")),
+          Pair ("sub", Refl (subspace (dual_space (Var "X"), 
+                     annihilator (Var "X", pre_annihilator (Var "X", Var "B")))),
+            Pair (
+              "closed", Refl (Id (Set (dual_space (Var "X")), 
+                Closure (annihilator (Var "X", pre_annihilator (Var "X", Var "B"))),
+                annihilator (Var "X", pre_annihilator (Var "X", Var "B")))),
+              Refl (Id (Set (dual_space (Var "X")), Var "B", annihilator (Var "X",
+                           pre_annihilator (Var "X", Var "B")))))), Bool)))), Bool)))
+
 ```
