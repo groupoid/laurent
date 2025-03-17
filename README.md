@@ -92,15 +92,17 @@ let taylor_theorem = Pi (Real, ("a", Pi (Nat, ("n",
 ```
 
 ```
-let proof_taylor = Lam (Real, ("a", Lam (Nat, ("n", Lam (Pi (Real, ("x", Real)), ("f",
-  Pair (
-    "diff_cond", Pi (Nat, ("k", If (RealIneq (RLte, Var "k", Var "n"),
+let proof_taylor =
+   Lam (Real, ("a", Lam (Nat, ("n", Lam (Pi (Real, ("x", Real)), ("f",
+    Pair ("diff_cond", Pi (Nat, ("k", If (RealIneq (RLte, Var "k", Var "n"),
             Refl (diff_k (Var "f", Var "a", Var "k")), Bool))),
     Refl (Id (Real,
       App (Var "f", Var "x"),
       RealOps (RPlus,
-        App (sum (Nat, ("k", RealOps (RDiv, App (diff_k (Var "f", Var "a", Var "k")), fact (Var "k")),
-        RealOps (RMul, Var "k", RealOps (RMinus, Var "x", Var "a")))), zero, RealOps (RMinus, Var "n", one)),
+        App (sum (Nat, ("k", RealOps (RDiv, App (diff_k (Var "f", Var "a", Var "k")),
+               fact (Var "k")),
+        RealOps (RMul, Var "k", RealOps (RMinus, Var "x", Var "a")))), 
+                    zero, RealOps (RMinus, Var "n", one)),
         remainder (Var "f", Var "x", Var "a", Var "n"))))
     )
   ))))))
