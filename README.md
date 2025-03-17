@@ -9,17 +9,18 @@ Distributions and Analys Mathematique by Laurent Schwartz.
 Type systems in mathematics and computer science provide
 a structured way to formalize proofs and computations.
 In this article, we present a minimal type system,
-designed to encode classical and modern analysis with
-just 19 core constructors. Unlike full HoTT,
+designed to encode classical and modern analysis with explicit core constructors. Unlike full HoTT,
 we omit identity types `Id`, `idp`, `J` to keep the system lean,
-\relying instead on `Bool` predicates and external test validation
-for equational reasoning. We’ll explore this system through
+relying instead on `Bool` predicates and external test validation
+for equational reasoning. Also we are aware that Set theory is embeddable in CIC but we
+wanted to have more classical core. We’ll explore this system through
 examples, starting with classical Riemann sums, advancing
 to Lebesgue integration, Bishop’s constructive analysis, L_2 spaces,
 and culminating in Schwartz’s theory of distributions.
 
 ```
 type exp =
+  | Universe of int             (* Universes *)
   | Var of string               (* Variables *)
   | Lam of exp * (string * exp) (* Lambda abstraction *)
   | App of exp * exp            (* Application *)
@@ -27,10 +28,10 @@ type exp =
   | Sig of exp * (string * exp) (* Dependent pair type *)
   | Pair of string * exp * exp  (* Pair constructor *)
 
+  | Bool                        (* Boolean type *)
   | Nat                         (* Natural numbers *)
   | Real                        (* Real numbers *)
   | Complex                     (* Complex numbers *)
-  | Bool                        (* Boolean type *)
   | If of exp * exp * exp       (* Conditional *)
   | Vec of exp * exp * exp      (* Vector space *)
   | RealIneq of real_ineq * exp * exp    (* Real inequalities: <, >, ≤, ≥ *)
