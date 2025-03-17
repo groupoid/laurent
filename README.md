@@ -61,10 +61,12 @@ and real_ineq = RLt | RGt | RLte | RGte
 and complex_op = CPlus | CMinus | CMult | CDiv | CExp
 ```
 
+## Analyse Mathematique
+
 ### Taylor’s Theorem with Remainder
 
-Volume 1: Calculus
-Chapter I: Differential Calculus
+* Volume 1: Calculus
+* Chapter I: Differential Calculus
 
 If f:R→R is n-times differentiable at a, then f(x) = \Sigma_{k=0}^{n-1}\frac{f^(k)(a)}{k!}(x-a)^k + 𝑅_𝑛(𝑥), where 𝑅_𝑛(𝑥)=𝑜((𝑥−𝑎)^{𝑛−1}) as 𝑥→𝑎.
 
@@ -105,8 +107,8 @@ let proof_taylor = Lam (Real, ("a", Lam (Nat, ("n", Lam (Pi (Real, ("x", Real)),
 
 ### Fundamental Theorem of Calculus
 
-Volume: Calculus
-Chapter II: Integral Calculus
+* Volume 1: Calculus
+* Chapter II: Integral Calculus
 
 If 𝑓 is continuous on [𝑎,𝑏], then 𝐹(𝑥)=∫_𝑎^𝑥{𝑓(𝑡)}𝑑𝑡 is differentiable, and 𝐹′(𝑥)=𝑓(𝑥).
 
@@ -142,8 +144,8 @@ let proof_ftc = Lam (Real, ("a", Lam (Real, ("b", Lam (Pi (Real, ("x", Real)), (
 
 ### Lebesgue Dominated Convergence Theorem
 
-Volume: Topology and Functional Analysis
-Chapter III: Integration
+* Volume 2: Topology and Functional Analysis
+* Chapter III: Integration
 
 If 𝑓𝑛→𝑓 a.e., ∣𝑓𝑛∣≤𝑔, and ∫𝑔<∞, then ∫𝑓𝑛→∫𝑓.
 
@@ -191,10 +193,10 @@ let proof_dominated = Lam (Seq (Pi (Real, ("x", Real)), ("fn",
       ))))))
 ```
 
-## Schwartz Kernel Theorem
+### Schwartz Kernel Theorem
 
-Volume. Topology and Functional Analysis
-Chapter VI: Distributions
+* Volume 2. Topology and Functional Analysis
+* Chapter VI: Distributions
 
 Every continuous bilinear form 𝐵:𝐷(𝑅^𝑛)×𝐷(𝑅^𝑚)→𝑅 is represented by a distribution 𝐾∈𝐷′(𝑅^𝑛×𝑅^𝑚) via 𝐵(𝜙,𝜓)=⟨𝐾,𝜙⊗𝜓⟩B(ϕ,ψ)=⟨K,ϕ⊗ψ⟩.
 
@@ -234,7 +236,10 @@ let proof_kernel = Lam (Pi (Real, ("x", Real), Pi (Real, ("y", Real)), ("B",
   ))))
 ```
 
-## Ba
+### Banach Spaces and Duality
+
+* Volume 2. Topology and Functional Analysis
+* Chapter V: Banach Spaces
 
 For a Banach space 𝑋, there’s a bijection between closed subspaces of 𝑋 and closed subspaces of 𝑋∗: A↦A^⊥, 𝐵↦^⊥𝐵.
 This bijection applies to closed subspaces (vector spaces), not arbitrary closed sets (e.g., singletons, bounded sets).
@@ -349,4 +354,78 @@ let proof_bijection_theorem = Lam (Set Real, ("X",
               Refl (Id (Set (dual_space (Var "X")), Var "B", annihilator (Var "X",
                            pre_annihilator (Var "X", Var "B")))))), Bool)))), Bool)))
 
+```
+
+### Banach-Steinhaus Theorem
+
+* Volume 2. Topology and Functional Analysis
+* Chapter IV. Topological Vector Spaces
+
+∀x∈X, α∈A sup ∥T α x∥ Y​ <∞⟹∃M∈R,∀α∈A,∥T α​ ∥ X→Y​ ≤M, ∥𝑇𝛼∥ = ∥=sup{∥T α x∥ Y ∣∥x∥ X ≤1}. 
+
+```
+let operator x y = Pi (Var "x", ("a", Var "y"))
+
+let continuous_linear x y t = And (
+  linear (Var "t"),
+  bounded (Var "t")
+)
+
+let bounded t = Sig (Real, ("M",
+  And (RealIneq (RGt, Var "M", zero),
+    Pi (Var "x", ("a",
+      RealIneq (RLte, norm (App (Var "t", Var "a")),
+       RealOps (RMult, Var "M", norm (Var "a"))))))))
+
+let op_norm x y t = Sup (Lam (Real, ("r",
+  Pi (Var "x", ("a",
+    If (RealIneq (RLte, norm (Var "a"), one),
+        RealIneq (RLte, norm (App (Var "t", Var "a")), Var "r"),
+        Bool)))))
+
+let bounded_set s = Sig (Real, ("B",
+  And (RealIneq (RGt, Var "B", zero),
+    Pi (Var "T", ("t", RealIneq (RLte, App (Var "s", Var "t"), Var "B"))))))
+
+let zero = RealOps (RMinus, Real, Real)
+
+let one = RealOps (RPlus, zero, zero)
+
+```
+
+```
+let banach_steinhaus = Pi (Set Real, ("X",
+  Pi (Set Real, ("Y",
+    If (And (banach_space (Var "X"), normed_space (Var "Y")),
+      Pi (Set (operator (Var "X", Var "Y")), ("T",
+        If (And (
+              Pi (Var "T", ("t", continuous_linear (Var "X", Var "Y", Var "t"))),
+              Pi (Var "X", ("x",
+                bounded_set (Lam (Var "T", ("t", norm (App (Var "t", Var "x")))))))),
+            Sig (Real, ("M",
+              And (RealIneq (RGt, Var "M", zero),
+                Pi (Var "T", ("t", RealIneq (RLte, 
+                op_norm (Var "X", Var "Y", Var "t"), Var "M")))))), Bool))), Bool))))
+```
+
+```
+let proof_banach_steinhaus = Lam (Set Real, ("X",
+  Lam (Set Real, ("Y",
+    If (Pair ("banach", Refl (banach_space (Var "X")), "normed", Refl (normed_space (Var "Y"))),
+      Lam (Set (operator (Var "X", Var "Y")), ("T",
+        If (Pair (
+              "cont_lin", Refl (Pi (Var "T", ("t", continuous_linear (Var "X", Var "Y", Var "t")))),
+              "pt_bdd", Refl (Pi (Var "X", ("x",
+                bounded_set (Lam (Var "T", ("t", norm (App (Var "t", Var "x"))))))))),
+          Pair (
+            "M", Sup (Lam (Real, ("r",
+              Pi (Var "T", ("t", RealIneq (RLte, op_norm (Var "X", Var "Y", Var "t"), Var "r")))))),
+            Pair (
+              "M_pos", RealIneq (RGt, Var "M", zero),  (* External check *)
+              "unif_bdd", Refl (Pi (Var "T", ("t",
+                RealIneq (RLte, op_norm (Var "X", Var "Y", Var "t"), Var "M")))))
+            )
+          ),
+          Bool))),
+      Bool))))
 ```
