@@ -439,24 +439,110 @@ let proof_banach_steinhaus = Lam (Set Real, ("X",
 ### de Rham Theorem
 
 ```
-let de_rham_theorem = Pi (Set Real, ("Omega",
-  Pi (Pi (Real, ("x", Vec (Real, Real, Real))), ("omega",
+let omega := Set (Vec_n n)
+
+let gamma := 
+  Lam (Real, ("t", 
+    If (RealIneq (RLte, Var "t", RealConst 0.5), 
+        App (Var "gamma_1", RealOps (RMult, RealConst 2, Var "t")), 
+        App (Var "gamma_2", RealOps (RMinus, one, RealOps (RMult, 
+          RealConst 2, RealOps (RMinus, Var "t", RealConst 0.5)))))))
+
+let is_open omega := 
+  Pi (omega, ("x", 
+    Sig (Real, ("delta", 
+      And (RealIneq (RGt, Var "delta", zero),
+        Pi (Vec_n n, ("y", 
+          If (RealIneq (RLt, App (norm, 
+              RealOps (RMinus, Var "y", Var "x")), Var "delta"), 
+              App (omega, Var "y"), 
+              Bool))))))))
+
+let c1_form omega n := 
+  Sig (one_form omega n, ("w", 
+    Pi (omega, ("x", 
+      Sig (Vec_n n, ("dw", 
+        Pi (Vec_n n, ("v", 
+          Id (Real, 
+            Limit (Real, Lam (Real, ("h", RealOps (RDiv, RealOps (RMinus,
+            App (App (Var "w", RealOps (RPlus, Var "x", Var "h")), Var "v"),
+            App (App (Var "w", Var "x"), Var "v"))), Var "h"))), zero), 
+            App (Var "dw", Var "v"))))))))))
+
+let loop omega n := 
+  Sig (Pi (Set (Lam (Real, ("t", And (RealIneq (RGte, Var "t", zero), 
+           RealIneq (RLte, Var "t", one)))), ("t", omega)), ("gamma", 
     And (
-      c1_form (Var "Omega", Var "omega"),
-      And (
-        Pi (Pi (Real, ("t", Vec (Real, Real, Real))), ("gamma",
-          If (And (
-                c_infty (Set (Lam (Real, ("t", And (RealIneq (RGte, Var "t", zero),
-                        RealIneq (RLte, Var "t", one))))), Var "gamma", Var "Omega"),
-                Id (Vec (Real, Real, Real), App (Var "gamma", zero), App (Var "gamma", one))),
-              Id (Real,
-                Lebesgue (Lam (Real, ("t", dot (App (Var "omega", 
-                    App (Var "gamma", Var "t")), deriv (Var "gamma", Var "t")))), zero, one),
-                zero),
-              Bool))),
-        Sig (Pi (Real, ("x", Real)), ("f",
+      Id (Vec_n n, App (Var "gamma", zero), App (Var "gamma", one)),
+      Pi (Nat, ("k", 
+        Sig (Pi (Real, ("t", Vec_n n)), ("dgamma_k", 
+          Pi (Real, ("t", 
+            Id (Vec_n n, 
+              Limit (Vec_n n, Lam (Real, ("h", RealOps (RDiv, RealOps (RMinus, 
+              App (Var "gamma", RealOps (RPlus, Var "t", Var "h")), 
+              App (Var "gamma", Var "t"))), Var "h"))), zero), 
+              App (Var "dgamma_k", Var "t")))))))))))
+
+let zero_form omega := Pi (omega, ("x", Real))
+
+let interval_measure := 
+  Measure (Set (Lam (Real, ("t", And (RealIneq (RGte, Var "t", zero), 
+    RealIneq (RLte, Var "t", one)))), Mu (Var "intervals", Var "sigma"))
+
+let deriv (Var "gamma", Var "t") := 
+  Limit (Vec_n n, Lam (Real, ("h", RealOps (RDiv, RealOps (RMinus, 
+    App (Var "gamma", RealOps (RPlus, Var "t", Var "h")),
+         App (Var "gamma", Var "t"))), Var "h"))), zero)
+
+let integral (Var "w", Var "gamma") := 
+  Lebesgue (Lam (Real, ("t", App (App (Var "w", App (Var "gamma", Var "t")), 
+        deriv (Var "gamma", Var "t")))), Var "interval_measure")
+
+let rec cm_form Omega n m := 
+  Sig (one_form Omega n, ("w", 
+    If (Id (Nat, Var "m", zero), 
+        True, 
+        Sig (Pi (Var "Omega", ("x", Vec_n n)), ("dw", 
           And (
-            Id (Pi (Real, ("x", Vec (Real, Real, Real))), Var "omega", deriv (Var "f")),
-            If (cm_form (Var "Omega", Var "omega", Var "m"), 
-                            cm_func (Var "Omega", Var "f", Var "m"), Bool)))))))))))
+            Pi (Var "Omega", ("x", Pi (Vec_n n, ("v", 
+              Id (Real, Limit (Real, Lam (Real, ("h", RealOps (RDiv, RealOps (RMinus,
+              App (App (Var "w", RealOps (RPlus, Var "x", Var "h")), Var "v"), 
+              App (App (Var "w", Var "x"), Var "v"))), Var "h"))), zero), 
+              App (Var "dw", Var "v")))))),
+            cm_form Omega n (RealOps (RMinus, Var "m", one)) (Lam (Var "Omega",
+             ("x", Lam (Vec_n n, ("v", App (Var "dw", Var "x")))))))))))))
+
+let differential (Var "f") := 
+  Lam (Var "Omega", ("x", 
+    Lam (Vec_n n, ("v", 
+      Limit (Real, Lam (Real, ("h", RealOps (RDiv, RealOps (RMinus, App (Var "f", 
+        RealOps (RPlus, Var "x", Var "v")), App (Var "f", Var "x"))), Var "h"))), zero)))))
+
+
+```
+
+```
+let de_rham_theorem =
+  Pi (Nat, ("n",   
+    Pi (Set (Vec (n, Real, RealOps RPlus, RealOps RMult)),
+      Pi (one_form Omega n, ("omega",
+        And (c1_form Omega n (Var "omega"),
+          And (Pi (loop Omega n, ("gamma",
+              Id (Real, integral (Var "omega", Var "gamma"), zero))),
+            Sig (zero_form Omega, ("f", And (
+                Id (one_form Omega n, Var "omega", differential (Var "f")),
+                Pi (Nat, ("m", If (cm_form Omega n (Var "m") (Var "omega"),
+                  cm_form Omega n (Var "m") (Var "f"), Bool)))))))))))))))
+```
+
+```
+let proof : de_rham_theorem =
+  Lam (Nat, ("n",
+    Lam (Set (Vec (Real, RealOps RPlus, RealOps RMult)), ("Omega",
+      Lam (one_form Omega n, ("omega",
+        Pair ("f", Lam (Omega, ("x", integral (Var "omega", path Omega n (Var "x0", Var "x")))),
+          And (
+            Id (one_form Omega n, Var "omega", differential (Var "f")),
+            Lam (Nat, ("m", If (cm_form Omega n (Var "m") (Var "omega"),
+              cm_form Omega n (Var "m") (Var "f"), Bool)))))))))))
 ```
