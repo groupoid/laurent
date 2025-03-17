@@ -435,3 +435,28 @@ let proof_banach_steinhaus = Lam (Set Real, ("X",
           Bool))),
       Bool))))
 ```
+
+### de Rham Theorem
+
+```
+let de_rham_theorem = Pi (Set Real, ("Omega",
+  Pi (Pi (Real, ("x", Vec (Real, Real, Real))), ("omega",
+    And (
+      c1_form (Var "Omega", Var "omega"),
+      And (
+        Pi (Pi (Real, ("t", Vec (Real, Real, Real))), ("gamma",
+          If (And (
+                c_infty (Set (Lam (Real, ("t", And (RealIneq (RGte, Var "t", zero),
+                        RealIneq (RLte, Var "t", one))))), Var "gamma", Var "Omega"),
+                Id (Vec (Real, Real, Real), App (Var "gamma", zero), App (Var "gamma", one))),
+              Id (Real,
+                Lebesgue (Lam (Real, ("t", dot (App (Var "omega", 
+                    App (Var "gamma", Var "t")), deriv (Var "gamma", Var "t")))), zero, one),
+                zero),
+              Bool))),
+        Sig (Pi (Real, ("x", Real)), ("f",
+          And (
+            Id (Pi (Real, ("x", Vec (Real, Real, Real))), Var "omega", deriv (Var "f")),
+            If (cm_form (Var "Omega", Var "omega", Var "m"), 
+                            cm_func (Var "Omega", Var "f", Var "m"), Bool)))))))))))
+```
