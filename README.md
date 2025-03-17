@@ -256,9 +256,11 @@ let banach_space x = And (
 
 let normed_space x = And (
   Pi (Var "x", ("a", Pi (Var "x", ("b",
-    RealIneq (RLte, norm (RealOps (RPlus, Var "a", Var "b")), RealOps (RPlus, norm (Var "a"), norm (Var "b"))))))),
+    RealIneq (RLte, norm (RealOps (RPlus, Var "a", Var "b")),
+        RealOps (RPlus, norm (Var "a"), norm (Var "b"))))))),
   Pi (Real, ("c", Pi (Var "x", ("a",
-    Id (Real, norm (RealOps (RMult, Var "c", Var "a")), RealOps (RMult, abs (Var "c"), norm (Var "a")))))))
+    Id (Real, norm (RealOps (RMult, Var "c", Var "a")), 
+         RealOps (RMult, abs (Var "c"), norm (Var "a")))))))
 )
 
 let cauchy xn x = Pi (Real, ("eps",
@@ -338,7 +340,8 @@ let proof_bijection_theorem = Lam (Set Real, ("X",
     Pair (
       "fwd", Lam (Set (Var "X"), ("A",
         If (Refl (closed_subspace (Var "X", Var "A")),
-          Pair ("sub", Refl (subspace (Var "X", pre_annihilator (Var "X", annihilator (Var "X", Var "A")))),
+          Pair ("sub", Refl (subspace (Var "X", pre_annihilator (Var "X",
+             annihilator (Var "X", Var "A")))),
             Pair ("closed", Refl (Id (Set (Var "X"), 
                 Closure (pre_annihilator (Var "X", annihilator (Var "X", Var "A"))),
                 pre_annihilator (Var "X", annihilator (Var "X", Var "A")))),
