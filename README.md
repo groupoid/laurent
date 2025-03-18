@@ -20,7 +20,7 @@ Bishop’s constructive analysis, L₂ spaces, and culminating in Schwartz’s
 theory of distributions.
 
 ```
-type exp =                               (* MLTT-75: *)
+type exp =                               (* MLTT-72: *)
   | Universe of int                      (*   Universes *)
   | Var of string                        (*   Variables *)
   | Forall of exp * (string * exp)       (*   Dependent function type : Universe 0 *)
@@ -48,13 +48,13 @@ type exp =                               (* MLTT-75: *)
   | Ordinal                              (*   Ordinals *)
                                          (* MEASURE: *)
   | Mu of exp * exp                      (*   Extend measure from base to sigma-algebra *)
-  | Measure of exp * exp                 (*   Measures *)
+  | Measure of exp * exp                 (*   Measures holds space and sigma-algebra *)
                                          (* CALCULUS: *)
   | Seq of exp                           (*   Sequences *)
   | Limit of exp * exp * exp             (*   Limits *)
   | Sup of exp                           (*   Supremum of a set s: Real -> Bool *)
   | Inf of exp                           (*   Infinum of a set s: Real -> Bool *)
-  | Lebesgue of exp * exp * exp          (*   Lebesgue integral *)
+  | Lebesgue of exp * exp * exp          (*   Lebesgue integral {f, mu, set}, mu : Measure *)
 
 and real_op = RPlus | RMinus | RMult | RDiv
 and real_ineq = RLt | RGt | RLte | RGte
