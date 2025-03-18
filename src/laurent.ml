@@ -272,6 +272,7 @@ and string_of_exp = function
 
 (* canonical examples *)
 
+let universal  : exp = Power Bool
 let sequence_a : exp = Lam ("n", Nat, RealOps (Div, One, NatToReal (Var "n")))
 let sequence_e : exp = Lam ("n", Nat, RealOps (Pow, RealOps (Plus, One, RealOps (Div, One, NatToReal (Var "n"))), NatToReal (Var "n")))
 let limit_a    : exp = Limit (sequence_a, Infinity, Zero)
@@ -305,6 +306,7 @@ let test_all () =
     test_term env ctx set_a (Set Real) "set_a";
     test_term env ctx e Real "e";
     test_term env ctx limit_a Real "limit_a";
+    test_term env ctx universal (Set Bool) "universal set";
     Printf.printf "All tests passed!\n"
 
 let () = test_all ()
