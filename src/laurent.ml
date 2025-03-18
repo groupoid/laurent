@@ -39,7 +39,7 @@ type exp =
   | Limit of exp * exp * exp
   | Sup of exp
   | Inf of exp
-  | Lebesgue of exp * exp
+  | Lebesgue of exp * exp * exp
 
 exception TypeError of string
 
@@ -79,7 +79,7 @@ let rec subst_many m t =
     | Limit (f, x', l) -> Limit (subst_many m f, subst_many m x', subst_many m l)
     | Sup s -> Sup (subst_many m s)
     | Inf s -> Inf (subst_many m s)
-    | Lebesgue (f, measure) -> Lebesgue (subst_many m f, subst_many m measure)
+    | Lebesgue (f, measure, set) -> Lebesgue (subst_many m f, subst_many m measure, subst_many m set)
     | _ -> t
 
 let subst x s t = subst_many [(x, s)] t
@@ -100,11 +100,13 @@ and infer env (ctx : context) (e : exp) : exp =
   | Var x -> (match lookup_var ctx x with | Some ty -> ty | None -> raise (TypeError ("Unbound variable: " ^ x)))
   | Forall (x, a, b) -> Universe 0
   | Exists (x, a, b) -> Universe 0
+  | Lam (x, domain, body) when equal env ctx domain Real && equal env ctx (infer env (add_var ctx x domain) body) Bool ->
+    Set Real
   | Lam (x, domain, body) ->
     let ctx' = add_var ctx x domain in
     let body_ty = infer env ctx' body in Forall (x, domain, body_ty)
   | App (f, arg) -> (match infer env ctx f with | Forall (x, a, b) -> check env ctx arg a; subst x arg b | ty -> raise (TypeError "Application requires a Pi type"))
-  | Pair (a, b) -> let a_ty = infer env ctx a in let b_ty = infer env ctx b in Exists ("x", a_ty, b_ty)
+  | Pair (a, b) -> let a_ty = infer env ctx a in let b_ty = infer env ctx b in Exists ("_", a_ty, b_ty)
   | Fst p -> (match infer env ctx p with | Exists (x, a, b) -> a | ty -> raise (TypeError ("Fst expects a Sigma type")))
   | Snd p -> (match infer env ctx p with | Exists (x, a, b) -> subst x (Fst p) b | ty -> raise (TypeError ("Snd expects a Sigma type")))
   | Bool -> Universe 0
@@ -155,9 +157,9 @@ and infer env (ctx : context) (e : exp) : exp =
       Bool
   | Ordinal -> Universe 0
   | Mu (base, sigma) ->
-      let _ = check env ctx base (Set Real) in
-      let _ = check env ctx sigma (Set (Set Real)) in
-      Measure (Real, Set Real)
+    let _ = check env ctx base (Universe 0) in
+    let _ = check env ctx sigma (Set (Set base)) in
+    Measure (base, Set (Set base))
   | Measure (space, sigma) ->
       let _ = check env ctx space (Universe 0) in
       let _ = check env ctx sigma (Set (Set space)) in
@@ -176,10 +178,11 @@ and infer env (ctx : context) (e : exp) : exp =
   | Inf s ->
       let _ = check env ctx s (Set Real) in
       Real
-  | Lebesgue (f, mu) ->
-      let _ = check env ctx f (Forall ("x", Real, Real)) in
-      let _ = check env ctx mu (Measure (Real, Set (Set Real))) in
-      Real
+  | Lebesgue (f, mu, set) ->
+    let _ = check env ctx f (Forall ("x", Real, Real)) in
+    let _ = check env ctx mu (Measure (Real, Set (Set Real))) in
+    let _ = check env ctx set (Set Real) in
+    Real
 
 and universe env ctx t =
     match infer env ctx t with
@@ -231,7 +234,7 @@ and equal' env ctx t1 t2 =
     | Limit (f1, x1, l1), Limit (f2, x2, l2) -> equal' env ctx f1 f2 && equal' env ctx x1 x2 && equal' env ctx l1 l2
     | Sup s1, Sup s2 -> equal' env ctx s1 s2
     | Inf s1, Inf s2 -> equal' env ctx s1 s2
-    | Lebesgue (f1, m1), Lebesgue (f2, m2) -> equal' env ctx f1 f2 && equal' env ctx m1 m2
+    | Lebesgue (f1, m1 ,s1), Lebesgue (f2, m2, s2) -> equal' env ctx f1 f2 && equal' env ctx m1 m2 && equal' env ctx s1 s2
     | _ -> false
 
 and reduce env ctx t =
@@ -277,30 +280,44 @@ and string_of_exp = function
   | Limit (f, x, l) -> "Limit (" ^ string_of_exp f ^ ", " ^ string_of_exp x ^ ", " ^ string_of_exp l ^ ")"
   | Sup s -> "Sup (" ^ string_of_exp s ^ ")"
   | Inf s -> "Inf (" ^ string_of_exp s ^ ")"
-  | Lebesgue (f, m) -> "Lebesgue (" ^ string_of_exp f ^ ", " ^ string_of_exp m ^ ")"
+  | Lebesgue (f, m, set) -> "Lebesgue (" ^ string_of_exp f ^ ", " ^ string_of_exp m ^ ")"
   | Forall (x, a, b) -> "Forall (" ^ x ^ ", " ^ string_of_exp a ^ ", " ^ string_of_exp b ^ ")"
 
-let test_term env ctx (term : exp) (expected_type : exp) (name : string) : unit =
-    try let inferred_type = infer env ctx term in
-        check env ctx inferred_type expected_type;
-        Printf.printf "%s OK\n" name
-    with TypeError msg -> Printf.printf "Error in %s: %s\n" name msg
+
+(* canonical example *)
+
+let interval_a_b (a: exp) (b: exp) : exp =
+    Lam ("x", Real,
+      And (RealIneq (Leq, a, Var "x"),
+           RealIneq (Leq, Var "x", b)))
 
 let integral_sig : exp =
-    Forall ("f",
-    Forall ("x", Real, Real),
-    Forall ("a", Real, Forall ("b", Real, Real)))
+    Forall ("f", Forall ("x", Real, Real),
+      Forall ("a", Real,
+        Forall ("b", Real,
+          Real)))
 
 let integral_term : exp =
     Lam ("f", Forall ("x", Real, Real),
-        Lam ("a", Real,
-            Lam ("b", Real,
-                Lebesgue (Var "f", Mu (Set Real, Power (Set Real))))))
+      Lam ("a", Real,
+        Lam ("b", Real,
+          Lebesgue (Var "f",
+            Mu (Real, Power (Set Real)),
+            interval_a_b (Var "a") (Var "b")))))
+
+(* runner *)
+
+let test_term env ctx (term : exp) (expected_type : exp) (name : string) : unit =
+    try let inferred_type = infer env ctx term in
+        if equal env ctx inferred_type expected_type then
+            Printf.printf "%s OK\n" name
+        else
+            raise (TypeError "Type mismatch")
+    with TypeError msg -> Printf.printf "Error in %s: %s\n" name msg
 
 let test_all () =
-  test_term env ctx integral_sig (Universe 0) "integral_sig";
-  test_term env ctx integral_term integral_sig "integral_term";
-
-  Printf.printf "All tests passed!\n"
+    test_term env ctx integral_sig (Universe 0) "integral_sig";
+    test_term env ctx integral_term integral_sig "integral_term";
+    Printf.printf "All tests passed!\n"
 
 let () = test_all ()
