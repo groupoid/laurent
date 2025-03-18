@@ -20,7 +20,7 @@ Bishop’s constructive analysis, L₂ spaces, and culminating in Schwartz’s
 theory of distributions.
 
 ```
-type exp =                               (* MLTT-75: *)
+type exp =                               (* MLTT-72: *)
   | Universe of int                      (*   Universes *)
   | Var of string                        (*   Variables *)
   | Forall of exp * (string * exp)       (*   Dependent function type : Universe 0 *)
