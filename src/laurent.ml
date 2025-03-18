@@ -4,7 +4,7 @@ let trace: bool = false
 let tests: bool = true
 
 type real_ineq = Lt | Gt | Leq | Geq | Eq
-type real_op = Plus | Minus | Times | Div
+type real_op = Plus | Minus | Times | Div | Pow
 type complex_op = CPlus | CMinus | CTimes | CDiv
 
 type exp =
@@ -17,6 +17,12 @@ type exp =
   | Pair of exp * exp                    (* Pair constructor for Exists *)
   | Fst of exp
   | Snd of exp
+  | Zero
+  | One
+  | Infinity
+  | NatToReal of exp
+  | S of exp
+  | Z
   | Bool
   | Nat
   | Real
@@ -112,6 +118,11 @@ and infer env (ctx : context) (e : exp) : exp =
   | Bool -> Universe 0
   | Nat -> Universe 0
   | Real -> Universe 0
+  | S e -> let _ = check env ctx e Nat in Nat
+  | NatToReal e -> let _ = check env ctx e Nat in Real
+  | Zero -> Real
+  | One -> Real
+  | Infinity -> Real
   | Complex -> Universe 0
   | If (cond, t, f) ->
       let ct = infer env ctx cond in
@@ -169,7 +180,7 @@ and infer env (ctx : context) (e : exp) : exp =
       Universe 0
   | Limit (f, x, l) ->
       let _ = check env ctx f (Forall ("n", Nat, Real)) in
-      let _ = check env ctx x Real in
+      let _ = check env ctx x (if equal env ctx x Infinity then Real else Nat) in
       let _ = check env ctx l Real in
       Real
   | Sup s ->
@@ -258,9 +269,15 @@ and string_of_exp = function
   | Pair (a, b) -> "Pair (" ^ string_of_exp a ^ ", " ^ string_of_exp b ^ ")"
   | Fst t -> (string_of_exp t) ^ ".1"
   | Snd t -> (string_of_exp t) ^ ".2"
+  | S e -> "S (" ^ string_of_exp e ^ ")"
+  | Z -> "Z"
+  | Zero -> "0"
+  | One -> "1"
+  | Infinity -> "∞"
   | Bool -> "Bool"
   | Nat -> "Nat"
   | Real -> "Real"
+  | NatToReal e -> "Real(" ^ string_of_exp e ^ ")"
   | Complex -> "Complex"
   | If (c, t, f) -> "If (" ^ string_of_exp c ^ ", " ^ string_of_exp t ^ ", " ^ string_of_exp f ^ ")"
   | Vec (n, f, a, b) -> "Vec (" ^ string_of_int n ^ ", " ^ string_of_exp f ^ ", " ^ string_of_exp a ^ ", " ^ string_of_exp b ^ ")"
@@ -284,7 +301,31 @@ and string_of_exp = function
   | Forall (x, a, b) -> "Forall (" ^ x ^ ", " ^ string_of_exp a ^ ", " ^ string_of_exp b ^ ")"
 
 
-(* canonical example *)
+(* canonical examples *)
+
+let sequence_a : exp =
+    Lam ("n", Nat, RealOps (Div, Real, Var "n"))
+
+let limit_a : exp =
+    Limit (sequence_a, Nat, Zero)
+
+let sequence_e : exp =
+    Lam ("n", Nat,
+      RealOps (Pow,
+        RealOps (Plus, One, RealOps (Div, One, NatToReal (Var "n"))),
+        NatToReal (Var "n")))
+
+let e_limit : exp = Limit (sequence_e, Infinity, Real)
+
+let e : exp = Limit (sequence_e, Infinity, Zero)
+
+let set_a : exp =
+    Lam ("x", Real,
+        Exists ("n", Nat,
+            RealIneq (Eq, Var "x", App (sequence_a, Var "n"))))
+
+let sup_a : exp = Sup set_a
+let inf_a : exp = Inf set_a
 
 let interval_a_b (a: exp) (b: exp) : exp =
     Lam ("x", Real,
@@ -318,6 +359,12 @@ let test_term env ctx (term : exp) (expected_type : exp) (name : string) : unit 
 let test_all () =
     test_term env ctx integral_sig (Universe 0) "integral_sig";
     test_term env ctx integral_term integral_sig "integral_term";
+    test_term env ctx set_a (Set Real) "set_a";
+    test_term env ctx limit_a Real "limit_a";
+    test_term env ctx sup_a Real "sup_a";
+    test_term env ctx inf_a Real "inf_a";
+    test_term env ctx sequence_e (Forall ("n", Nat, Real)) "sequence_e";
+    test_term env ctx e Real "e";
     Printf.printf "All tests passed!\n"
 
 let () = test_all ()

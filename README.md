@@ -22,13 +22,11 @@ and culminating in Schwartz’s theory of distributions.
 type exp =                               (* MLTT-75: *)
   | Universe of int                      (*   Universes *)
   | Var of string                        (*   Variables *)
-  | Pi of exp * (string * exp)           (*   Dependent function type *)
+  | Forall of exp * (string * exp)       (*   Dependent function type *)
+  | Exists of exp * (string * exp)       (*   Set Truncated Dependent pair type *)
   | Lam of exp * (string * exp)          (*   Lambda abstraction *)
   | App of exp * exp                     (*   Application *)
-  | Sig of exp * (string * exp)          (*   Dependent pair type *)
   | Pair of string * exp * exp           (*   Pair constructor *)
-  | Id of exp * exp * exp                (*   Identity type *)
-  | Refl of exp                          (*   Reflexivity *)
                                          (* CARRIERS: *)
   | Bool                                 (*   Boolean type *)
   | Nat                                  (*   Natural numbers *)
@@ -55,8 +53,8 @@ type exp =                               (* MLTT-75: *)
   | Limit of exp * exp * exp             (*   Limits *)
   | Sup of exp                           (*   Supremum of a set s: Real -> Bool *)
   | Inf of exp                           (*   Infinum of a set s: Real -> Bool *)
-  | Lebesgue of exp * exp                (*   Lebesgue integral *)
-  
+  | Lebesgue of exp * exp * exp          (*   Lebesgue integral *)
+
 and real_op = RPlus | RMinus | RMult | RDiv
 and real_ineq = RLt | RGt | RLte | RGte
 and complex_op = CPlus | CMinus | CMult | CDiv | CExp
