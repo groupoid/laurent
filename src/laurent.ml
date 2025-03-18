@@ -1,3 +1,4 @@
+(* 1957 (c) Laurent Schwartz *)
 (* Copyright (c) 2025 Groupoid Infinity *)
 
 let trace: bool = false
@@ -10,11 +11,11 @@ type complex_op = CPlus | CMinus | CTimes | CDiv
 type exp =
   | Universe of int
   | Var of string
-  | Lam of string * exp * exp            (* Lambda abstraction *)
-  | App of exp * exp                     (* Application *)
-  | Forall of string * exp * exp         (* Universal quantification:   ∀ (x:A), B *)
-  | Exists of string * exp * exp         (* Existential quantification: ∃ (x:A), B *)
-  | Pair of exp * exp                    (* Pair constructor for Exists *)
+  | Lam of string * exp * exp
+  | App of exp * exp
+  | Forall of string * exp * exp (* Universal quantification:   ∀ (x:A), B *)
+  | Exists of string * exp * exp (* Existential quantification: ∃ (x:A), B *)
+  | Pair of exp * exp
   | Fst of exp
   | Snd of exp
   | Zero
@@ -105,7 +106,7 @@ and infer env (ctx : context) (e : exp) : exp =
   | Universe i -> Universe 0
   | Var x -> (match lookup_var ctx x with | Some ty -> ty | None -> raise (TypeError ("Unbound variable: " ^ x)))
   | Forall (x, a, b) -> Universe 0
-  | Exists (x, a, b) -> Universe 0
+  | Exists (x, domain, body) when equal env ctx (infer env (add_var ctx x domain) body) Bool ->  Bool
   | Lam (x, domain, body) when equal env ctx domain Real && equal env ctx (infer env (add_var ctx x domain) body) Bool ->
     Set Real
   | Lam (x, domain, body) ->
@@ -194,6 +195,7 @@ and infer env (ctx : context) (e : exp) : exp =
     let _ = check env ctx mu (Measure (Real, Set (Set Real))) in
     let _ = check env ctx set (Set Real) in
     Real
+  | _ -> raise (TypeError "No Type Yet")
 
 and universe env ctx t =
     match infer env ctx t with
@@ -246,6 +248,11 @@ and equal' env ctx t1 t2 =
     | Sup s1, Sup s2 -> equal' env ctx s1 s2
     | Inf s1, Inf s2 -> equal' env ctx s1 s2
     | Lebesgue (f1, m1 ,s1), Lebesgue (f2, m2, s2) -> equal' env ctx f1 f2 && equal' env ctx m1 m2 && equal' env ctx s1 s2
+    | Infinity, Infinity -> true
+    | Zero, Zero -> true
+    | One, One -> true
+    | Z, Z -> true
+    | S e1, S e2 -> equal' env ctx e1 e2
     | _ -> false
 
 and reduce env ctx t =
@@ -282,7 +289,7 @@ and string_of_exp = function
   | If (c, t, f) -> "If (" ^ string_of_exp c ^ ", " ^ string_of_exp t ^ ", " ^ string_of_exp f ^ ")"
   | Vec (n, f, a, b) -> "Vec (" ^ string_of_int n ^ ", " ^ string_of_exp f ^ ", " ^ string_of_exp a ^ ", " ^ string_of_exp b ^ ")"
   | RealIneq (op, a, b) -> "RealIneq (" ^ (match op with Lt -> "<" | Gt -> ">" | Leq -> "<=" | Geq -> ">=" | Eq -> "=") ^ ", " ^ string_of_exp a ^ ", " ^ string_of_exp b ^ ")"
-  | RealOps (op, a, b) -> "RealOps (" ^ (match op with Plus -> "+" | Minus -> "-" | Times -> "*" | Div -> "/") ^ ", " ^ string_of_exp a ^ ", " ^ string_of_exp b ^ ")"
+  | RealOps (op, a, b) -> "RealOps (" ^ (match op with Plus -> "+" | Minus -> "-" | Times -> "*" | Div -> "/" | Pow -> "^") ^ ", " ^ string_of_exp a ^ ", " ^ string_of_exp b ^ ")"
   | ComplexOps (op, a, b) -> "ComplexOps (" ^ (match op with CPlus -> "+c" | CMinus -> "-c" | CTimes -> "*c" | CDiv -> "/c") ^ ", " ^ string_of_exp a ^ ", " ^ string_of_exp b ^ ")"
   | Closure s -> "Closure (" ^ string_of_exp s ^ ")"
   | Set a -> "Set (" ^ string_of_exp a ^ ")"
@@ -300,14 +307,13 @@ and string_of_exp = function
   | Lebesgue (f, m, set) -> "Lebesgue (" ^ string_of_exp f ^ ", " ^ string_of_exp m ^ ")"
   | Forall (x, a, b) -> "Forall (" ^ x ^ ", " ^ string_of_exp a ^ ", " ^ string_of_exp b ^ ")"
 
-
 (* canonical examples *)
 
 let sequence_a : exp =
-    Lam ("n", Nat, RealOps (Div, Real, Var "n"))
+    Lam ("n", Nat, RealOps (Div, One, NatToReal (Var "n")))
 
 let limit_a : exp =
-    Limit (sequence_a, Nat, Zero)
+    Limit (sequence_a, Infinity, Zero)
 
 let sequence_e : exp =
     Lam ("n", Nat,
@@ -320,9 +326,7 @@ let e_limit : exp = Limit (sequence_e, Infinity, Real)
 let e : exp = Limit (sequence_e, Infinity, Zero)
 
 let set_a : exp =
-    Lam ("x", Real,
-        Exists ("n", Nat,
-            RealIneq (Eq, Var "x", App (sequence_a, Var "n"))))
+    Lam ("x", Real, RealIneq (Gt, Var "x", Zero))
 
 let sup_a : exp = Sup set_a
 let inf_a : exp = Inf set_a
@@ -349,9 +353,10 @@ let integral_term : exp =
 (* runner *)
 
 let test_term env ctx (term : exp) (expected_type : exp) (name : string) : unit =
+    Printf.printf "%s: " name;
     try let inferred_type = infer env ctx term in
         if equal env ctx inferred_type expected_type then
-            Printf.printf "%s OK\n" name
+            Printf.printf " OK\n"
         else
             raise (TypeError "Type mismatch")
     with TypeError msg -> Printf.printf "Error in %s: %s\n" name msg
@@ -359,12 +364,12 @@ let test_term env ctx (term : exp) (expected_type : exp) (name : string) : unit 
 let test_all () =
     test_term env ctx integral_sig (Universe 0) "integral_sig";
     test_term env ctx integral_term integral_sig "integral_term";
-    test_term env ctx set_a (Set Real) "set_a";
-    test_term env ctx limit_a Real "limit_a";
-    test_term env ctx sup_a Real "sup_a";
     test_term env ctx inf_a Real "inf_a";
-    test_term env ctx sequence_e (Forall ("n", Nat, Real)) "sequence_e";
+    test_term env ctx sup_a Real "sup_a";
+    test_term env ctx sequence_a (Forall ("n", Nat, Real)) "sequence_a";
+    test_term env ctx set_a (Set Real) "set_a";
     test_term env ctx e Real "e";
+    test_term env ctx limit_a Real "limit_a";
     Printf.printf "All tests passed!\n"
 
 let () = test_all ()
