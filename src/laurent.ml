@@ -183,19 +183,28 @@ and infer env (ctx : context) (e : exp) : exp =
     | Seq a -> let _ = check env ctx a (Universe 0) in Universe 0
 (*
     | Limit (f, x, l, p) ->
-      let _ = check env ctx f (Forall ("n", Nat, Real)) in
-      let x_ty = if equal env ctx x Infinity then Real else Nat in
-      let _ = check env ctx x x_ty in
-      let _ = check env ctx l Real in
-      let limit_proof_type =
-        Forall ("ε", Real,
-          Forall ("p", RealIneq (Gt, Var "ε", Zero),
+        let _ = check env ctx f (Forall ("n", Nat, Real)) in
+        let x_ty = if equal env ctx x Infinity then Real else Nat in
+        let _ = check env ctx x x_ty in
+        let _ = check env ctx l Real in
+        let limit_proof_type =
+          Forall ("ε", Real,
             Exists ("N", Real,
-              Forall ("n", Nat,
-                Forall ("q", RealIneq (Gt, Var "n", Var "N"),
-                  RealIneq (Lt, RealOps (Abs, RealOps (Minus, App (f, Var "n"), l), Zero), Var "ε"))))))     in
-      let ctx' = add_var (add_var ctx "f" (Forall ("n", Nat, Real))) "l" Real in
-      let _ = check env ctx' p (subst_many [("f", f); ("l", l)] limit_proof_type) in Bool
+              Forall ("n", Nat, Bool)))
+        in
+        let ctx' = add_var (add_var ctx "f" (Forall ("n", Nat, Real))) "l" Real in
+        let p_ty = subst_many [("f", f); ("l", l)] limit_proof_type in
+        let _ = check env ctx' p p_ty in
+        let _ = match p with
+                | Lam ("ε", Real,
+                    Pair (n_val,
+                      Lam ("n", Nat, body))) ->
+                  let ctx_n = add_var (add_var ctx' "ε" Real) "n" Nat in
+                  check env ctx_n body
+                    (BoolAnd (RealIneq (Gt, Var "ε", Zero),
+                      BoolAnd (RealIneq (Gt, Var "n", n_val),
+                               RealIneq (Lt, RealOps (Abs, RealOps (Minus, App (f, Var "n"), l)), Var "ε"))))
+                | _ -> raise (TypeError "Limit proof must match ε-N structure") in Bool
 *)
     | Limit (f, x, l, p) ->
       let _ = check env ctx f (Forall ("n", Nat, Real)) in
@@ -388,7 +397,10 @@ let l2_space : exp =
   Lam ("f", Forall ("x", Real, Real),
     RealIneq (Lt,
       Lebesgue (
-        Lam ("x", Real, RealOps (Pow, RealOps (Abs, App (Var "f", Var "x"), Zero), RealOps (Plus, One, One))),
+        Lam ("x", Real,
+          RealOps (Pow,
+            RealOps (Abs, App (Var "f", Var "x"), Zero),
+            RealOps (Plus, One, One))),
         Mu (Real, Power (Set Real)),
         Lam ("x", Real, Bool)),
       Infinity))
