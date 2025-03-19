@@ -53,14 +53,16 @@ type exp =
   | Closure of exp
   | Set of exp
   | Union of exp * exp
-  | Intersect of exp * exp
+  | Complement of exp (* ℝ \ A *)
+  | Intersect of exp * exp (* a ∩ b *)
+  | Sum of exp (* ∑ a_n *)
   | Power of exp
   | And of exp * exp
   | Ordinal
   | Mu of exp * exp
   | Measure of exp * exp
   | Seq of exp
-  | Limit of exp * exp * exp * exp  (* f: sequence, x: bound, l: limit, p: proof *)
+  | Limit of exp * exp * exp * exp (* f: sequence, x: bound, l: limit, p: proof *)
   | Sup of exp
   | Inf of exp
   | Lebesgue of exp * exp * exp
@@ -94,6 +96,7 @@ let rec subst_many m t =
     | Set a -> Set (subst_many m a)
     | Union (a, b) -> Union (subst_many m a, subst_many m b)
     | Intersect (a, b) -> Intersect (subst_many m a, subst_many m b)
+    | Complement a -> Complement (subst_many m a)
     | Power a -> Power (subst_many m a)
     | And (a, b) -> And (subst_many m a, subst_many m b)
     | Ordinal -> Ordinal
@@ -171,7 +174,14 @@ and infer env (ctx : context) (e : exp) : exp =
     | Closure s -> let _ = check env ctx s (Set Real) in Set Real
     | Set a -> Universe 0 
     | Union (a, b) -> let a_typ = infer env ctx a in let _ = check env ctx b a_typ in a_typ
-    | Intersect (a, b) -> let a_typ = infer env ctx a in let _ = check env ctx b a_typ in a_typ
+    | Complement a ->
+      let _ = check env ctx a (Set Real) in
+      Set Real
+    | Intersect (a, b) ->
+      let _ = check env ctx a (Set Real) in
+      let _ = check env ctx b (Set Real) in
+      Set Real
+    | Sum a -> let _ = check env ctx a (Forall ("n", Nat, Real)) in Real
     | Power a -> let _ = check env ctx a (Universe 0) in Set a
     | And (a, b) -> let _ = check env ctx a Bool in let _ = check env ctx b Bool in Bool
     | Ordinal -> Universe 0
@@ -276,6 +286,7 @@ and equal' env ctx t1 t2 =
     | Set a1, Set a2 -> equal' env ctx a1 a2
     | Union (a1, b1), Union (a2, b2) -> equal' env ctx a1 a2 && equal' env ctx b1 b2
     | Intersect (a1, b1), Intersect (a2, b2) -> equal' env ctx a1 a2 && equal' env ctx b1 b2
+    | Complement a, Complement b -> equal' env ctx a b
     | Power a1, Power a2 -> equal' env ctx a1 a2
     | And (a1, b1), And (a2, b2) -> equal' env ctx a1 a2 && equal' env ctx b1 b2
     | Ordinal, Ordinal -> true
@@ -341,6 +352,8 @@ and string_of_exp = function
   | ComplexOps (op, a, b) -> "ComplexOps (" ^ (match op with CPlus -> "+C" | CMinus -> "-C" | CTimes -> "*C" | CDiv -> "/C") ^ ", " ^ string_of_exp a ^ ", " ^ string_of_exp b ^ ")"
   | Closure s -> "Closure (" ^ string_of_exp s ^ ")"
   | Set a -> "Set (" ^ string_of_exp a ^ ")"
+  | Complement a -> "Complement (" ^ string_of_exp a ^ ")"
+  | Sum a -> "Sum (" ^ string_of_exp a ^ ")"
   | Union (a, b) -> "Union (" ^ string_of_exp a ^ ", " ^ string_of_exp b ^ ")"
   | Intersect (a, b) -> "Intersect (" ^ string_of_exp a ^ ", " ^ string_of_exp b ^ ")"
   | Power a -> "Power (" ^ string_of_exp a ^ ")"
@@ -393,6 +406,9 @@ let e : exp =
               Lam ("q", RealIneq (Gt, Var "n", Var "N"),
                 RealIneq (Lt, RealOps (Abs, RealOps (Minus, App (sequence_e, Var "n"), RealOps (Exp, One, One)), Zero), Var "ε")))))))))
 
+let lebesgue_measure =
+  Mu (Real, Power (Set Real))
+
 let l2_space : exp =
   Lam ("f", Forall ("x", Real, Real),
     RealIneq (Lt,
@@ -401,8 +417,8 @@ let l2_space : exp =
           RealOps (Pow,
             RealOps (Abs, App (Var "f", Var "x"), Zero),
             RealOps (Plus, One, One))),
-        Mu (Real, Power (Set Real)),
-        Lam ("x", Real, Bool)),
+        lebesgue_measure,
+        Set Real),
       Infinity))
 
 (* runner *)
