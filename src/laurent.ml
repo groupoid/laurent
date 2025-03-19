@@ -150,9 +150,26 @@ and infer env (ctx : context) (e : exp) : exp =
     match e with
     | Universe i -> Universe 0
     | Var x -> (match lookup_var ctx x with | Some ty -> ty | None -> raise (TypeError ("Unbound variable: " ^ x)))
-    | Forall (x, a, b) -> Universe 0
+    | Forall (x, domain, body) ->
+      let _ = infer env ctx domain in
+      let ctx' = add_var ctx x domain in
+      let body_ty = infer env ctx' body in
+      if trace then Printf.printf "Forall (%s, %s): body_ty = %s\n" x (string_of_exp domain) (string_of_exp body_ty);
+      if equal env ctx body_ty Bool then Bool
+      else Universe 0
     | Exists (x, domain, body) -> let _ = infer env (add_var ctx x domain) body in Bool
-    | App (f, arg) -> (match infer env ctx f with | Forall (x, a, b) -> check env ctx arg a; subst x arg b | ty -> raise (TypeError "Application requires a Pi type"))
+    | App (f, arg) ->
+      (match infer env ctx f with
+      | Forall (x, a, b) -> check env ctx arg a; subst x arg b
+      | Set (Set a) -> check env ctx arg (Set a); Bool
+(*
+      | Set (Set a) ->
+        let arg_ty = infer env ctx arg in
+        if trace then Printf.printf "App: f = %s, arg_ty = %s, expected = %s\n" (string_of_exp f) (string_of_exp arg_ty) (string_of_exp (Set a));
+        if equal env ctx arg_ty (Set a) then Bool
+        else raise (TypeError ("App to Set (Set _) expects a set argument, got " ^ string_of_exp arg_ty ^ ", expected " ^ string_of_exp (Set a)))
+*)
+      | ty -> raise (TypeError "Application requires a Pi type"))
     | Lam (x, domain, body) when equal env ctx domain Real && equal env ctx (infer env (add_var ctx x domain) body) Bool -> Set Real
     | Lam (x, domain, body) ->
       let ctx' = add_var ctx x domain in
@@ -197,7 +214,13 @@ and infer env (ctx : context) (e : exp) : exp =
          | Abs | Ln | Sin | Cos | Exp | Neg  -> Real)
     | ComplexOps (op, a, b) -> let _ = check env ctx a Complex in let _ = check env ctx b Complex in Complex
     | Closure s -> let _ = check env ctx s (Set Real) in Set Real
-    | Set a -> Universe 0
+    | Set a ->
+    let a_ty = infer env ctx a in
+    (match a_ty with
+     | Forall (x, domain, body) when equal env ctx domain Real && equal env ctx body Bool -> Set Real
+     | Universe i -> Universe 0
+     | Set b -> Set b
+     | _ -> raise (TypeError ("Set expects a predicate or type, got " ^ string_of_exp a_ty)))
     | UnionSet (a, b) -> let a_typ = infer env ctx a in let _ = check env ctx b a_typ in a_typ
     | Union a -> let _ = check env ctx a (Forall ("n", Nat, Set Real)) in Set Real
     | Complement a ->
@@ -205,7 +228,11 @@ and infer env (ctx : context) (e : exp) : exp =
       Set Real
     | Intersect (a, b) -> let a_typ = infer env ctx a in let _ = check env ctx b a_typ in a_typ
     | Sum a -> let _ = check env ctx a (Forall ("n", Nat, Real)) in Real
-    | Power a -> let _ = check env ctx a (Universe 0) in Set a
+(*    | Power a -> let _ = check env ctx a (Universe 0) in Set a *)
+    | Power a ->
+      let a_ty = infer env ctx a in
+      if equal env ctx a_ty (Universe 0) then Set a
+      else raise (TypeError "Power expects a type")
     | And (a, b) -> let _ = check env ctx a Bool in let _ = check env ctx b Bool in Bool
     | Ordinal -> Universe 0
     | Mu (base, sigma) ->
@@ -483,7 +510,7 @@ let test_all () =
     test_term env ctx l2_space (Forall ("f", Forall ("x", Real, Real), Bool)) "l_2 space";
     test_term env ctx sigma_algebra Bool "sigma_algebra";
     let ctx = add_var ctx "f" (Forall ("x", Real, Real)) in
-        test_term env ctx measurable (Universe 0) "measurable";
+        test_term env ctx measurable (Bool) "measurable";
     Printf.printf "All tests passed!\n"
 
 let () = test_all ()
