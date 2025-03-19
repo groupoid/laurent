@@ -21,8 +21,8 @@
 let trace: bool = false
 let tests: bool = true
 
-type real_ineq = Lt | Gt | Leq | Geq | Eq
-type real_op = Plus | Minus | Times | Div | Pow | Abs | Ln | Sin | Cos | Exp
+type real_ineq = Lt | Gt | Leq | Geq | Eq | Neq
+type real_op = Plus | Minus | Times | Div | Neg | Pow | Abs | Ln | Sin | Cos | Exp
 type complex_op = CPlus | CMinus | CTimes | CDiv
 
 type exp =
@@ -81,6 +81,25 @@ type subst_map = (string * exp) list
 let env : env = []
 let ctx : context = []
 let add_var ctx x ty = (x, ty) :: ctx
+
+let is_sigma_algebra sigma =
+  Exists ("_",
+    Exists ("_", App (sigma, Set Real),
+      Forall ("A", Set Real,
+        Forall ("_", App (sigma, Var "A"),
+          App (sigma, Complement (Var "A"))))),
+    Forall ("An", Forall ("n", Nat, Set Real),
+      Forall ("_", Forall ("n", Nat, App (sigma, App (Var "An", Var "n"))),
+        App (sigma, Union (Var "An")))))
+
+let is_measurable sigma f =
+  Forall ("a", Real,
+    Forall ("b", Real,
+      Forall ("_", RealIneq (Lt, Var "a", Var "b"),
+        App (sigma,
+             Set (Lam ("x", Real,
+                       Exists ("_", RealIneq (Lt, Var "a", App (f, Var "x")),
+                              RealIneq (Lt, App (f, Var "x"), Var "b"))))))))
 
 let rec subst_many m t =
     match t with
@@ -175,7 +194,7 @@ and infer env (ctx : context) (e : exp) : exp =
         let _ = check env ctx a Real in
         (match op with
          | Plus | Minus | Times | Div | Pow -> let _ = check env ctx b Real in Real
-         | Abs | Ln | Sin | Cos | Exp -> Real)
+         | Abs | Ln | Sin | Cos | Exp | Neg  -> Real)
     | ComplexOps (op, a, b) -> let _ = check env ctx a Complex in let _ = check env ctx b Complex in Complex
     | Closure s -> let _ = check env ctx s (Set Real) in Set Real
     | Set a -> Universe 0
@@ -195,31 +214,6 @@ and infer env (ctx : context) (e : exp) : exp =
       Measure (base, Set (Set base))
     | Measure (space, sigma) -> let _ = check env ctx space (Universe 0) in let _ = check env ctx sigma (Set (Set space)) in Universe 0
     | Seq a -> let _ = check env ctx a (Universe 0) in Universe 0
-(*
-    | Limit (f, x, l, p) ->
-        let _ = check env ctx f (Forall ("n", Nat, Real)) in
-        let x_ty = if equal env ctx x Infinity then Real else Nat in
-        let _ = check env ctx x x_ty in
-        let _ = check env ctx l Real in
-        let limit_proof_type =
-          Forall ("ε", Real,
-            Exists ("N", Real,
-              Forall ("n", Nat, Bool)))
-        in
-        let ctx' = add_var (add_var ctx "f" (Forall ("n", Nat, Real))) "l" Real in
-        let p_ty = subst_many [("f", f); ("l", l)] limit_proof_type in
-        let _ = check env ctx' p p_ty in
-        let _ = match p with
-                | Lam ("ε", Real,
-                    Pair (n_val,
-                      Lam ("n", Nat, body))) ->
-                  let ctx_n = add_var (add_var ctx' "ε" Real) "n" Nat in
-                  check env ctx_n body
-                    (BoolAnd (RealIneq (Gt, Var "ε", Zero),
-                      BoolAnd (RealIneq (Gt, Var "n", n_val),
-                               RealIneq (Lt, RealOps (Abs, RealOps (Minus, App (f, Var "n"), l)), Var "ε"))))
-                | _ -> raise (TypeError "Limit proof must match ε-N structure") in Bool
-*)
     | Limit (f, x, l, p) ->
       let _ = check env ctx f (Forall ("n", Nat, Real)) in
       let x_ty = if equal env ctx x Infinity then Real else Nat in
@@ -233,8 +227,35 @@ and infer env (ctx : context) (e : exp) : exp =
                 Forall ("q", RealIneq (Gt, Var "n", Var "N"), Bool))))) in
       let ctx' = add_var (add_var ctx "f" (Forall ("n", Nat, Real))) "l" Real in
       let _ = check env ctx' p (subst_many [("f", f); ("l", l)] limit_proof_type) in Bool
+
     | Sup s -> let _ = check env ctx s (Set Real) in Real
     | Inf s -> let _ = check env ctx s (Set Real) in Real
+(*
+    | Lebesgue (f, mu, set) ->
+      let sigma = (match mu with
+                  | Mu (Real, s) -> s
+                  | _ -> raise (TypeError "Lebesgue requires a measure on Real"))  in
+      let _ = check env ctx f (Forall ("x", Real, Real)) in
+      let _ = check env ctx mu (Measure (Real, sigma)) in
+      let _ = check env ctx set (Set Real) in
+      let _ = check env ctx (is_sigma_algebra sigma) Bool in
+      let _ = check env ctx (App (sigma, set)) Bool in
+      let _ = check env ctx (is_measurable sigma f) Bool in
+      let _ = (match set with
+                | Union an ->
+                  let _ = check env ctx (Forall ("n", Nat, App (sigma, App (an, Var "n")))) Bool in
+                  let _ = check env ctx
+                            (Forall ("n", Nat,
+                              Forall ("m", Nat,
+                                Forall ("_", RealIneq (Neq, Var "n", Var "m"),
+                                  RealIneq (Eq, Intersect (App (an, Var "n"), App (an, Var "m")), Zero)))))
+                            Bool in
+                  check env ctx
+                    (RealIneq (Eq, App (mu, Union an),
+                                  Sum (Lam ("n", Nat, App (mu, App (an, Var "n"))))))
+                    Bool
+                | _ -> ())    in Real
+*)
     | Lebesgue (f, mu, set) ->
       let _ = check env ctx f (Forall ("x", Real, Real)) in
       let _ = check env ctx mu (Measure (Real, Set (Set Real))) in
@@ -242,7 +263,6 @@ and infer env (ctx : context) (e : exp) : exp =
       (match set_ty with
       | Set Real -> Real
       | _ -> check env ctx set (Set Real); Real)
-(*    | x -> raise (TypeError ("No Type Yet: " ^ (string_of_exp x))) *)
 
 and universe env ctx t =
     match infer env ctx t with
@@ -348,11 +368,11 @@ and string_of_exp = function
   | Complex -> "Complex"
   | If (c, t, f) -> "If (" ^ string_of_exp c ^ ", " ^ string_of_exp t ^ ", " ^ string_of_exp f ^ ")"
   | Vec (n, f, a, b) -> "Vec (" ^ string_of_int n ^ ", " ^ string_of_exp f ^ ", " ^ string_of_exp a ^ ", " ^ string_of_exp b ^ ")"
-  | RealIneq (op, a, b) -> "RealIneq (" ^ (match op with Lt -> "<" | Gt -> ">" | Leq -> "<=" | Geq -> ">=" | Eq -> "=") ^ ", " ^ string_of_exp a ^ ", " ^ string_of_exp b ^ ")"
+  | RealIneq (op, a, b) -> "RealIneq (" ^ (match op with Lt -> "<" | Gt -> ">" | Leq -> "<=" | Geq -> ">=" | Eq -> "=" | Neq -> "Neq") ^ ", " ^ string_of_exp a ^ ", " ^ string_of_exp b ^ ")"
   | RealOps (op, a, b) ->
     let op_str = match op with
       | Plus -> "+R" | Minus -> "-R" | Times -> "*R" | Div -> "/R" | Pow -> "^R"
-      | Abs -> "Abs" | Ln -> "Ln" | Sin -> "Sin" | Cos -> "Cos" | Exp -> "Exp"
+      | Abs -> "Abs" | Ln -> "Ln" | Sin -> "Sin" | Cos -> "Cos" | Exp -> "Exp" | Neg -> "Neg"
     in "RealOps (" ^ op_str ^ ", " ^ string_of_exp a ^ ", " ^ string_of_exp b ^ ")"
   | ComplexOps (op, a, b) -> "ComplexOps (" ^ (match op with CPlus -> "+C" | CMinus -> "-C" | CTimes -> "*C" | CDiv -> "/C") ^ ", " ^ string_of_exp a ^ ", " ^ string_of_exp b ^ ")"
   | Closure s -> "Closure (" ^ string_of_exp s ^ ")"
@@ -427,17 +447,14 @@ let l2_space : exp =
         Lam ("x", Real, Bool)),
       Infinity))
 
-let is_sigma_algebra sigma =
-  Exists ("_",
-    Exists ("_", App (sigma, Set Real),
-      Forall ("A", Set Real,
-        Forall ("_", App (sigma, Var "A"),
-          App (sigma, Complement (Var "A"))))),
-    Forall ("An", Forall ("n", Nat, Set Real),
-      Forall ("_", Forall ("n", Nat, App (sigma, App (Var "An", Var "n"))),
-        App (sigma, Union (Var "An")))))
 
 let sigma_algebra = is_sigma_algebra (Power (Set Real))
+
+
+let measurable =
+  is_measurable
+    (Power (Set Real))
+    (Lam ("x", Real, RealOps (Pow, RealOps (Abs, App (Var "f", Var "x"), Zero), NatToReal (S (S Z)))))
 
 (* runner *)
 
@@ -453,6 +470,7 @@ let test_term env ctx (term : exp) (expected_type : exp) (name : string) : unit 
     with TypeError msg -> Printf.printf "Error in %s: %s\n" name msg
 
 let test_all () =
+    let ctx = add_var ctx "f" (Forall ("x", Real, Real)) in
     test_term env ctx integral_sig (Universe 0) "integral_sig";
     test_term env ctx integral_term integral_sig "integral_term";
     test_term env ctx sequence_a (Forall ("n", Nat, Real)) "sequence_a";
@@ -464,6 +482,8 @@ let test_all () =
     test_term env ctx e Real "e";
     test_term env ctx l2_space (Forall ("f", Forall ("x", Real, Real), Bool)) "l_2 space";
     test_term env ctx sigma_algebra Bool "sigma_algebra";
+    let ctx = add_var ctx "f" (Forall ("x", Real, Real)) in
+        test_term env ctx measurable (Universe 0) "measurable";
     Printf.printf "All tests passed!\n"
 
 let () = test_all ()
