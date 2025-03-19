@@ -181,6 +181,22 @@ and infer env (ctx : context) (e : exp) : exp =
       Measure (base, Set (Set base))
     | Measure (space, sigma) -> let _ = check env ctx space (Universe 0) in let _ = check env ctx sigma (Set (Set space)) in Universe 0
     | Seq a -> let _ = check env ctx a (Universe 0) in Universe 0
+(*
+    | Limit (f, x, l, p) ->
+      let _ = check env ctx f (Forall ("n", Nat, Real)) in
+      let x_ty = if equal env ctx x Infinity then Real else Nat in
+      let _ = check env ctx x x_ty in
+      let _ = check env ctx l Real in
+      let limit_proof_type =
+        Forall ("ε", Real,
+          Forall ("p", RealIneq (Gt, Var "ε", Zero),
+            Exists ("N", Real,
+              Forall ("n", Nat,
+                Forall ("q", RealIneq (Gt, Var "n", Var "N"),
+                  RealIneq (Lt, RealOps (Abs, RealOps (Minus, App (f, Var "n"), l), Zero), Var "ε"))))))     in
+      let ctx' = add_var (add_var ctx "f" (Forall ("n", Nat, Real))) "l" Real in
+      let _ = check env ctx' p (subst_many [("f", f); ("l", l)] limit_proof_type) in Bool
+*)
     | Limit (f, x, l, p) ->
       let _ = check env ctx f (Forall ("n", Nat, Real)) in
       let x_ty = if equal env ctx x Infinity then Real else Nat in
@@ -198,7 +214,11 @@ and infer env (ctx : context) (e : exp) : exp =
     | Inf s -> let _ = check env ctx s (Set Real) in Real
     | Lebesgue (f, mu, set) ->
       let _ = check env ctx f (Forall ("x", Real, Real)) in
-      let _ = check env ctx mu (Measure (Real, Set (Set Real))) in let _ = check env ctx set (Set Real) in Real
+      let _ = check env ctx mu (Measure (Real, Set (Set Real))) in
+      let set_ty = infer env ctx set in
+      (match set_ty with
+      | Set Real -> Real
+      | _ -> check env ctx set (Set Real); Real)
 (*    | x -> raise (TypeError ("No Type Yet: " ^ (string_of_exp x))) *)
 
 and universe env ctx t =
