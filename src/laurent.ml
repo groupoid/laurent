@@ -22,7 +22,7 @@
    6) Schwartz’s theory of distributions.
 *)
 
-let trace: bool = true
+let trace: bool = false
 let tests: bool = true
 
 type real_ineq = Lt | Gt | Leq | Geq | Eq | Neq
