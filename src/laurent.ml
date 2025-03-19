@@ -29,53 +29,53 @@ type real_ineq = Lt | Gt | Leq | Geq | Eq | Neq
 type real_op = Plus | Minus | Times | Div | Neg | Pow | Abs | Ln | Sin | Cos | Exp
 type complex_op = CPlus | CMinus | CTimes | CDiv
 
-type exp =
-  | Universe of int
-  | Prop
-  | Var of string
-  | Lam of string * exp * exp
-  | App of exp * exp
-  | Forall of string * exp * exp (* Universal quantification:   ∀ (x:A), B *)
-  | Exists of string * exp * exp (* Existential quantification: ∃ (x:A), B *)
-  | Pair of exp * exp
-  | Fst of exp
-  | Snd of exp
-  | NatToReal of exp
-  | Nat                                   (*   ℕ   *)
-  | Integer                               (*   ℤ   *)
-  | Real                                  (*   ℝ   *)
-  | Complex                               (*   ℂ   *)
-  | Bool                                  (*   𝟚   *)
-  | Vec of int * exp * exp * exp          (*   𝕍   *)
-  | Zero                                  (*  0.0  *)
-  | One                                   (*  1.0  *)
-  | Infinity                              (*   ∞   *)
-  | S of exp                              (*   1+  *)
-  | Z                                     (*   0   *)
-  | If of exp * exp * exp
-  | RealIneq of real_ineq * exp * exp     (* Inequalities a < b, etc. *)
-  | RealOps of real_op * exp * exp        (* Real +, -, *, etc. *)
-  | ComplexOps of complex_op * exp * exp  (* Complex +, -, *, etc. *)
+type exp =                         (* MLTT-72 Vibe Check                     *)
+  | Prop                           (* Prop Universe, Prop : Universe 0       *)
+  | Universe of int                (* Universe 0 : Universe 1, no others     *)
+  | Var of string                  (* Variable definition                    *)
+  | Forall of string * exp * exp   (* Universal quantification:   ∀ (x:A), B *)
+  | Lam of string * exp * exp      (* ∀-intro, Implication                   *)
+  | App of exp * exp               (* ∀-elim, Modus Ponens                   *)
+  | Exists of string * exp * exp   (* Existential quantification: ∃ (x:A), B *)
+  | Pair of exp * exp              (* ∃-intro, existence consists of:        *)
+  | Fst of exp                     (* ∃-elim-1, witness                      *)
+  | Snd of exp                     (* ∃-elim-2, proof                        *)
+  | NatToReal of exp               (* Carriers:                              *)
+  | Nat                            (*   ℕ   *)
+  | Integer                        (*   ℤ   *)
+  | Real                           (*   ℝ   *)
+  | Complex                        (*   ℂ   *)
+  | Bool                           (*   𝟚   *)
+  | Vec of int * exp * exp * exp   (*   𝕍   *)
+  | Zero                           (*  0.0  *)
+  | One                            (*  1.0  *)
+  | Infinity                       (*   ∞   *)
+  | S of exp                       (*   1+  *)
+  | Z                              (*   0   *)
+  | If of exp * exp * exp                   (* 𝟚-Eliminator : 𝟚 -> ℝ         *)
+  | RealIneq of real_ineq * exp * exp       (* Inequalities a < b, etc.      *)
+  | RealOps of real_op * exp * exp          (* Real +, -, *, etc.            *)
+  | ComplexOps of complex_op * exp * exp    (* Complex +, -, *, etc.         *)
   | Closure of exp
-  | Set of exp             (* Term level: { x : A | P } Set Lam, Type Level: Set Real *)
-  | UnionSet of exp * exp  (* A ∪ B *)
-  | Complement of exp      (* ℝ \ A *)
-  | Intersect of exp * exp (* a ∩ b *)
-  | Power of exp           (* a ^ b *)
-  | And of exp * exp       (* a ∩ b *)
+  | Set of exp              (* Term level: { x : A | P } Set Lam, Type Level: Set Real *)
+  | UnionSet of exp * exp   (* A ∪ B *)
+  | Complement of exp       (* ℝ \ A *)
+  | Intersect of exp * exp  (* a ∩ b *)
+  | Power of exp            (* a ^ b *)
+  | And of exp * exp        (* a ∩ b *)
   | Ordinal
-  | Mu of exp * exp        (* Measure type *)
-  | Measure of exp * exp   (* Measure expression *)
-  | Seq of exp             (* a_n : N -> R, Seq Lam *)
-  | Sum of exp             (* ∑ a_n, Sum Lam *)
-  | Union of exp           (* ⋃ A_n, Union Lam  *)
-  | Limit of limit         (* Limit(f,x,l,p) : Real, f: sequence, x: bound, l: limit, p: proof *)
-  | Sup of exp             (* sup a_n : R, Sup Seq (N -> R) *)
-  | Inf of exp             (* inf a_n : R, Inf Seq (N -> R) *)
-  | Lebesgue of lebesgue   (* ∫ f dμ over set *)
+  | Mu of exp * exp         (* Measure type *)
+  | Measure of exp * exp    (* Measure expression *)
+  | Seq of exp              (* a_n : N -> R, Seq Lam *)
+  | Sum of exp              (* ∑ a_n, Sum Lam *)
+  | Union of exp            (* ⋃ A_n, Union Lam  *)
+  | Limit of limit          (* Limit(f,x,l,p) : Real, f: sequence, x: bound, l: limit, p: proof *)
+  | Sup of exp              (* sup a_n : R, Sup Seq (N -> R) *)
+  | Inf of exp              (* inf a_n : R, Inf Seq (N -> R) *)
+  | Lebesgue of lebesgue    (* ∫ f dμ over set *)
 
 and limit = exp * exp * exp * exp
-and lebesgue = exp * exp * exp 
+and lebesgue = exp * exp * exp
 
 exception TypeError of string
 
