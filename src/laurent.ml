@@ -9,9 +9,9 @@
    In this article, we present a minimal type system,
    designed to encode classical and modern analysis with explicit core constructors.
    We omit identity types `Id`, `idp`, `J` (HoTT, MLTT-80, MLTT-75) to
-   keep the system lean with Pi and Set truncated Sigma relying instead on `Bool`
+   keep the system lean with Pi and Set truncated Sigma relying instead on `Bool` (which equals `Prop`)
    predicates and external test validation for equational reasoning.
-   Also we have explicitly built in Set theory with Open Sets and Topoligy
+   Also we have explicitly built in Set theory with Open Sets and Topology
    to have more classical core. We’ll explore this system through examples,
    starting with classical Riemann sums, advancing to built-in Lebesgue integration and Custom Measures,
    Bishop’s constructive analysis, L₂ spaces, and culminating in Schwartz’s
