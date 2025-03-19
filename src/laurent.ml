@@ -35,6 +35,7 @@ type exp =
   | Pair of exp * exp
   | Fst of exp
   | Snd of exp
+
   | Zero
   | One
   | Infinity
@@ -42,30 +43,34 @@ type exp =
   | S of exp
   | Z
   | Bool
-  | Nat
-  | Real
+  | Nat (* ℕ *)
+  | Real (* ℝ *)
   | Complex
   | If of exp * exp * exp
   | Vec of int * exp * exp * exp
-  | RealIneq of real_ineq * exp * exp
-  | RealOps of real_op * exp * exp
+  | RealIneq of real_ineq * exp * exp (* a < b, etc. *)
+  | RealOps of real_op * exp * exp (* +, -, *, etc. *)
   | ComplexOps of complex_op * exp * exp
+
   | Closure of exp
-  | Set of exp
-  | Union of exp * exp
+  | Set of exp (* { x : A | P } *)
+  | UnionSet of exp * exp  (* A ∪ B *)
   | Complement of exp (* ℝ \ A *)
   | Intersect of exp * exp (* a ∩ b *)
-  | Sum of exp (* ∑ a_n *)
   | Power of exp
-  | And of exp * exp
+  | And of exp * exp (* a ∩ b *)
   | Ordinal
-  | Mu of exp * exp
-  | Measure of exp * exp
+
+  | Mu of exp * exp (* Measure type *)
+  | Measure of exp * exp (* Measure expression *)
+
   | Seq of exp
+  | Sum of exp (* ∑ a_n *)
+  | Union of exp (* ⋃ A_n *)
   | Limit of exp * exp * exp * exp (* f: sequence, x: bound, l: limit, p: proof *)
   | Sup of exp
   | Inf of exp
-  | Lebesgue of exp * exp * exp
+  | Lebesgue of exp * exp * exp (* ∫ f dμ over set *)
 
 exception TypeError of string
 
@@ -94,7 +99,8 @@ let rec subst_many m t =
     | ComplexOps (op, a, b) -> ComplexOps (op, subst_many m a, subst_many m b)
     | Closure s -> Closure (subst_many m s)
     | Set a -> Set (subst_many m a)
-    | Union (a, b) -> Union (subst_many m a, subst_many m b)
+    | UnionSet (a, b) -> UnionSet (subst_many m a, subst_many m b)
+    | Union a -> Union (subst_many m a)
     | Intersect (a, b) -> Intersect (subst_many m a, subst_many m b)
     | Complement a -> Complement (subst_many m a)
     | Power a -> Power (subst_many m a)
@@ -172,15 +178,13 @@ and infer env (ctx : context) (e : exp) : exp =
          | Abs | Ln | Sin | Cos | Exp -> Real)
     | ComplexOps (op, a, b) -> let _ = check env ctx a Complex in let _ = check env ctx b Complex in Complex
     | Closure s -> let _ = check env ctx s (Set Real) in Set Real
-    | Set a -> Universe 0 
-    | Union (a, b) -> let a_typ = infer env ctx a in let _ = check env ctx b a_typ in a_typ
+    | Set a -> Universe 0
+    | UnionSet (a, b) -> let a_typ = infer env ctx a in let _ = check env ctx b a_typ in a_typ
+    | Union a -> let _ = check env ctx a (Forall ("n", Nat, Set Real)) in Set Real
     | Complement a ->
       let _ = check env ctx a (Set Real) in
       Set Real
-    | Intersect (a, b) ->
-      let _ = check env ctx a (Set Real) in
-      let _ = check env ctx b (Set Real) in
-      Set Real
+    | Intersect (a, b) -> let a_typ = infer env ctx a in let _ = check env ctx b a_typ in a_typ
     | Sum a -> let _ = check env ctx a (Forall ("n", Nat, Real)) in Real
     | Power a -> let _ = check env ctx a (Universe 0) in Set a
     | And (a, b) -> let _ = check env ctx a Bool in let _ = check env ctx b Bool in Bool
@@ -284,7 +288,8 @@ and equal' env ctx t1 t2 =
     | ComplexOps (op1, a1, b1), ComplexOps (op2, a2, b2) -> op1 = op2 && equal' env ctx a1 a2 && equal' env ctx b1 b2
     | Closure s1, Closure s2 -> equal' env ctx s1 s2
     | Set a1, Set a2 -> equal' env ctx a1 a2
-    | Union (a1, b1), Union (a2, b2) -> equal' env ctx a1 a2 && equal' env ctx b1 b2
+    | UnionSet (a1, b1), UnionSet (a2, b2) -> equal' env ctx a1 a2 && equal' env ctx b1 b2
+    | Union a, Union b -> equal' env ctx a b
     | Intersect (a1, b1), Intersect (a2, b2) -> equal' env ctx a1 a2 && equal' env ctx b1 b2
     | Complement a, Complement b -> equal' env ctx a b
     | Power a1, Power a2 -> equal' env ctx a1 a2
@@ -354,7 +359,8 @@ and string_of_exp = function
   | Set a -> "Set (" ^ string_of_exp a ^ ")"
   | Complement a -> "Complement (" ^ string_of_exp a ^ ")"
   | Sum a -> "Sum (" ^ string_of_exp a ^ ")"
-  | Union (a, b) -> "Union (" ^ string_of_exp a ^ ", " ^ string_of_exp b ^ ")"
+  | UnionSet (a, b) -> "UnionSet (" ^ string_of_exp a ^ ", " ^ string_of_exp b ^ ")"
+  | Union a -> "Union (" ^ string_of_exp a ^ ")"
   | Intersect (a, b) -> "Intersect (" ^ string_of_exp a ^ ", " ^ string_of_exp b ^ ")"
   | Power a -> "Power (" ^ string_of_exp a ^ ")"
   | And (a, b) -> "And (" ^ string_of_exp a ^ ", " ^ string_of_exp b ^ ")"
@@ -418,8 +424,20 @@ let l2_space : exp =
             RealOps (Abs, App (Var "f", Var "x"), Zero),
             RealOps (Plus, One, One))),
         lebesgue_measure,
-        Set Real),
+        Lam ("x", Real, Bool)),
       Infinity))
+
+let is_sigma_algebra sigma =
+  Exists ("_",
+    Exists ("_", App (sigma, Set Real),
+      Forall ("A", Set Real,
+        Forall ("_", App (sigma, Var "A"),
+          App (sigma, Complement (Var "A"))))),
+    Forall ("An", Forall ("n", Nat, Set Real),
+      Forall ("_", Forall ("n", Nat, App (sigma, App (Var "An", Var "n"))),
+        App (sigma, Union (Var "An")))))
+
+let sigma_algebra = is_sigma_algebra (Power (Set Real))
 
 (* runner *)
 
@@ -445,6 +463,7 @@ let test_all () =
     test_term env ctx universal (Set Bool) "universal set";
     test_term env ctx e Real "e";
     test_term env ctx l2_space (Forall ("f", Forall ("x", Real, Real), Bool)) "l_2 space";
+    test_term env ctx sigma_algebra Bool "sigma_algebra";
     Printf.printf "All tests passed!\n"
 
 let () = test_all ()
