@@ -43,34 +43,34 @@ type exp =
   | S of exp
   | Z
   | Bool
-  | Nat (* ℕ *)
-  | Real (* ℝ *)
+  | Nat                    (* ℕ *)
+  | Real                   (* ℝ *)
   | Complex
   | If of exp * exp * exp
   | Vec of int * exp * exp * exp
-  | RealIneq of real_ineq * exp * exp (* a < b, etc. *)
-  | RealOps of real_op * exp * exp (* +, -, *, etc. *)
-  | ComplexOps of complex_op * exp * exp
-
+  | RealIneq of real_ineq * exp * exp     (* Inequalities a < b, etc. *)
+  | RealOps of real_op * exp * exp        (* Real +, -, *, etc. *)
+  | ComplexOps of complex_op * exp * exp  (* Complex +, -, *, etc. *)
   | Closure of exp
-  | Set of exp (* { x : A | P } *)
+  | Set of exp             (* { x : A | P } *)
   | UnionSet of exp * exp  (* A ∪ B *)
-  | Complement of exp (* ℝ \ A *)
+  | Complement of exp      (* ℝ \ A *)
   | Intersect of exp * exp (* a ∩ b *)
-  | Power of exp
-  | And of exp * exp (* a ∩ b *)
+  | Power of exp           (* a ^ b *)
+  | And of exp * exp       (* a ∩ b *)
   | Ordinal
+  | Mu of exp * exp        (* Measure type *)
+  | Measure of exp * exp   (* Measure expression *)
+  | Seq of exp             (* a_n : N -> R, Seq Lam *)
+  | Sum of exp             (* ∑ a_n, Sum Lam *)
+  | Union of exp           (* ⋃ A_n, Union Lam  *)
+  | Limit of limit         (* Limit(f,x,l,p) : Real, f: sequence, x: bound, l: limit, p: proof *)
+  | Sup of exp             (* sup a_n : R, Sup Seq (N -> R) *)
+  | Inf of exp             (* inf a_n : R, Inf Seq (N -> R) *)
+  | Lebesgue of lebesgue   (* ∫ f dμ over set *)
 
-  | Mu of exp * exp (* Measure type *)
-  | Measure of exp * exp (* Measure expression *)
-
-  | Seq of exp
-  | Sum of exp (* ∑ a_n *)
-  | Union of exp (* ⋃ A_n *)
-  | Limit of exp * exp * exp * exp (* f: sequence, x: bound, l: limit, p: proof *)
-  | Sup of exp
-  | Inf of exp
-  | Lebesgue of exp * exp * exp (* ∫ f dμ over set *)
+and limit = exp * exp * exp * exp
+and lebesgue = exp * exp * exp 
 
 exception TypeError of string
 
