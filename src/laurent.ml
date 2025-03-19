@@ -22,7 +22,7 @@
    6) Schwartz’s theory of distributions.
 *)
 
-let trace: bool = false
+let trace: bool = true
 let tests: bool = true
 
 type real_ineq = Lt | Gt | Leq | Geq | Eq | Neq
@@ -161,7 +161,6 @@ and infer env (ctx : context) (e : exp) : exp =
       let _ = infer env ctx domain in
       let ctx' = add_var ctx x domain in
       let body_ty = infer env ctx' body in
-      if trace then Printf.printf "Forall (%s, %s): body_ty = %s\n" x (string_of_exp domain) (string_of_exp body_ty);
       if equal env ctx body_ty Prop then Prop
       else Universe 0
     | Exists (x, domain, body) -> let _ = infer env (add_var ctx x domain) body in Prop
@@ -307,7 +306,7 @@ and check env (ctx : context) (term : exp) (expected : exp) : unit =
     )
 
 and equal' env ctx t1 t2 =
-    if trace then Printf.printf "Equal: %s vs %s\n" (string_of_exp t1) (string_of_exp t2);
+(*    if trace then Printf.printf "Equal: %s vs %s\n" (string_of_exp t1) (string_of_exp t2); *)
     match t1, t2 with
     | Var x, Var y -> x = y
     | Universe i, Universe j -> i <= j
@@ -361,7 +360,7 @@ and equal' env ctx t1 t2 =
     | _ -> t1 = t2
 
 and reduce env ctx t =
-    if trace then Printf.printf "Reduce: %s\n" (string_of_exp t);
+(*    if trace then Printf.printf "Reduce: %s\n" (string_of_exp t); *)
     match t with
     | App (Lam (x, domain, body), arg) -> subst x arg body
     | App (f, arg) -> let f' = reduce env ctx f in let arg' = reduce env ctx arg in App (f', arg')
@@ -371,7 +370,7 @@ and reduce env ctx t =
     | _ -> t
 
 and normalize env ctx t =
-    if trace then Printf.printf "Normalize: %s\n" (string_of_exp t);
+(*    if trace then Printf.printf "Normalize: %s\n" (string_of_exp t); *)
     let t' = reduce env ctx t in
     if equal' env ctx t t' then t else normalize env ctx t'
 
