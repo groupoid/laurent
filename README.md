@@ -23,43 +23,77 @@ We’ll explore this system through examples, starting with:
 5) L₂ spaces, and culminating in
 6) Schwartz’s theory of distributions.
 
+Usage
+-----
+
 ```
-type exp =                               (* MLTT-72: *)
-  | Universe of int                      (*   Universes *)
-  | Var of string                        (*   Variables *)
-  | Forall of exp * (string * exp)       (*   Dependent function type : Universe 0 *)
-  | Exists of exp * (string * exp)       (*   Set Truncated Dependent pair type : Bool *)
-  | Lam of exp * (string * exp)          (*   Lambda abstraction *)
-  | App of exp * exp                     (*   Application *)
-  | Pair of string * exp * exp           (*   Pair constructor *)
-                                         (* CARRIERS: *)
-  | Bool                                 (*   Boolean type *)
-  | Nat                                  (*   Natural numbers *)
-  | Real                                 (*   Real numbers *)
-  | Complex                              (*   Complex numbers *)
-  | If of exp * exp * exp                (*   Conditional *)
-  | Vec of int * exp * exp * exp         (*   Vector space n-dimensional *)
-  | RealIneq of real_ineq * exp * exp    (*   Real inequalities: <, >, ≤, ≥ *)
-  | RealOps of real_op * exp * exp       (*   Real operations *)
-  | ComplexOps of complex_op * exp * exp (*   Complex operations *)
-                                         (* TOPOLOGY/SETS: *)
-  | Closure of exp                       (*   Topological closure of a set *)
-  | Set of exp                           (*   Sets *)
-  | Union of exp * exp                   (*   Set union *)
-  | Complement of exp                    (*   Set complement *)
-  | Intersect of exp * exp               (*   Set intersection *)
-  | Power of exp                         (*   Power set *)
-  | Ordinal                              (*   Ordinals *)
-                                         (* MEASURE: *)
-  | Mu of exp * exp                      (*   Extend measure from base to sigma-algebra *)
-  | Measure of exp * exp                 (*   Measures holds space and sigma-algebra *)
-                                         (* CALCULUS: *)
-  | Seq of exp                           (*   Sequences *)
-  | Sum of exp                           (*   Sums *)
-  | Limit of exp * exp * exp             (*   Limits *)
-  | Sup of exp                           (*   Supremum of a set s: Real -> Bool *)
-  | Inf of exp                           (*   Infinum of a set s: Real -> Bool *)
-  | Lebesgue of exp * exp * exp          (*   Lebesgue integral {f, mu, set}, mu : Measure *)
+$ ./laurent
+TEST OK> integral_sig : Universe 0
+TEST OK> integral_term : Forall (f, Forall (x, ℝ, ℝ), Forall (a, ℝ, Forall (b, ℝ, ℝ)))
+TEST OK> sequence_a : Forall (n, ℕ, ℝ)
+TEST OK> limit_a : Prop
+TEST OK> inf_a : ℝ
+TEST OK> sup_a : ℝ
+TEST OK> set_a : Set (ℝ)
+TEST OK> universal set : Set (Prop)
+TEST OK> e : ℝ
+TEST OK> l_2 space : Forall (f, Forall (x, ℝ, ℝ), Prop)
+TEST OK> sigma_algebra : Prop
+TEST OK> measurable : Prop
+All tests passed!
+```
+
+Syntax
+------
+
+```
+type exp =                         (* MLTT-72 Vibe Check                     *)
+  | Prop                           (* Prop Universe, Prop : Universe 0       *)
+  | Universe of int                (* Universe 0 : Universe 1, no others     *)
+  | Var of string                  (* Variable definition                    *)
+  | Forall of string * exp * exp   (* Universal quantification:   ∀ (x:A), B *)
+  | Lam of string * exp * exp      (* ∀-intro, Implication                   *)
+  | App of exp * exp               (* ∀-elim, Modus Ponens                   *)
+  | Exists of string * exp * exp   (* Existential quantification: ∃ (x:A), B *)
+  | Pair of exp * exp              (* ∃-intro, existence consists of:        *)
+  | Fst of exp                     (* ∃-elim-1, witness                      *)
+  | Snd of exp                     (* ∃-elim-2, proof                        *)
+  | NatToReal of exp               (* Carriers:                              *)
+  | Bool                           (*   𝟚   *)
+  | Nat                            (*   ℕ   *)
+  | Integer                        (*   ℤ   *)
+  | Rational                       (*   ℚ   *)
+  | Real                           (*   ℝ   *)
+  | Complex                        (*   ℂ   *)
+  | Quaternionic                   (*   ℍ   *)
+  | Octanionic                     (*   𝕆   *)
+  | Vec of int * exp * exp * exp   (*   𝕍   *)
+  | Zero                           (*  0.0  *)
+  | One                            (*  1.0  *)
+  | Infinity                       (*   ∞   *)
+  | S of exp                       (*   1+  *)
+  | Z                              (*   0   *)
+  | If of exp * exp * exp                   (* 𝟚-Eliminator : 𝟚 -> ℝ         *)
+  | RealIneq of real_ineq * exp * exp       (* Inequalities a < b, etc.      *)
+  | RealOps of real_op * exp * exp          (* Real +, -, *, etc.            *)
+  | ComplexOps of complex_op * exp * exp    (* Complex +, -, *, etc.         *)
+  | Closure of exp
+  | Set of exp              (* Term level: { x : A | P } Set Lam, Type Level: Set Real *)
+  | UnionSet of exp * exp   (* A ∪ B *)
+  | Complement of exp       (* ℝ \ A *)
+  | Intersect of exp * exp  (* a ∩ b *)
+  | Power of exp            (* a ^ b *)
+  | And of exp * exp        (* a ∩ b *)
+  | Ordinal
+  | Mu of exp * exp         (* Measure type *)
+  | Measure of exp * exp    (* Measure expression *)
+  | Seq of exp              (* a_n : N -> R, Seq Lam *)
+  | Sum of exp              (* ∑ a_n, Sum Lam *)
+  | Union of exp            (* ⋃ A_n, Union Lam  *)
+  | Limit of limit          (* Limit(f,x,l,p) : Real, f: sequence, x: bound, l: limit, p: proof *)
+  | Sup of exp              (* sup a_n : R, Sup Seq (N -> R) *)
+  | Inf of exp              (* inf a_n : R, Inf Seq (N -> R) *)
+  | Lebesgue of lebesgue    (* ∫ f dμ over set *)
 
 and real_op = RPlus | RMinus | RMult | RDiv
 and real_ineq = RLt | RGt | RLte | RGte
@@ -550,3 +584,16 @@ let proof : de_rham_theorem =
             Lam (Nat, ("m", If (cm_form Omega n (Var "m") (Var "omega"),
               cm_form Omega n (Var "m") (Var "f"), Bool)))))))))))
 ```
+
+## Bibliography
+
+[1]. Laurent Schwartz. Analyse Mathematique (1967)<br>
+[2]. Errett Bishop. <a href="https://archive.org/details/foundationsofcon0000bish">Foundations of Constructive Analysis</a> (1967)<br>
+[3]. Douglas Bridges. <a href="https://core.ac.uk/download/pdf/82492373.pdf">Constructive mathematics: a foundation for computable analysis </a> (1999)<br>
+[4]. Auke Booij. <a href="https://etheses.bham.ac.uk/id/eprint/10411/7/Booij2020PhD.pdf">Analysis in Univalent Type Theory</a> (2020)<br>
+[5]. Zachary Murray. <a href="https://arxiv.org/pdf/2205.08354">Constructive Real Numbers in the Agda Proof Assistant</a> (2023)<br>
+[6]. William Ziemer, Monica Torres. <a href="https://www.math.purdue.edu/~torresm/pubs/Modern-real-analysis.pdf">Modern Real Analysis </a> (2017)<br>
+
+## Author
+
+Namdak Tonpa
