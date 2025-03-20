@@ -41,11 +41,14 @@ type exp =                         (* MLTT-72 Vibe Check                     *)
   | Fst of exp                     (* ∃-elim-1, witness                      *)
   | Snd of exp                     (* ∃-elim-2, proof                        *)
   | NatToReal of exp               (* Carriers:                              *)
+  | Bool                           (*   𝟚   *)
   | Nat                            (*   ℕ   *)
   | Integer                        (*   ℤ   *)
+  | Rational                       (*   ℚ   *)
   | Real                           (*   ℝ   *)
   | Complex                        (*   ℂ   *)
-  | Bool                           (*   𝟚   *)
+  | Quaternionic                   (*   ℍ   *)
+  | Octanionic                     (*   𝕆   *)
   | Vec of int * exp * exp * exp   (*   𝕍   *)
   | Zero                           (*  0.0  *)
   | One                            (*  1.0  *)
@@ -198,6 +201,9 @@ and infer env (ctx : context) (e : exp) : exp =
     | One -> Real
     | Infinity -> Real
     | Complex -> Universe 0
+    | Quaternionic -> Universe 0
+    | Octanionic -> Universe 0
+    | Rational -> Universe 0
     | If (cond, t, f) -> let ct = infer env ctx cond in let _ = check env ctx ct Prop in let t_typ = infer env ctx t in let _ = check env ctx f t_typ in t_typ
     | Vec (n, field, a, b) -> let _ = check env ctx field (Universe 0) in let _ = check env ctx a field in let _ = check env ctx b field in Universe 0
     | RealIneq (op, a, b) ->
@@ -240,21 +246,31 @@ and infer env (ctx : context) (e : exp) : exp =
       let _ = check env ctx sigma (Set (Set base)) in
       Measure (base, Set (Set base))
     | Measure (space, sigma) -> let _ = check env ctx space (Universe 0) in let _ = check env ctx sigma (Set (Set space)) in Universe 0
-    | Seq a -> let _ = check env ctx a (Universe 0) in Universe 0
-    | Limit (f, x, l, p) ->
-      let _ = check env ctx f (Forall ("n", Nat, Real)) in
-      let x_ty = if equal env ctx x Infinity then Real else Nat in
-      let _ = check env ctx x x_ty in
-      let _ = check env ctx l Real in
-      let limit_proof_type =
-        Forall ("ε", Real,
-          Forall ("p", RealIneq (Gt, Var "ε", Zero),
-            Exists ("N", Real,
-              Forall ("n", Nat,
-                Forall ("q", RealIneq (Gt, Var "n", Var "N"), Prop))))) in
-      let ctx' = add_var (add_var ctx "f" (Forall ("n", Nat, Real))) "l" Real in
-      let _ = check env ctx' p (subst_many [("f", f); ("l", l)] limit_proof_type) in Prop
-
+    | Seq a ->
+      let a_ty = infer env ctx a in
+      (match a_ty with
+      | Forall ("n", Nat, codomain) when equal env ctx codomain Nat ||
+                                         equal env ctx codomain Integer ||
+                                         equal env ctx codomain Real ||
+                                         equal env ctx codomain Complex -> a_ty
+      | _ -> raise (TypeError "Seq expects a function a : N -> ( N | Z | Q | R | C | H | O )"))
+    | Limit (Seq f, x, l, p) ->
+        let codomain = match infer env ctx f with
+                       | Forall ("n", Nat, c) -> c
+                       | _ -> raise (TypeError "Limit expects a sequence") in
+        let _ = check env ctx f (Forall ("n", Nat, codomain)) in
+        let x_ty = if equal env ctx x Infinity then Real else Nat in
+        let _ = check env ctx x x_ty in
+        let _ = check env ctx l codomain in
+        let limit_proof_type =
+            Forall ("ε", Real,
+              Forall ("p", RealIneq (Gt, Var "ε", Zero),
+                Exists ("N", Real,
+                  Forall ("n", Nat,
+                    Forall ("q", RealIneq (Gt, Var "n", Var "N"), Prop))))) in
+        let ctx' = add_var (add_var ctx "f" (Forall ("n", Nat, codomain))) "l" codomain in
+        let _ = check env ctx' p (subst_many [("f", f); ("l", l)] limit_proof_type) in Prop
+    | Limit _ -> raise (TypeError "Limit expects a Seq argument")
     | Sup s -> let _ = check env ctx s (Set Real) in Real
     | Inf s -> let _ = check env ctx s (Set Real) in Real
 (*
@@ -383,7 +399,7 @@ and string_of_exp = function
   | Pair (a, b) -> "Pair (" ^ string_of_exp a ^ ", " ^ string_of_exp b ^ ")"
   | Fst t -> (string_of_exp t) ^ ".1"
   | Snd t -> (string_of_exp t) ^ ".2"
-  | S e -> "S (" ^ string_of_exp e ^ ")"
+  | S e -> "S " ^ string_of_exp e ^ ""
   | Z -> "Z"
   | Zero -> "0"
   | One -> "1"
@@ -393,6 +409,9 @@ and string_of_exp = function
   | Integer -> "ℤ"
   | Nat -> "ℕ"
   | Real -> "ℝ"
+  | Rational -> "ℚ"
+  | Octanionic -> "𝕆"
+  | Quaternionic -> "ℍ"
   | NatToReal e -> "ℝ(" ^ string_of_exp e ^ ")"
   | Complex -> "ℂ"
   | If (c, t, f) -> "If (" ^ string_of_exp c ^ ", " ^ string_of_exp t ^ ", " ^ string_of_exp f ^ ")"
@@ -438,7 +457,7 @@ let sequence_a : exp =
     Lam ("n", Nat, RealOps (Div, One, NatToReal (Var "n")))
 
 let limit_a : exp =
-  Limit (sequence_a, Infinity, Zero,
+  Limit (Seq sequence_a, Infinity, Zero,
     Lam ("ε", Real,
       Lam ("p", RealIneq (Gt, Var "ε", Zero),
         Pair (RealOps (Div, One, Var "ε"),
@@ -453,7 +472,7 @@ let sequence_e : exp =
 
 let e : exp =
   Fst (Pair (RealOps (Exp, One, One),  (* e = exp(1) *)
-    Limit (sequence_e, Infinity, RealOps (Exp, One, One),
+    Limit (Seq sequence_e, Infinity, RealOps (Exp, One, One),
       Lam ("ε", Real,
         Lam ("p", RealIneq (Gt, Var "ε", Zero),
           Pair (RealOps (Div, RealOps (Exp, One, Zero), RealOps (Times, RealOps (Plus, One, One), Var "ε")),
