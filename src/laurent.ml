@@ -504,6 +504,9 @@ let measurable =
     (Power (Set Real))
     (Lam ("x", Real, RealOps (Pow, RealOps (Abs, App (Var "f", Var "x"), Zero), NatToReal (S (S Z)))))
 
+let interval_pred (a : exp) (b : exp) : exp =
+    Set (Lam ("x", Real, And (RealIneq (Leq, a, Var "x"), RealIneq (Leq, Var "x", b))))
+
 (* runner *)
 
 let test_term env ctx (term : exp) (expected_type : exp) (name : string) : unit =
@@ -531,7 +534,8 @@ let test_all () =
     test_term env ctx l2_space (Forall ("f", Forall ("x", Real, Real), Prop)) "l_2 space";
     test_term env ctx sigma_algebra Prop "sigma_algebra";
     let ctx = add_var ctx "f" (Forall ("x", Real, Real)) in
-        test_term env ctx measurable (Prop) "measurable";
+    test_term env ctx measurable (Prop) "measurable";
+    test_term env ctx (interval_pred Zero One) (Set Real) "interval_[a,b]";
     Printf.printf "All tests passed!\n"
 
 let () = test_all ()
