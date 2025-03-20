@@ -584,3 +584,15 @@ let proof : de_rham_theorem =
             Lam (Nat, ("m", If (cm_form Omega n (Var "m") (Var "omega"),
               cm_form Omega n (Var "m") (Var "f"), Bool)))))))))))
 ```
+
+## Bibliography
+
+[1]. Laurent Schwartz. Analyse Mathematique (1967)<br>
+[2]. Errett Bishop. <a href="">Foundations of Constructive Analysis</a> (1967)<br>
+[3]. Douglas Bridges. <a href="https://core.ac.uk/download/pdf/82492373.pdf">Constructive mathematics: a foundation for computable analysis </a> (1999)<br>
+[4]. Auke Booij. <a href="https://etheses.bham.ac.uk/id/eprint/10411/7/Booij2020PhD.pdf">Analysis in Univalent Type Theory</a> (2020)<br>
+[5]. Zachary Murray. <a href="https://arxiv.org/pdf/2205.08354">Constructive Real Numbers in the Agda Proof Assistant</a> (2023)<br>
+
+## Author
+
+Namdak Tonpa
