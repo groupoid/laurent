@@ -23,6 +23,29 @@ We’ll explore this system through examples, starting with:
 5) L₂ spaces, and culminating in
 6) Schwartz’s theory of distributions.
 
+Usage
+-----
+
+```
+$ ./laurent
+TEST OK> integral_sig : Universe 0
+TEST OK> integral_term : Forall (f, Forall (x, ℝ, ℝ), Forall (a, ℝ, Forall (b, ℝ, ℝ)))
+TEST OK> sequence_a : Forall (n, ℕ, ℝ)
+TEST OK> limit_a : Prop
+TEST OK> inf_a : ℝ
+TEST OK> sup_a : ℝ
+TEST OK> set_a : Set (ℝ)
+TEST OK> universal set : Set (Prop)
+TEST OK> e : ℝ
+TEST OK> l_2 space : Forall (f, Forall (x, ℝ, ℝ), Prop)
+TEST OK> sigma_algebra : Prop
+TEST OK> measurable : Prop
+All tests passed!
+```
+
+Syntax
+------
+
 ```
 type exp =                               (* MLTT-72: *)
   | Universe of int                      (*   Universes *)
