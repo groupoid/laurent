@@ -2,7 +2,7 @@ Laurent Schwartz: Analytical Type Theory
 ========================================
 
 Type Theory for mechanical formalization of Théorie des
-Distributions and Analyse Mathematique by Laurent Schwartz.
+Distributions and Analyse Mathematique by Laurent Schwartz and Foundation of Constructive Analysis by Errett Bishop.
 
 <img src="https://laurent.groupoid.space/img/laurent.png" widht=600>
 
