@@ -1,0 +1,107 @@
+include ../../header
+
+html
+    head
+        meta(property='og:title'       content='SEQ')
+        meta(property='og:description' content='Sequences')
+        meta(property='og:url'         content='https://laurent.groupoid.space/foundations/mltt/seq/')
+
+block title
+    title SEQ
+
+block content
+    nav
+        <a href='../../index.html'>LAURENT</a>
+        <a href='#'>SEQ</a>
+    article.main
+        .exe
+            section
+                h1 SEQUENCES
+                span.
+        aside
+            time Published: 21 MAR 2025
+        .exe
+            section
+                +tex.
+                    $\text{Seq}$-type represents sequences, functions from natural numbers to a
+                    codomain type, foundational for convergence, limits, and series in analysis.
+                    It captures the discrete indexing central to Riemann sums and beyond.
+                +tex.
+                    In this system, sequences bridge type theory with classical analysis,
+                    supporting definitions of suprema, infima, and integrals via ordered terms.
+
+                h2 Formation
+                +tex.
+                    $\mathbf{Definition\ 1.1}$ ($\text{Seq}$-Formation). A sequence is a function
+                    from $\mathbb{N}$ to a type $A : U$, typically $\mathbb{R}$ or $\mathbb{C}$.
+                +tex(true).
+                    $$
+                        \text{Seq} : U =_{def} \mathbb{N} \rightarrow A.
+                    $$
+                +code.
+                    type exp =
+                      | Seq of exp  (* Seq (Lam ("n", Nat, a_n)) *)
+
+                h2 Introduction
+                +tex.
+                    $\mathbf{Definition\ 1.2}$ ($\text{Seq}$-Introduction). A sequence is introduced
+                    by a lambda abstraction $\lambda n. a_n$, where $a_n : A$ for each $n : \mathbb{N}$.
+                +tex(true).
+                    $$
+                        a : \text{Seq}(A) =_{def} \lambda n. a_n.
+                    $$
+                +code.
+                    let sequence_a : exp =
+                      Seq (Lam ("n", Nat, RealOps (Div, One, NatToReal (Var "n"))))
+
+                h2 Elimination
+                +tex.
+                    $\mathbf{Definition\ 1.3}$ ($\text{Seq}$-Elimination). Evaluating a sequence
+                    $a : \text{Seq}(A)$ at $n : \mathbb{N}$ yields the term $a_n : A$.
+                +tex(true).
+                    $$
+                        a(n) : A =_{def} \text{App}(a, n).
+                    $$
+                +code.
+                    let eval_seq (s : exp) (n : exp) : exp =
+                      App (s, n)  (* a n *)
+
+                h2 Computation
+                +tex.
+                    $\mathbf{Definition\ 1.4}$ ($\text{Seq}$-Computation). Applying a sequence
+                    reduces to substituting the index into the sequence body.
+                +tex(true).
+                    $$
+                        (\lambda n. a_n)(m) =_A a_m.
+                    $$
+                +code.
+                    let reduce env ctx = function
+                      | App (Seq (Lam (n, _, body)), arg) -> subst n arg body
+                      | _ -> ...
+
+                h2 Uniqueness
+                +tex.
+                    $\mathbf{Definition\ 1.5}$ ($\text{Seq}$-Uniqueness). Two sequences
+                    $a, b : \text{Seq}(A)$ are equal if they agree on all indices,
+                    i.e., $\forall n : \mathbb{N}, a_n =_A b_n$.
+                +tex(true).
+                    $$
+                        a =_{\text{Seq}(A)} b \iff \forall n : \mathbb{N}, a(n) =_A b(n).
+                    $$
+                +code.
+                    let equal env ctx (Seq a) (Seq b) =
+                      equal env ctx a b
+
+                h2 Theorems
+                +tex.
+                    $\mathbf{Theorem\ 1.6}$ (Pointwise Convergence). A sequence $a : \text{Seq}(A)$
+                    converges to $l : A$ if $\forall \varepsilon > 0, \exists N : \mathbb{N},
+                    \forall n > N, |a_n - l| < \varepsilon$, formalized via $\text{Limit}$.
+                +tex.
+                    $\mathbf{Theorem\ 1.7}$ (Boundedness). A sequence $a : \text{Seq}(\mathbb{R})$
+                    is bounded if $\exists M : \mathbb{R}, \forall n : \mathbb{N}, |a_n| \leq M$.
+                +code.
+                    let bounded_seq (s : exp) (m : exp) =
+                      Forall ("n", Nat, RealIneq (Lte, RealOps (Abs, App (s, Var "n"), Zero), m))
+
+include ../../footer

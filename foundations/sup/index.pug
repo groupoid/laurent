@@ -1,0 +1,109 @@
+include ../../header
+
+html
+    head
+        meta(property='og:title'       content='SUP')
+        meta(property='og:description' content='Supremum')
+        meta(property='og:url'         content='https://laurent.groupoid.space/foundations/sup/')
+
+block title
+    title SUP
+
+block content
+    nav
+        <a href='../../index.html'>LAURENT</a>
+        <a href='#'>SUP</a>
+    article.main
+        .exe
+            section
+                h1 SUPREMUM
+                span.
+        aside
+            time Published: 21 MAR 2025
+        .exe
+            section
+                +tex.
+                    $\text{Sup}$-type computes the supremum of a set of real numbers,
+                    the least upper bound, essential for defining limits and integrals in analysis.
+                    It leverages the completeness of $\mathbb{R}$ in this system.
+                +tex.
+                    In Schwartz’s framework, $\text{Sup}$ supports constructive and classical
+                    analysis, grounding properties like boundedness and convergence.
+
+                h2 Formation
+                +tex.
+                    $\mathbf{Definition\ 2.1}$ ($\text{Sup}$-Formation). The supremum is defined
+                    over a set $S : \text{Set}(\mathbb{R})$, yielding a real number.
+                +tex(true).
+                    $$
+                        \text{Sup} : \mathbb{R} =_{def} \sup S.
+                    $$
+                +code.
+                    type exp =
+                      | Sup of exp  (* Sup S *)
+
+                h2 Introduction
+                +tex.
+                    $\mathbf{Definition\ 2.2}$ ($\text{Sup}$-Introduction). The supremum of a set
+                    $S = \{ x : \mathbb{R} \mid P(x) \}$ is introduced as $\text{Sup}(S)$, assuming
+                    $S$ is non-empty and bounded above.
+                +tex(true).
+                    $$
+                        \sup S : \mathbb{R} =_{def} \text{Sup}(\{ x : \mathbb{R} \mid P(x) \}).
+                    $$
+                +code.
+                    let sup_a : exp =
+                      Sup (Set (Lam ("x", Real, RealIneq (Gt, Var "x", Zero))))
+
+                h2 Elimination
+                +tex.
+                    $\mathbf{Definition\ 2.3}$ ($\text{Sup}$-Elimination). The supremum $\sup S$
+                    serves as an upper bound, provable via its defining properties.
+                +tex(true).
+                    $$
+                        \forall x : S, x \leq \sup S \land \forall y : \mathbb{R}, (y < \sup S \implies \exists x : S, y < x).
+                    $$
+                +code.
+                    let upper_bound (s : exp) (sup_s : exp) =
+                      Forall ("x", Real, RealIneq (Lte, Var "x", sup_s))
+
+                h2 Computation
+                +tex.
+                    $\mathbf{Definition\ 2.4}$ ($\text{Sup}$-Computation). The supremum does not
+                    reduce directly but is characterized by its least upper bound property,
+                    verifiable via Z3 for concrete sets.
+                +tex(true).
+                    $$
+                        \sup S =_{\mathbb{R}} \text{least } y \text{ s.t. } \forall x : S, x \leq y.
+                    $$
+                +code.
+                    let infer env ctx (Sup s) = check env ctx s (Set Real); Real
+
+                h2 Uniqueness
+                +tex.
+                    $\mathbf{Definition\ 2.5}$ ($\text{Sup}$-Uniqueness). The supremum of a set
+                    $S$ is unique in $\mathbb{R}$, as any two least upper bounds must be equal.
+                +tex(true).
+                    $$
+                        y, z \text{ are suprema of } S \implies y =_{\mathbb{R}} z.
+                    $$
+                +code.
+                    let equal env ctx (Sup s1) (Sup s2) =
+                      equal env ctx s1 s2
+
+                h2 Theorems
+                +tex.
+                    $\mathbf{Theorem\ 2.6}$ (Completeness). Every non-empty set of real numbers
+                    bounded above has a supremum in $\mathbb{R}$, ensured by this system’s design.
+                +tex(true).
+                    $$
+                        S \neq \emptyset \land \exists M, \forall x : S, x \leq M \implies \exists \sup S.
+                    $$
+                +tex.
+                    $\mathbf{Theorem\ 2.7}$ (Sequence Supremum). For a sequence $a : \text{Seq}(\mathbb{R})$,
+                    $\sup \{ a_n \mid n : \mathbb{N} \}$ exists if the sequence is bounded above.
+                +code.
+                    let seq_sup (s : exp) =
+                      Sup (Set (Lam ("x", Real, Exists ("n", Nat, RealIneq (Eq, Var "x", App (s, Var "n"))))))
+
+include ../../footer

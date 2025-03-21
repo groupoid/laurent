@@ -1,0 +1,117 @@
+include ../../header
+
+html
+    head
+        meta(property='og:title'       content='LEBESGUE')
+        meta(property='og:description' content='Lebesgue Integration')
+        meta(property='og:url'         content='https://laurent.groupoid.space/foundations/lebesgue/')
+
+block title
+    title LEBESGUE
+
+block content
+    nav
+        <a href='../../index.html'>LAURENT</a>
+        <a href='#'>LEBESGUE</a>
+    article.main
+        .exe
+            section
+                h1 LEBESGUE INTEGRATION
+                span.
+        aside
+            time Published: 21 MAR 2025
+        .exe
+            section
+                +tex.
+                    $\text{Lebesgue}$-type defines Lebesgue integration over a measurable set
+                    with respect to a measure, yielding a real number. It generalizes Riemann
+                    integration and is pivotal in Schwartz’s theory of distributions.
+                +tex.
+                    In this system, $\text{Lebesgue}$ leverages $\text{Measure}$ and $\mu$ to
+                    formalize integration, supporting both classical and constructive analysis.
+
+                h2 Formation
+                +tex.
+                    $\mathbf{Definition\ 4.1}$ ($\text{Lebesgue}$-Formation). Lebesgue integration
+                    is formed over a function $f : \mathbb{R} \rightarrow \mathbb{R}$, a measure
+                    $\mu : \text{Measure}(A, \Sigma)$, and a set $S : \Sigma$, resulting in a real value.
+                +tex(true).
+                    $$
+                        \text{Lebesgue} : \mathbb{R} =_{def} \int_S f \, d\mu.
+                    $$
+                +code.
+                    type exp =
+                      | Lebesgue of exp * exp * exp  (* ∫ f dμ over S *)
+
+                h2 Introduction
+                +tex.
+                    $\mathbf{Definition\ 4.2}$ ($\text{Lebesgue}$-Introduction). An integral is
+                    introduced as $\text{Lebesgue}(f, \mu, S)$, where $f$ is measurable, $\mu$ is
+                    a measure, and $S$ is in $\mu$’s $\sigma$-algebra.
+                +tex(true).
+                    $$
+                        \int_S f \, d\mu : \mathbb{R} =_{def} \text{Lebesgue}(f, \mu, S).
+                    $$
+                +code.
+                    let integral_term : exp =
+                      Lam ("f", Forall ("x", Real, Real),
+                        Lam ("a", Real,
+                          Lam ("b", Real,
+                            Lebesgue (Var "f", lebesgue_measure (Var "a") (Var "b"), interval_a_b (Var "a") (Var "b")))))
+
+                h2 Elimination
+                +tex.
+                    $\mathbf{Definition\ 4.3}$ ($\text{Lebesgue}$-Elimination). The integral
+                    $\int_S f \, d\mu$ yields a real number, usable in inequalities or further computations.
+                +tex(true).
+                    $$
+                        \int_S f \, d\mu : \mathbb{R} \text{ satisfies properties like } \int_S f \, d\mu \geq 0 \text{ if } f \geq 0.
+                    $$
+                +code.
+                    let infer env ctx (Lebesgue (f, mu, s)) = Real
+
+                h2 Computation
+                +tex.
+                    $\mathbf{Definition\ 4.4}$ ($\text{Lebesgue}$-Computation). For simple cases
+                    (e.g., intervals), $\text{Lebesgue}$ reduces via the measure, verifiable by Z3.
+                +tex(true).
+                    $$
+                        \int_{[a, b]} 1 \, d\mu =_{\mathbb{R}} \mu([a, b]).
+                    $$
+                +code.
+                    let reduce env ctx = function
+                      | Lebesgue (f, Mu (_, _, Lam ("S", _, body)), s) when equal env ctx f One ->
+                          subst "S" s body
+                      | _ -> ...
+
+                h2 Uniqueness
+                +tex.
+                    $\mathbf{Definition\ 4.5}$ ($\text{Lebesgue}$-Uniqueness). The Lebesgue integral
+                    is unique for a given $f$, $\mu$, and $S$, determined by the measure’s definition.
+                +tex(true).
+                    $$
+                        \int_S f \, d\mu_1 = \int_S f \, d\mu_2 \iff \mu_1 = \mu_2.
+                    $$
+                +code.
+                    let equal env ctx (Lebesgue (f1, m1, s1)) (Lebesgue (f2, m2, s2)) =
+                      equal env ctx f1 f2 && equal env ctx m1 m2 && equal env ctx s1 s2
+
+                h2 Theorems
+                +tex.
+                    $\mathbf{Theorem\ 4.6}$ (Monotonicity). If $f \leq g$ on $S$, then
+                    $\int_S f \, d\mu \leq \int_S g \, d\mu$, assuming $\mu$ is non-negative.
+                +tex(true).
+                    $$
+                        f \leq g \implies \int_S f \, d\mu \leq \int_S g \, d\mu.
+                    $$
+                +tex.
+                    $\mathbf{Theorem\ 4.7}$ (Dominated Convergence). For a sequence $f_n : \text{Seq}(\mathbb{R} \rightarrow \mathbb{R})$
+                    converging to $f$ with $|f_n| \leq g$ and $\int g \, d\mu < \infty$,
+                    $\lim_{n \to \infty} \int f_n \, d\mu = \int f \, d\mu$.
+                +code.
+                    let dom_conv (fn : exp) (f : exp) (g : exp) (mu : exp) (s : exp) =
+                      And (Limit (Seq (Lam ("n", Nat, Lebesgue (App (fn, Var "n"), mu, s))), Infinity,
+                                 Lebesgue (f, mu, s), True),
+                           Lebesgue (g, mu, s))
+
+include ../../footer
