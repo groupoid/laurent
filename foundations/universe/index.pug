@@ -82,4 +82,23 @@ block content
                     and classical. Lean’s $\text{Prop}$ is similar but supports quotient types natively,
                     which we defer to future extensions (e.g., Dedekind cuts in $\mathbb{R}$).
                 +tex.
-                    Our $U_0 : U_1$ mirrors Coq’s minimal hierarch
+                    Our $U_0 : U_1$ mirrors Coq’s minimal hierarchy for analysis but avoids Lean’s
+                    full cumulativity, prioritizing Z3-driven decidability over proof complexity.
+
+                h2 Advantages and Limitations
+                +tex.
+                    $\mathbf{Advantages}$: The limited hierarchy ensures type checking is straightforward,
+                    and $\text{Prop}$’s classical nature aligns with Schwartz’s analysis, enabling
+                    efficient Z3 verification for real arithmetic and set equality.
+                +tex.
+                    $\mathbf{Limitations}$: Higher universes ($U_2, U_3, \ldots$) are absent, restricting
+                    nested type constructions beyond $U_1$ (e.g., $\text{Power}(\text{Power}(A))$ requires
+                    careful encoding). Impredicativity is sacrificed for simplicity.
+
+                h2 Future Directions
+                +tex.
+                    Future support for quotient types (e.g., Lean-style $\text{Quotient}$) could enrich
+                    $U_0$, enabling constructions like Dedekind reals directly within the system, though
+                    current focus remains on Z3-backed real analysis without such granularity.
+
+include ../../footer
