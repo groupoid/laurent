@@ -22,6 +22,7 @@
    5) L₂ spaces, and culminating in
    6) Schwartz’s theory of distributions.
 
+   Single file distribution:
    $ ocamlfind ocamlc -o laurent -package z3 -linkpkg laurent.ml
 *)
 
@@ -67,21 +68,21 @@ type exp =                         (* MLTT-72 Vibe Check                     *)
   | RealOps of real_op * exp * exp          (* Real +, -, *, etc.            *)
   | ComplexOps of complex_op * exp * exp    (* Complex +, -, *, etc.         *)
   | Closure of exp
-  | SetEq of exp * exp
-  | True
-  | False
-  | Set of exp              (* Term level: { x : A | P } Set Lam, Type Level: Set Real *)
-  | Complement of exp       (* ℝ \ A *)
-  | Intersect of exp * exp  (* a ∩ b *)
-  | Power of exp            (* a ^ b *)
-  | And of exp * exp        (* a ∩ b *)
-  | Or of exp * exp         (* a ∪ b *)
+  | SetEq of exp * exp      (* a = b,       a b : Set  *)
+  | True                    (* True : Prop             *)
+  | False                   (* False : Prop            *)
+  | Set of exp              (* { x : A | P }, A : Set  *)
+  | Complement of exp       (* ℝ \ A,         A : Set  *)
+  | Intersect of exp * exp  (* a ∩ b,       a b : Set  *)
+  | Power of exp            (* a ^ b,       a b : Set  *)
+  | And of exp * exp        (* a ∩ b,       a b : Prop *)
+  | Or of exp * exp         (* a ∪ b,       a b : Prop *)
   | Ordinal
-  | Mu of exp * exp * exp   (* Measure type *)
-  | Measure of exp * exp    (* Measure expression *)
+  | Mu of exp * exp * exp   (* μ (base : U_0, sigma : Set (Set base), f : Set base -> base) : Measure *)
+  | Measure of exp * exp    (* Measure (space : U_0, sigma : Set (Set space)) : U_0 *)
   | Seq of exp              (* a_n : N -> R, Seq Lam *)
-  | Sum of exp              (* ∑ a_n, Sum Lam *)
-  | Union of exp            (* ⋃ A_n, Union Lam  *)
+  | Sum of exp              (* ∑ a_n, Sum Lam, inifinite sum *)
+  | Union of exp            (* ⋃ A_n, Union Lam, infinite union *)
   | Limit of limit          (* Limit(f,x,l,p) : Real, f: sequence, x: bound, l: limit, p: proof *)
   | Sup of exp              (* sup a_n : R, Sup Seq (N -> R) *)
   | Inf of exp              (* inf a_n : R, Inf Seq (N -> R) *)
@@ -176,8 +177,6 @@ let rec string_of_exp = function
   | Sup s -> "Sup (" ^ string_of_exp s ^ ")"
   | Inf s -> "Inf (" ^ string_of_exp s ^ ")"
   | Lebesgue (f, m, set) -> "Lebesgue (" ^ string_of_exp f ^ ", " ^ string_of_exp m ^ ")"
-
-
 
 let rec subst_many m t =
     match t with
@@ -356,7 +355,9 @@ and infer env (ctx : context) (e : exp) : exp =
       let _ = check env ctx sigma (Set (Set base)) in
       let _ = check env ctx measure_func (Forall ("A", Set Real, Real)) in
       Measure (base, Set (Set base))
-    | Measure (space, sigma) -> let _ = check env ctx space (Universe 0) in let _ = check env ctx sigma (Set (Set space)) in Universe 0
+    | Measure (space, sigma) ->
+      let _ = check env ctx space (Universe 0) in
+      let _ = check env ctx sigma (Set (Set space)) in Universe 0
     | Lebesgue (f, mu, set) ->
       let base = match infer env ctx mu with
         | Measure (b, _) -> b
@@ -613,7 +614,7 @@ let test_z3 () =
     let d = And (App (a, Var "x"), App (b, Var "x")) in
     let one_point = interval_a_b One One in
     (* Property 1: C = [1, 1] *)
-    let prop1 = SetEq (c,one_point) in
+    let prop1 = SetEq (c, one_point) in
     test_term env ctx (normalize env ctx prop1) True "C = [1, 1]";
     (* Property 2: D ⇔ (x = 1) *)
     let x_eq_one = RealIneq (Eq, Var "x", One) in
