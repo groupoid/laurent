@@ -1,0 +1,113 @@
+include ../../header
+
+html
+    head
+        meta(property='og:title'       content='EXISTS')
+        meta(property='og:description' content='Existential Quantification')
+        meta(property='og:url'         content='https://laurent.groupoid.space/foundations/exists/')
+
+block title
+    title EXISTS
+
+block content
+    nav
+        <a href='../../index.html'>LAURENT</a>
+        <a href='#'>EXISTS</a>
+    article.main.list
+        section
+            h1 EXISTENTIAL QUANTIFICATION
+            aside time Published: 21 MAR 2025
+        section
+            +tex.
+                $\exists$-type represents existential quantification, encoding the existence
+                of a witness $x : A$ satisfying a property $B(x)$. It is a dependent sum,
+                interpreted as a coproduct or disjoint union, truncated to a proposition.
+            +tex.
+                In this system, $\exists$-types are foundational for defining sets, measures,
+                and classical logical statements, aligning with Schwartz’s analysis framework.
+
+            h2 Formation
+            +tex.
+                $\mathbf{Definition\ 2.1}$ ($\exists$-Formation, Dependent Sum). The existential
+                type is indexed over a type $A : U$ with a family $B(x) : \text{Prop}$, formed
+                as a 0-truncated dependent sum.
+            +tex(true).
+                $$
+                    \exists : \text{Prop} =_{def} || \sum_{x : A} B(x) ||_0.
+                $$
+            +code.
+                type exp =
+                  | Exists of string * exp * exp  (* ∃ (x : A), B(x) *)
+
+            h2 Introduction
+            +tex.
+                $\mathbf{Definition\ 2.2}$ (Witness Pair). A pair $(a, b)$ where $a : A$
+                and $b : B(a)$ introduces a term proving $\exists (x : A), B(x)$.
+            +tex(true).
+                $$
+                    (a, b) : \exists (x : A), B(x).
+                $$
+            +code.
+                let pair (a : exp) (b : exp) : exp =
+                  Pair (a, b)  (* (a, b) *)
+
+            h2 Elimination
+            +tex.
+                $\mathbf{Definition\ 2.3}$ (Projections). The projections $\text{fst}$
+                and $\text{snd}$ extract the witness and proof from an existential term.
+            +tex(true).
+                $$
+                    \text{fst} : (\exists (x : A), B(x)) \rightarrow A =_{def} (a, b) \mapsto a.
+                $$
+            +tex(true).
+                $$
+                    \text{snd} : \Pi_{p : \exists (x : A), B(x)} B(\text{fst}(p)) =_{def} (a, b) \mapsto b.
+                $$
+            +code.
+                let fst (p : exp) : exp = Fst p  (* p.1 *)
+                let snd (p : exp) : exp = Snd p  (* p.2 *)
+
+            h2 Computation
+            +tex.
+                $\mathbf{Definition\ 2.4}$ ($\exists$-Computation). The β-rules for projections
+                reduce pairs to their components.
+            +tex(true).
+                $$
+                    \text{fst}(a, b) =_A a, \quad \text{snd}(a, b) =_{B(a)} b.
+                $$
+            +code.
+                let reduce env ctx = function
+                  | Fst (Pair (a, _)) -> a
+                  | Snd (Pair (_, b)) -> b
+                  | _ -> ...
+
+            h2 Uniqueness
+            +tex.
+                $\mathbf{Definition\ 2.5}$ ($\exists$-Uniqueness). As a proposition,
+                $\exists (x : A), B(x)$ is 0-truncated, so any two proofs are equal up to
+                propositional equality.
+            +tex(true).
+                $$
+                    p, q : \exists (x : A), B(x) \implies p =_{\text{Prop}} q.
+                $$
+            +code.
+                (* Implicit in Prop truncation *)
+                let equal env ctx p q = true  (* For Prop terms *)
+
+            h2 Theorems
+            +tex.
+                $\mathbf{Theorem\ 2.6}$ (Classical Logic). If $\exists x : A, P(x)$ holds,
+                there exists some $a : A$ such that $P(a)$ is true, validated by Z3 reduction.
+            +tex(true).
+                $$
+                    \exists x : A, P(x) \implies \text{fst}(p) : A \land P(\text{fst}(p)).
+                $$
+            +tex.
+                $\mathbf{Theorem\ 2.7}$ (Axiom of Choice). If for all $x : A$ there exists
+                $y : B(x)$ such that $R(x, y)$, then a choice function exists.
+            +code.
+                let ac (a : exp) (b : exp) (r : exp) =
+                  Exists ("f", Forall ("x", a, Exists ("y", b, r)),
+                        Forall ("x", a, r))
+
+include ../../footer

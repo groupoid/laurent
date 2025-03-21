@@ -1,0 +1,112 @@
+include ../../header
+
+html
+    head
+        meta(property='og:title'       content='FORALL')
+        meta(property='og:description' content='Universal Quantification')
+        meta(property='og:url'         content='https://laurent.groupoid.space/foundations/forall/')
+
+block title
+    title FORALL
+
+block content
+    nav
+        <a href='../../index.html'>LAURENT</a>
+        <a href='#'>FORALL</a>
+    article.main
+        .exe
+            section
+                h1 UNIVERSAL QUANTIFICATION
+                span.
+        aside
+            time Published: 21 MAR 2025
+        .exe
+            section
+                +tex.
+                    $\forall$-type represents universal quantification over a domain,
+                    encoding properties or functions that hold for all elements of a type.
+                    It is the type-theoretic analogue of logical $\forall$ and forms the basis
+                    for dependent function spaces (Π-types) when the body is a type family.
+                +tex.
+                    In this system, $\forall$-types are used to define predicates, sets,
+                    measures, and logical statements, bridging classical analysis with type theory.
+
+                h2 Formation
+                +tex.
+                    $\mathbf{Definition\ 1.1}$ ($\forall$-Formation). The universal quantification
+                    type is formed over a domain $A : U$ and a body $B(x) : U$ or $\text{Prop}$,
+                    representing "for all $x : A$, $B(x)$ holds."
+                +tex(true).
+                    $$
+                        \forall : U =_{def} \prod_{x : A} B(x).
+                    $$
+                +code.
+                    type exp =
+                      | Forall of string * exp * exp  (* ∀ (x : A), B(x) *)
+
+                h2 Introduction
+                +tex.
+                    $\mathbf{Definition\ 1.2}$ ($\forall$-Introduction). A term of type
+                    $\forall (x : A), B(x)$ is introduced via a lambda abstraction $\lambda x. b$,
+                    where $b : B(x)$ for all $x : A$.
+                +tex(true).
+                    $$
+                        \lambda x. b : \forall (x : A), B(x).
+                    $$
+                +code.
+                    let lam (x : string) (a : exp) (b : exp) : exp =
+                      Lam (x, a, b)  (* λ x : A. b *)
+
+                h2 Elimination
+                +tex.
+                    $\mathbf{Definition\ 1.3}$ ($\forall$-Elimination). Given $f : \forall (x : A), B(x)$
+                    and $a : A$, the application $f(a)$ yields $B(a)$.
+                +tex(true).
+                    $$
+                        f(a) : B(a) =_{def} \text{App}(f, a).
+                    $$
+                +code.
+                    let apply (f : exp) (a : exp) : exp =
+                      App (f, a)  (* f a *)
+
+                h2 Computation
+                +tex.
+                    $\mathbf{Definition\ 1.4}$ ($\forall$-Computation). The β-rule states that
+                    applying a lambda abstraction reduces to substitution.
+                +tex(true).
+                    $$
+                        (\lambda x. b)(a) =_{B(a)} b[x \mapsto a].
+                    $$
+                +code.
+                    let reduce env ctx = function
+                      | App (Lam (x, _, body), arg) -> subst x arg body
+                      | _ -> ...
+
+                h2 Uniqueness
+                +tex.
+                    $\mathbf{Definition\ 1.5}$ ($\forall$-Uniqueness). The η-rule states that
+                    any function $f$ equals its eta-expanded form.
+                +tex(true).
+                    $$
+                        f =_{\forall (x : A), B(x)} \lambda x. f(x).
+                    $$
+                +code.
+                    (* Implicit in type equality *)
+                    let equal env ctx f (Lam (x, a, App (f', Var x'))) =
+                      x = x' && equal env ctx f f'
+
+                h2 Theorems
+                +tex.
+                    $\mathbf{Theorem\ 1.6}$ (Predicate Logic). If $\forall x : A, P(x)$ holds
+                    and $a : A$, then $P(a)$ holds (modus ponens in type theory).
+                +tex(true).
+                    $$
+                        \forall x : A, P(x) \implies P(a).
+                    $$
+                +tex.
+                    $\mathbf{Theorem\ 1.7}$ (Set Definition). Sets in this system are defined as
+                    $\forall$-types with a propositional body, e.g., $\{ x : \mathbb{R} \mid P(x) \}$.
+                +code.
+                    let set_a = Set (Lam ("x", Real, RealIneq (Gt, Var "x", Zero)))
+
+include ../../footer
