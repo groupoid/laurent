@@ -1,0 +1,113 @@
+include ../../header
+
+html
+    head
+        meta(property='og:title'       content='MEASURE')
+        meta(property='og:description' content='Measure Type')
+        meta(property='og:url'         content='https://laurent.groupoid.space/foundations/measure/')
+
+block title
+    title MEASURE
+
+block content
+    nav
+        <a href='../../index.html'>LAURENT</a>
+        <a href='#'>MEASURE</a>
+    article.main
+        .exe
+            section
+                h1 MEASURE TYPE
+                span.
+        aside
+            time Published: 21 MAR 2025
+        .exe
+            section
+                +tex.
+                    $\text{Measure}$-type classifies measure spaces, pairing a base type with
+                    a $\sigma$-algebra to form the domain of measure functions. It is a higher-level
+                    construct for typing $\mu$ and enabling integration in Schwartz’s analysis.
+                +tex.
+                    This type ensures that measures operate over well-defined measurable spaces,
+                    supporting Lebesgue integration and custom measures in the system.
+
+                h2 Formation
+                +tex.
+                    $\mathbf{Definition\ 2.1}$ ($\text{Measure}$-Formation). The measure type is
+                    formed over a base type $A : U$ and a $\sigma$-algebra $\Sigma : \text{Set}(\text{Set}(A))$,
+                    classifying measure functions.
+                +tex(true).
+                    $$
+                        \text{Measure} : U =_{def} \text{Measure}(A, \Sigma).
+                    $$
+                +code.
+                    type exp =
+                      | Measure of exp * exp  (* Measure (A, Σ) *)
+
+                h2 Introduction
+                +tex.
+                    $\mathbf{Definition\ 2.2}$ ($\text{Measure}$-Introduction). A measure type is
+                    introduced by constructing a measure $\mu(A, \Sigma, f)$, where $f$ maps sets
+                    in $\Sigma$ to $\mathbb{R}$, satisfying measure axioms.
+                +tex(true).
+                    $$
+                        \text{Measure}(A, \Sigma) =_{def} \text{type of } \mu(A, \Sigma, f).
+                    $$
+                +code.
+                    let measure_type (a : exp) (sigma : exp) : exp =
+                      Measure (a, sigma)
+
+                h2 Elimination
+                +tex.
+                    $\mathbf{Definition\ 2.3}$ ($\text{Measure}$-Elimination). A term of type
+                    $\text{Measure}(A, \Sigma)$ can be used to define integrals or evaluate sets,
+                    typically via a $\mu$ constructor.
+                +tex(true).
+                    $$
+                        \mu : \text{Measure}(A, \Sigma) \implies \mu(S) : \mathbb{R} \text{ for } S : \Sigma.
+                    $$
+                +code.
+                    let infer env ctx = function
+                      | Mu (base, sigma, _) -> Measure (base, sigma)
+                      | _ -> ...
+
+                h2 Computation
+                +tex.
+                    $\mathbf{Definition\ 2.4}$ ($\text{Measure}$-Computation). The type
+                    $\text{Measure}(A, \Sigma)$ reduces to its constituent parts when constructing
+                    specific measures, with no direct term-level reduction.
+                +tex(true).
+                    $$
+                        \text{Measure}(A, \Sigma) \text{ supports } \mu(A, \Sigma, f).
+                    $$
+                +code.
+                    let check env ctx mu (Measure (base, sigma)) =
+                      check env ctx mu (Measure (base, sigma))
+
+                h2 Uniqueness
+                +tex.
+                    $\mathbf{Definition\ 2.5}$ ($\text{Measure}$-Uniqueness). Two measure types
+                    $\text{Measure}(A, \Sigma)$ and $\text{Measure}(A', \Sigma')$ are equal if
+                    $A = A'$ and $\Sigma = \Sigma'$, ensuring unique measurable spaces.
+                +tex(true).
+                    $$
+                        \text{Measure}(A, \Sigma) =_U \text{Measure}(A', \Sigma') \iff A =_U A' \land \Sigma =_{\text{Set}(\text{Set}(A))} \Sigma'.
+                    $$
+                +code.
+                    let equal env ctx (Measure (a1, s1)) (Measure (a2, s2)) =
+                      equal env ctx a1 a2 && equal env ctx s1 s2
+
+                h2 Theorems
+                +tex.
+                    $\mathbf{Theorem\ 2.6}$ (Measurable Space). $\text{Measure}(A, \Sigma)$ defines
+                    a measurable space if $\Sigma$ is a $\sigma$-algebra over $A$, supporting integration.
+                +tex(true).
+                    $$
+                        \text{is_sigma_algebra}(\Sigma) \implies \text{Measure}(A, \Sigma) \text{ is valid}.
+                    $$
+                +tex.
+                    $\mathbf{Theorem\ 2.7}$ (Lebesgue Measure Typing). The Lebesgue measure over
+                    $\mathbb{R}$ is typed as $\text{Measure}(\mathbb{R}, \text{Power}(\text{Set}(\mathbb{R})))$.
+                +code.
+                    let lebesgue_type = Measure (Real, Power (Set Real))
+
+include ../../footer
