@@ -1,0 +1,26 @@
+{
+  "name": "laurent",
+  "version": "1.2.0",
+  "description": "Laurent: Analytical Type System",
+  "main": "",
+  "scripts": {
+    "start": "pug -O ./framework.js index.pug",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/groupoid/anders"
+  },
+  "author": "Groupoid Infinity",
+  "license": "DHARMA",
+  "preinstall": "npm i -g pug-cli",
+  "devDependencies": {
+    "mathjax-full": "^3.2.0",
+    "node-sass": "^9.0.0",
+    "npm": "^10.1.0",
+    "pug": "^3.0.3",
+    "pug-cli": "^1.0.0-alpha6",
+    "sass": "^1.68.0"
+  },
+  "dependencies": {}
+}
