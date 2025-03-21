@@ -1,0 +1,114 @@
+include ../../header
+
+html
+    head
+        meta(property='og:title'       content='COMPLEMENT')
+        meta(property='og:description' content='Set Complement')
+        meta(property='og:url'         content='https://laurent.groupoid.space/foundations/complement/')
+
+block title
+    title COMPLEMENT
+
+block content
+    nav
+        <a href='../../index.html'>LAURENT</a>
+        <a href='#'>COMPLEMENT</a>
+    article.main
+        .exe
+            section
+                h1 SET COMPLEMENT
+                span.
+        aside
+            time Published: 21 MAR 2025
+        .exe
+            section
+                +tex.
+                    $\text{Complement}$-type constructs the complement of a set with respect to
+                    its base type, defining elements not in the original set via predicate negation.
+                    It is crucial for $\sigma$-algebra closure and measure theory operations.
+                +tex.
+                    In this system, $\text{Complement}$ integrates with $\text{Set}$ and $\text{SetEq}$,
+                    using logical negation and Z3 to ensure consistency in set definitions.
+
+                h2 Formation
+                +tex.
+                    $\mathbf{Definition\ 2.1}$ ($\text{Complement}$-Formation). The complement of
+                    a set $S : \text{Set}(A)$ with respect to $A$ forms a new set of elements not in $S$.
+                +tex(true).
+                    $$
+                        \text{Complement} : \text{Set}(A) =_{def} A \setminus S.
+                    $$
+                +code.
+                    type exp =
+                      | Complement of exp * exp  (* A \ S *)
+
+                h2 Introduction
+                +tex.
+                    $\mathbf{Definition\ 2.2}$ ($\text{Complement}$-Introduction). The complement
+                    of $S = \{ x : A \mid P(x) \}$ in $A$ is introduced as $A \setminus S = \{ x : A \mid \neg P(x) \}$.
+                +tex(true).
+                    $$
+                        A \setminus S : \text{Set}(A) =_{def} \text{Complement}(A, S).
+                    $$
+                +code.
+                    let complement_set (a : exp) (s : exp) : exp =
+                      Complement (a, s)
+
+                h2 Elimination
+                +tex.
+                    $\mathbf{Definition\ 2.3}$ ($\text{Complement}$-Elimination). Membership in
+                    $A \setminus S$ holds if an element is in $A$ but not in $S$, expressed as negation.
+                +tex(true).
+                    $$
+                        (A \setminus S)(a) : \text{Prop} =_{def} \neg S(a).
+                    $$
+                +code.
+                    let reduce env ctx = function
+                      | App (Complement (_, Set (Lam (x, _, p))), a) ->
+                          Not (subst x a p)
+                      | _ -> ...
+
+                h2 Computation
+                +tex.
+                    $\mathbf{Definition\ 2.4}$ ($\text{Complement}$-Computation). Applying
+                    $A \setminus S$ to an element reduces to the negation of $S$’s predicate,
+                    verifiable by Z3 for concrete cases.
+                +tex(true).
+                    $$
+                        (A \setminus S)(a) =_{\text{Prop}} \neg P(a).
+                    $$
+                +code.
+                    let infer env ctx (Complement (a, s)) =
+                      check env ctx s (Set a); Set a
+
+                h2 Uniqueness
+                +tex.
+                    $\mathbf{Definition\ 2.5}$ ($\text{Complement}$-Uniqueness). The complement
+                    $A \setminus S$ is uniquely determined by its predicate, equal to another set
+                    $U$ if $\forall x : A, \neg S(x) \iff U(x)$, provable via $\text{SetEq}$.
+                +tex(true).
+                    $$
+                        A \setminus S =_{\text{Set}(A)} U \iff \forall x : A, \neg S(x) =_{\text{Prop}} U(x).
+                    $$
+                +code.
+                    let equal env ctx (Complement (a1, s1)) (Complement (a2, s2)) =
+                      equal env ctx a1 a2 && equal env ctx s1 s2
+
+                h2 Theorems
+                +tex.
+                    $\mathbf{Theorem\ 2.6}$ (Double Complement). For a set $S : \text{Set}(A)$,
+                    the double complement equals the original set: $A \setminus (A \setminus S) = S$.
+                +tex(true).
+                    $$
+                        A \setminus (A \setminus S) =_{\text{Set}(A)} S.
+                    $$
+                +tex.
+                    $\mathbf{Theorem\ 2.7}$ (Measure of Complement). For a measure
+                    $\mu : \text{Measure}(A, \Sigma)$ with finite total measure $\mu(A)$,
+                    $\mu(A \setminus S) = \mu(A) - \mu(S)$, assuming $S : \Sigma$.
+                +code.
+                    let measure_complement (mu : exp) (a : exp) (s : exp) =
+                      SetEq (App (mu, Complement (a, s)),
+                             RealOps (Minus, App (mu, a), App (mu, s)))
+
+include ../../footer
