@@ -52,7 +52,9 @@ block content
                     Limits are handled via $\text{Limit}$, avoiding explicit construction.
                 +tex(true).
                     $$
-                        \forall a : \text{Seq}(\mathbb{R}), \ (\forall \varepsilon > 0, \exists N, \forall m, n > N, |a_m - a_n| < \varepsilon) \implies \exists l, \lim_{n \to \infty} a_n = l.
+                        \forall a : \text{Seq}(\mathbb{R}), \\
+                        (\forall \varepsilon > 0, \exists N, \forall m, n > N, |a_m - a_n| < \varepsilon) \\
+                        \implies \exists l, \lim_{n \to \infty} a_n = l.
                     $$
                 +code.
                     let real_complete (a : exp) : exp =
