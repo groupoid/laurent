@@ -1,0 +1,108 @@
+include ../../header
+
+html
+    head
+        meta(property='og:title'       content='POWER')
+        meta(property='og:description' content='Power Set')
+        meta(property='og:url'         content='https://laurent.groupoid.space/foundations/power/')
+
+block title
+    title POWER
+
+block content
+    nav
+        <a href='../../index.html'>LAURENT</a>
+        <a href='#'>POWER</a>
+    article.main
+        .exe
+            section
+                h1 POWER SET
+                span.
+        aside
+            time Published: 21 MAR 2025
+        .exe
+            section
+                +tex.
+                    $\text{Power}$-type constructs the power set of a type, the set of all subsets,
+                    foundational for defining $\sigma$-algebras and measurable spaces in analysis.
+                    It extends set theory into type theory with a higher-level construct.
+                +tex.
+                    In this system, $\text{Power}$ supports $\text{Measure}$ and $\text{Set}$ operations,
+                    providing the domain for Lebesgue and custom measures.
+
+                h2 Formation
+                +tex.
+                    $\mathbf{Definition\ 5.1}$ ($\text{Power}$-Formation). The power set of a type
+                    $A : U$ is the set of all subsets of $A$, typed as $\text{Set}(\text{Set}(A))$.
+                +tex(true).
+                    $$
+                        \text{Power} : U =_{def} \mathcal{P}(A).
+                    $$
+                +code.
+                    type exp =
+                      | Power of exp  (* P(A) *)
+
+                h2 Introduction
+                +tex.
+                    $\mathbf{Definition\ 5.2}$ ($\text{Power}$-Introduction). The power set $\mathcal{P}(A)$
+                    is introduced as the collection of all possible sets $S : \text{Set}(A)$.
+                +tex(true).
+                    $$
+                        \mathcal{P}(A) : \text{Set}(\text{Set}(A)) =_{def} \text{Power}(A).
+                    $$
+                +code.
+                    let power_set (a : exp) : exp =
+                      Power (a)
+
+                h2 Elimination
+                +tex.
+                    $\mathbf{Definition\ 5.3}$ ($\text{Power}$-Elimination). Membership in $\mathcal{P}(A)$
+                    holds for any set $S : \text{Set}(A)$, allowing use in $\sigma$-algebras or measures.
+                +tex(true).
+                    $$
+                        S \in \mathcal{P}(A) : \text{Prop} =_{def} S : \text{Set}(A).
+                    $$
+                +code.
+                    let infer env ctx (Power a) =
+                      check env ctx a U; Set (Set a)
+
+                h2 Computation
+                +tex.
+                    $\mathbf{Definition\ 5.4}$ ($\text{Power}$-Computation). $\mathcal{P}(A)$ does not
+                    reduce directly but defines a type for subsets, verifiable via $\text{SetEq}$ for equality.
+                +tex(true).
+                    $$
+                        S \in \mathcal{P}(A) \iff S \subseteq A.
+                    $$
+                +code.
+                    let subset (s : exp) (a : exp) =
+                      Forall ("x", a, Implies (App (s, Var "x"), True))
+
+                h2 Uniqueness
+                +tex.
+                    $\mathbf{Definition\ 5.5}$ ($\text{Power}$-Uniqueness). The power set $\mathcal{P}(A)$
+                    is unique for a given $A$, containing all subsets and equal to another $P$ if
+                    $\forall S : \text{Set}(A), S \in \mathcal{P}(A) \iff S \in P$.
+                +tex(true).
+                    $$
+                        \mathcal{P}(A) =_{\text{Set}(\text{Set}(A))} P \iff \forall S, (S \subseteq A \iff S \in P).
+                    $$
+                +code.
+                    let equal env ctx (Power a1) (Power a2) =
+                      equal env ctx a1 a2
+
+                h2 Theorems
+                +tex.
+                    $\mathbf{Theorem\ 5.6}$ (Cardinality). For a finite type $A$ with $n$ elements,
+                    $\mathcal{P}(A)$ has $2^n$ elements, though infinite in cases like $\mathbb{R}$.
+                +tex(true).
+                    $$
+                        |A| = n \implies |\mathcal{P}(A)| = 2^n.
+                    $$
+                +tex.
+                    $\mathbf{Theorem\ 5.7}$ (Sigma-Algebra Basis). $\mathcal{P}(\mathbb{R})$ serves
+                    as the $\sigma$-algebra for the Lebesgue measure, containing all measurable subsets.
+                +code.
+                    let lebesgue_sigma = Power (Set Real)
+
+include ../../footer

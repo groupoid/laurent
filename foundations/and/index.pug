@@ -1,0 +1,115 @@
+include ../../header
+
+html
+    head
+        meta(property='og:title'       content='AND')
+        meta(property='og:description' content='Logical Conjunction')
+        meta(property='og:url'         content='https://laurent.groupoid.space/foundations/and/')
+
+block title
+    title AND
+
+block content
+    nav
+        <a href='../../index.html'>LAURENT</a>
+        <a href='#'>AND</a>
+    article.main
+        .exe
+            section
+                h1 LOGICAL CONJUNCTION
+                span.
+        aside
+            time Published: 21 MAR 2025
+        .exe
+            section
+                +tex.
+                    $\text{And}$-type represents logical conjunction, combining two propositions
+                    into a single proposition that holds if both are true. It is a building block
+                    for predicate definitions and set operations in this system.
+                +tex.
+                    In Schwartz’s framework, $\text{And}$ underpins interval definitions and
+                    compound conditions, with Z3 ensuring propositional consistency.
+
+                h2 Formation
+                +tex.
+                    $\mathbf{Definition\ 2.1}$ ($\text{And}$-Formation). Conjunction is formed over
+                    two propositions $P, Q : \text{Prop}$, yielding their logical "and".
+                +tex(true).
+                    $$
+                        \text{And} : \text{Prop} =_{def} P \land Q.
+                    $$
+                +code.
+                    type exp =
+                      | And of exp * exp  (* P ∧ Q *)
+
+                h2 Introduction
+                +tex.
+                    $\mathbf{Definition\ 2.2}$ ($\text{And}$-Introduction). Conjunction $P \land Q$
+                    is introduced by providing proofs of both $P$ and $Q$.
+                +tex(true).
+                    $$
+                        P \land Q : \text{Prop} =_{def} \text{And}(P, Q).
+                    $$
+                +code.
+                    let conj (p : exp) (q : exp) : exp =
+                      And (p, q)
+
+                h2 Elimination
+                +tex.
+                    $\mathbf{Definition\ 2.3}$ ($\text{And}$-Elimination). From $P \land Q$, one can
+                    derive $P$ or $Q$ individually, reflecting classical conjunction rules.
+                +tex(true).
+                    $$
+                        P \land Q \implies P, \quad P \land Q \implies Q.
+                    $$
+                +code.
+                    let fst_conj (p : exp) = match p with
+                      | And (p1, _) -> p1
+                      | _ -> ...
+                    let snd_conj (p : exp) = match p with
+                      | And (_, p2) -> p2
+                      | _ -> ...
+
+                h2 Computation
+                +tex.
+                    $\mathbf{Definition\ 2.4}$ ($\text{And}$-Computation). Conjunction reduces to
+                    $\text{True}$ if both $P$ and $Q$ are $\text{True}$, otherwise $\text{False}$,
+                    verifiable by Z3.
+                +tex(true).
+                    $$
+                        P \land Q =_{\text{Prop}} \text{True} \text{ if } P = Q = \text{True}.
+                    $$
+                +code.
+                    let reduce env ctx = function
+                      | And (True, True) -> True
+                      | And (p, q) -> smt_verify_iff ctx_z3 (And (p, q)) True
+                      | _ -> ...
+
+                h2 Uniqueness
+                +tex.
+                    $\mathbf{Definition\ 2.5}$ ($\text{And}$-Uniqueness). As a proposition,
+                    $P \land Q$ is unique in $\text{Prop}$, with all proofs equal due to 0-truncation.
+                +tex(true).
+                    $$
+                        p, q : P \land Q \implies p =_{\text{Prop}} q.
+                    $$
+                +code.
+                    let equal env ctx (And (p1, q1)) (And (p2, q2)) =
+                      equal env ctx p1 p2 && equal env ctx q1 q2
+
+                h2 Theorems
+                +tex.
+                    $\mathbf{Theorem\ 2.6}$ (Commutativity). Conjunction is commutative:
+                    $P \land Q = Q \land P$, provable by logical equivalence.
+                +tex(true).
+                    $$
+                        P \land Q =_{\text{Prop}} Q \land P.
+                    $$
+                +tex.
+                    $\mathbf{Theorem\ 2.7}$ (Intersection Definition). For sets $S, T : \text{Set}(A)$,
+                    membership in $S \cap T$ is defined as $S(x) \land T(x)$, using $\text{And}$.
+                +code.
+                    let intersect_member (s : exp) (t : exp) (x : exp) =
+                      And (App (s, x), App (t, x))
+
+include ../../footer

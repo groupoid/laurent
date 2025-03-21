@@ -1,0 +1,110 @@
+include ../../header
+
+html
+    head
+        meta(property='og:title'       content='PROP')
+        meta(property='og:description' content='Propositional Universe')
+        meta(property='og:url'         content='https://laurent.groupoid.space/foundations/prop/')
+
+block title
+    title PROP
+
+block content
+    nav
+        <a href='../../index.html'>LAURENT</a>
+        <a href='#'>PROP</a>
+    article.main
+        .exe
+            section
+                h1 PROPOSITIONAL UNIVERSE
+                span.
+        aside
+            time Published: 21 MAR 2025
+        .exe
+            section
+                +tex.
+                    $\text{Prop}$-type is the universe of propositions, 0-truncated types that
+                    represent logical statements with at most one proof. It is the foundation for
+                    logical reasoning and set predicates in this system.
+                +tex.
+                    In Schwartz’s framework, $\text{Prop}$ supports classical logic constructs
+                    like $\exists$, $\forall$, and $\land$, with Z3 verifying their truth.
+
+                h2 Formation
+                +tex.
+                    $\mathbf{Definition\ 4.1}$ ($\text{Prop}$-Formation). The propositional universe
+                    classifies terms that are propositions, distinct from higher universes like $U$.
+                +tex(true).
+                    $$
+                        \text{Prop} : \text{Type} =_{def} \text{universe of propositions}.
+                    $$
+                +code.
+                    type exp =
+                      | Prop  (* Prop *)
+
+                h2 Introduction
+                +tex.
+                    $\mathbf{Definition\ 4.2}$ ($\text{Prop}$-Introduction). A proposition is introduced
+                    via logical constructs like $\text{And}$, $\text{Or}$, $\exists$, or inequalities,
+                    typed as $\text{Prop}$.
+                +tex(true).
+                    $$
+                        P : \text{Prop} =_{def} \text{e.g., } a \leq b \text{ or } \exists x, P(x).
+                    $$
+                +code.
+                    let prop_leq (a : exp) (b : exp) : exp =
+                      RealIneq (Lte, a, b)
+
+                h2 Elimination
+                +tex.
+                    $\mathbf{Definition\ 4.3}$ ($\text{Prop}$-Elimination). A term $p : \text{Prop}$
+                    can be used in logical rules (e.g., modus ponens) or reduced to $\text{True}$/$\text{False}$.
+                +tex(true).
+                    $$
+                        P : \text{Prop} \implies P = \text{True} \lor P = \text{False}.
+                    $$
+                +code.
+                    let infer env ctx p =
+                      check env ctx p Prop; Prop
+
+                h2 Computation
+                +tex.
+                    $\mathbf{Definition\ 4.4}$ ($\text{Prop}$-Computation). Propositions reduce via
+                    logical rules or Z3 verification, yielding $\text{True}$ or $\text{False}$ in decidable cases.
+                +tex(true).
+                    $$
+                        1 \leq 2 =_{\text{Prop}} \text{True}.
+                    $$
+                +code.
+                    let reduce env ctx = function
+                      | RealIneq (Lte, RealNum a, RealNum b) -> if a <= b then True else False
+                      | p -> smt_verify_iff ctx_z3 p True
+
+                h2 Uniqueness
+                +tex.
+                    $\mathbf{Definition\ 4.5}$ ($\text{Prop}$-Uniqueness). All proofs of a proposition
+                    $P : \text{Prop}$ are equal, due to 0-truncation, ensuring propositional extensionality.
+                +tex(true).
+                    $$
+                        p, q : P \implies p =_{\text{Prop}} q.
+                    $$
+                +code.
+                    let equal env ctx p q =
+                      check env ctx p Prop; check env ctx q Prop; true
+
+                h2 Theorems
+                +tex.
+                    $\mathbf{Theorem\ 4.6}$ (Classical Logic). $\text{Prop}$ supports excluded middle:
+                    for any $P : \text{Prop}$, $P \lor \neg P$, aligning with Z3’s classical reasoning.
+                +tex(true).
+                    $$
+                        P \lor \neg P =_{\text{Prop}} \text{True}.
+                    $$
+                +tex.
+                    $\mathbf{Theorem\ 4.7}$ (Set Predicate). A set $S : \text{Set}(A)$ is defined by
+                    a predicate $P : A \rightarrow \text{Prop}$, where $S(x) : \text{Prop}$.
+                +code.
+                    let set_predicate (a : exp) (p : exp) =
+                      Set (Lam ("x", a, p))
+
+include ../../footer

@@ -1,0 +1,112 @@
+include ../../header
+
+html
+    head
+        meta(property='og:title'       content='SUM')
+        meta(property='og:description' content='Arithmetic Sum')
+        meta(property='og:url'         content='https://laurent.groupoid.space/foundations/sum/')
+
+block title
+    title SUM
+
+block content
+    nav
+        <a href='../../index.html'>LAURENT</a>
+        <a href='#'>SUM</a>
+    article.main
+        .exe
+            section
+                h1 ARITHMETIC SUM
+                span.
+        aside
+            time Published: 21 MAR 2025
+        .exe
+            section
+                +tex.
+                    $\text{Sum}$-type represents the arithmetic addition of two terms, typically
+                    real numbers, foundational for defining measures, integrals, and series in analysis.
+                    It embodies the basic operation of combining quantities in a typed setting.
+                +tex.
+                    In this system, $\text{Sum}$ operates over $\mathbb{R}$ or other numeric types,
+                    supporting computations like Lebesgue measure and sequence summation.
+
+                h2 Formation
+                +tex.
+                    $\mathbf{Definition\ 1.1}$ ($\text{Sum}$-Formation). The sum is formed over two
+                    terms $a, b : A$, where $A$ is a numeric type (e.g., $\mathbb{R}$), yielding their addition.
+                +tex(true).
+                    $$
+                        \text{Sum} : A =_{def} a + b.
+                    $$
+                +code.
+                    type exp =
+                      | RealOps of rop * exp * exp  (* a + b *)
+                    and rop = Plus | Minus | Times | Div
+
+                h2 Introduction
+                +tex.
+                    $\mathbf{Definition\ 1.2}$ ($\text{Sum}$-Introduction). The sum of $a$ and $b$
+                    is introduced as $a + b$, using the `Plus` operator within $\text{RealOps}$.
+                +tex(true).
+                    $$
+                        a + b : \mathbb{R} =_{def} \text{RealOps}(\text{Plus}, a, b).
+                    $$
+                +code.
+                    let sum_ab (a : exp) (b : exp) : exp =
+                      RealOps (Plus, a, b)
+
+                h2 Elimination
+                +tex.
+                    $\mathbf{Definition\ 1.3}$ ($\text{Sum}$-Elimination). The sum $a + b$ yields
+                    a value in $A$, usable in further arithmetic or inequalities.
+                +tex(true).
+                    $$
+                        a + b : \mathbb{R} \text{ satisfies } (a + b) - b = a.
+                    $$
+                +code.
+                    let infer env ctx (RealOps (Plus, a, b)) =
+                      check env ctx a Real; check env ctx b Real; Real
+
+                h2 Computation
+                +tex.
+                    $\mathbf{Definition\ 1.4}$ ($\text{Sum}$-Computation). For concrete numerals,
+                    $\text{Sum}$ reduces to arithmetic addition; for symbolic terms, it remains as is,
+                    verifiable by Z3 in equalities.
+                +tex(true).
+                    $$
+                        1 + 2 =_{\mathbb{R}} 3.
+                    $$
+                +code.
+                    let reduce env ctx = function
+                      | RealOps (Plus, RealNum n, RealNum m) -> RealNum (n + m)
+                      | _ -> ...
+
+                h2 Uniqueness
+                +tex.
+                    $\mathbf{Definition\ 1.5}$ ($\text{Sum}$-Uniqueness). The sum $a + b$ is unique
+                    in $A$, determined by the properties of addition (e.g., commutativity, associativity).
+                +tex(true).
+                    $$
+                        a + b =_{\mathbb{R}} c + d \iff a - d = c - b.
+                    $$
+                +code.
+                    let equal env ctx (RealOps (Plus, a, b)) (RealOps (Plus, c, d)) =
+                      equal env ctx (RealOps (Minus, a, d)) (RealOps (Minus, c, b))
+
+                h2 Theorems
+                +tex.
+                    $\mathbf{Theorem\ 1.6}$ (Commutativity). Addition is commutative:
+                    $a + b = b + a$, inherent to $\mathbb{R}$’s structure.
+                +tex(true).
+                    $$
+                        a + b =_{\mathbb{R}} b + a.
+                    $$
+                +tex.
+                    $\mathbf{Theorem\ 1.7}$ (Measure Additivity). For disjoint sets $S, T$ and a measure
+                    $\mu$, $\mu(S \cup T) = \mu(S) + \mu(T)$, using $\text{Sum}$ for the right-hand side.
+                +code.
+                    let measure_sum (mu : exp) (s : exp) (t : exp) =
+                      SetEq (App (mu, Union (s, t)),
+                             RealOps (Plus, App (mu, s), App (mu, t)))
+
+include ../../footer

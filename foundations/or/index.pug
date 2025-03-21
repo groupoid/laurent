@@ -1,0 +1,113 @@
+include ../../header
+
+html
+    head
+        meta(property='og:title'       content='OR')
+        meta(property='og:description' content='Logical Disjunction')
+        meta(property='og:url'         content='https://laurent.groupoid.space/foundations/or/')
+
+block title
+    title OR
+
+block content
+    nav
+        <a href='../../index.html'>LAURENT</a>
+        <a href='#'>OR</a>
+    article.main
+        .exe
+            section
+                h1 LOGICAL DISJUNCTION
+                span.
+        aside
+            time Published: 21 MAR 2025
+        .exe
+            section
+                +tex.
+                    $\text{Or}$-type represents logical disjunction, combining two propositions
+                    into a single proposition that holds if at least one is true. It supports
+                    set unions and alternative conditions in this system.
+                +tex.
+                    In Schwartz’s framework, $\text{Or}$ defines union predicates and closure
+                    properties, with Z3 ensuring logical consistency.
+
+                h2 Formation
+                +tex.
+                    $\mathbf{Definition\ 3.1}$ ($\text{Or}$-Formation). Disjunction is formed over
+                    two propositions $P, Q : \text{Prop}$, yielding their logical "or".
+                +tex(true).
+                    $$
+                        \text{Or} : \text{Prop} =_{def} P \lor Q.
+                    $$
+                +code.
+                    type exp =
+                      | Or of exp * exp  (* P ∨ Q *)
+
+                h2 Introduction
+                +tex.
+                    $\mathbf{Definition\ 3.2}$ ($\text{Or}$-Introduction). Disjunction $P \lor Q$
+                    is introduced by providing a proof of either $P$ or $Q$.
+                +tex(true).
+                    $$
+                        P \lor Q : \text{Prop} =_{def} \text{Or}(P, Q).
+                    $$
+                +code.
+                    let disj (p : exp) (q : exp) : exp =
+                      Or (p, q)
+
+                h2 Elimination
+                +tex.
+                    $\mathbf{Definition\ 3.3}$ ($\text{Or}$-Elimination). From $P \lor Q$ and proofs
+                    that $P \implies R$ and $Q \implies R$, one derives $R$, reflecting classical disjunction.
+                +tex(true).
+                    $$
+                        P \lor Q, P \implies R, Q \implies R \implies R.
+                    $$
+                +code.
+                    let or_elim (p_or_q : exp) (p_to_r : exp) (q_to_r : exp) : exp =
+                      match p_or_q with
+                      | Or (p, q) -> If (p, p_to_r, q_to_r)
+                      | _ -> ...
+
+                h2 Computation
+                +tex.
+                    $\mathbf{Definition\ 3.4}$ ($\text{Or}$-Computation). Disjunction reduces to
+                    $\text{True}$ if either $P$ or $Q$ is $\text{True}$, verifiable by Z3.
+                +tex(true).
+                    $$
+                        P \lor Q =_{\text{Prop}} \text{True} \text{ if } P = \text{True} \lor Q = \text{True}.
+                    $$
+                +code.
+                    let reduce env ctx = function
+                      | Or (True, _) -> True
+                      | Or (_, True) -> True
+                      | Or (p, q) -> smt_verify_iff ctx_z3 (Or (p, q)) True
+                      | _ -> ...
+
+                h2 Uniqueness
+                +tex.
+                    $\mathbf{Definition\ 3.5}$ ($\text{Or}$-Uniqueness). As a proposition,
+                    $P \lor Q$ is unique in $\text{Prop}$, with all proofs equal due to 0-truncation.
+                +tex(true).
+                    $$
+                        p, q : P \lor Q \implies p =_{\text{Prop}} q.
+                    $$
+                +code.
+                    let equal env ctx (Or (p1, q1)) (Or (p2, q2)) =
+                      equal env ctx p1 p2 && equal env ctx q1 q2
+
+                h2 Theorems
+                +tex.
+                    $\mathbf{Theorem\ 3.6}$ (Commutativity). Disjunction is commutative:
+                    $P \lor Q = Q \lor P$, provable by logical equivalence.
+                +tex(true).
+                    $$
+                        P \lor Q =_{\text{Prop}} Q \lor P.
+                    $$
+                +tex.
+                    $\mathbf{Theorem\ 3.7}$ (Union Definition). For sets $S, T : \text{Set}(A)$,
+                    membership in $S \cup T$ is defined as $S(x) \lor T(x)$, using $\text{Or}$.
+                +code.
+                    let union_member (s : exp) (t : exp) (x : exp) =
+                      Or (App (s, x), App (t, x))
+
+include ../../footer
