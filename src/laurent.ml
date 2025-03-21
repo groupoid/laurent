@@ -402,6 +402,8 @@ and reduce env ctx t =
     match t with
     | SetEq (Set (Lam (x1, Real, p1)), Set (Lam (x2, Real, p2))) -> smt_verify_iff ctx_z3 p1 p2
     | SetEq (s, s') when equal env ctx s s' -> True
+    | Intersect (Set (Lam (x1, Real, p1)), Set (Lam (x2, Real, p2))) ->
+      Set (Lam ("x", Real, And (subst x1 (Var "x") p1, subst x2 (Var "x") p2)))
     | App (Lam (x, domain, body), arg) -> subst x arg body
     | Set (Lam (x, domain, body)) -> True
     | App (f, arg) -> let f' = reduce env ctx f in let arg' = reduce env ctx arg in App (f', arg')
