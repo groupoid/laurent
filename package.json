@@ -4,7 +4,7 @@
   "description": "Laurent: Analytical Type System",
   "main": "",
   "scripts": {
-    "start": "pug -O ./framework.js ./foundations index.pug",
+    "start": "pug -O ./framework.js ./foundations ./mathematics index.pug",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
