@@ -1,0 +1,121 @@
+include ../../header
+
+html
+    head
+        meta(property='og:title'       content='CLOSURE')
+        meta(property='og:description' content='Topological Closure')
+        meta(property='og:url'         content='https://laurent.groupoid.space/foundations/closure/')
+
+block title
+    title CLOSURE
+
+block content
+    nav
+        <a href='../../index.html'>LAURENT</a>
+        <a href='#'>CLOSURE</a>
+    article.main
+        .exe
+            section
+                h1 TOPOLOGICAL CLOSURE
+                span.
+        aside
+            time Published: 21 MAR 2025
+        .exe
+            section
+                +tex.
+                    $\text{Closure}$-type constructs the topological closure of a set, the smallest
+                    closed set containing it, by including all its limit points. It is fundamental
+                    in topology and analysis, supporting definitions of continuity and density.
+                +tex.
+                    In this system, $\text{Closure}$ operates over $\text{Set}(\mathbb{R})$,
+                    leveraging $\text{Limit}$ and $\text{Seq}$ to define closure points, with Z3 ensuring
+                    rigorous verification in the context of Schwartz’s framework.
+
+                h2 Formation
+                +tex.
+                    $\mathbf{Definition\ 1.1}$ ($\text{Closure}$-Formation). The closure of a set
+                    $S : \text{Set}(A)$ in a topological space (here, $A = \mathbb{R}$ with the standard
+                    topology) forms a new set containing $S$ and its limit points.
+                +tex(true).
+                    $$
+                        \text{Closure} : \text{Set}(\mathbb{R}) =_{def} \overline{S}.
+                    $$
+                +code.
+                    type exp =
+                      | Closure of exp  (* cl(S) *)
+
+                h2 Introduction
+                +tex.
+                    $\mathbf{Definition\ 1.2}$ ($\text{Closure}$-Introduction). The closure of
+                    $S = \{ x : \mathbb{R} \mid P(x) \}$ is introduced as $\overline{S}$, the set of
+                    all points $x : \mathbb{R}$ such that every neighborhood of $x$ intersects $S$.
+                +tex(true).
+                    $$
+                        \overline{S} : \text{Set}(\mathbb{R}) =_{def} \text{Closure}(S).
+                    $$
+                +code.
+                    let closure_set (s : exp) : exp =
+                      Closure (s)
+
+                h2 Elimination
+                +tex.
+                    $\mathbf{Definition\ 1.3}$ ($\text{Closure}$-Elimination). Membership in
+                    $\overline{S}$ holds if a point is in $S$ or is a limit point of $S$, i.e.,
+                    approachable by a sequence in $S$.
+                +tex(true).
+                    $$
+                        \overline{S}(x) : \text{Prop} =_{def} S(x) \lor \exists a : \text{Seq}(\mathbb{R}), (\forall n, a_n \in S) \land \lim_{n \to \infty} a_n = x.
+                    $$
+                +code.
+                    let reduce env ctx = function
+                      | App (Closure (Set (Lam (x, _, p))), y) ->
+                          Or (subst x y p,
+                              Exists ("a", Seq Real,
+                                And (Forall ("n", Nat, App (Set (Lam (x, Real, p)), App (Var "a", Var "n"))),
+                                     Limit (Var "a", Infinity, y, True))))
+                      | _ -> ...
+
+                h2 Computation
+                +tex.
+                    $\mathbf{Definition\ 1.4}$ ($\text{Closure}$-Computation). Applying $\overline{S}$
+                    to a point reduces to checking membership or limit point status, verifiable by Z3
+                    for concrete sequences and predicates.
+                +tex(true).
+                    $$
+                        \overline{S}(x) =_{\text{Prop}} S(x) \lor \exists a_n \to x \text{ with } a_n \in S.
+                    $$
+                +code.
+                    let infer env ctx (Closure s) =
+                      check env ctx s (Set Real); Set Real
+
+                h2 Uniqueness
+                +tex.
+                    $\mathbf{Definition\ 1.5}$ ($\text{Closure}$-Uniqueness). The closure $\overline{S}$
+                    is uniquely determined as the smallest closed set containing $S$, equal to another
+                    set $U$ if $\forall x : \mathbb{R}, \overline{S}(x) \iff U(x)$, provable via $\text{SetEq}$.
+                +tex(true).
+                    $$
+                        \overline{S} =_{\text{Set}(\mathbb{R})} U \iff \forall x : \mathbb{R}, \overline{S}(x) =_{\text{Prop}} U(x).
+                    $$
+                +code.
+                    let equal env ctx (Closure s1) (Closure s2) =
+                      equal env ctx s1 s2
+
+                h2 Theorems
+                +tex.
+                    $\mathbf{Theorem\ 1.6}$ (Idempotence). The closure of a closure equals the closure:
+                    $\overline{\overline{S}} = \overline{S}$, as closure yields a closed set.
+                +tex(true).
+                    $$
+                        \overline{\overline{S}} =_{\text{Set}(\mathbb{R})} \overline{S}.
+                    $$
+                +tex.
+                    $\mathbf{Theorem\ 1.7}$ (Union Preservation). The closure of a union equals the
+                    union of closures: $\overline{S \cup T} = \overline{S} \cup \overline{T}$, reflecting
+                    topological properties over $\mathbb{R}$.
+                +code.
+                    let closure_union (s : exp) (t : exp) =
+                      SetEq (Closure (Union (s, t)),
+                             Union (Closure s, Closure t))
+
+include ../../footer
