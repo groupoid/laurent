@@ -29,123 +29,126 @@ block content
                 h2 Basic Constructs
                 +code.
                     let universal : exp = Power Prop
-                    (* \(\mathcal{P}(\text{Prop})\) : Set of all propositions *)
                 +tex.
-                    Defines the power set of propositions, \(\mathcal{P}(\text{Prop})\), a higher type in \(U_1\).
+                    Defines the power set of propositions, $\mathcal{P}(\text{Prop})$, a higher type in $U_1$.
 
                 +code.
-                    let set_a : exp = Set (Lam ("x", Real, RealIneq (Gt, Var "x", Zero)))
-                    (* \(\{ x : \mathbb{R} \mid x > 0 \}\) *)
+                    let set_a : exp =
+                      Set (Lam ("x", Real,
+                        RealIneq (Gt, Var "x", Zero)))
                 +tex.
-                    Represents the set of positive reals, \(\{ x : \mathbb{R} \mid x > 0 \}\).
+                    Represents the set of positive reals, $\{ x : \mathbb{R} \mid x > 0 \}$.
 
                 +code.
                     let sup_a : exp = Sup set_a
-                    (* \(\sup \{ x : \mathbb{R} \mid x > 0 \} = +\infty\) *)
                 +tex.
-                    Computes the supremum, \(\sup \{ x > 0 \} = +\infty\), as the set is unbounded above.
+                    Computes the supremum, $\sup \{ x > 0 \} = +\infty$, as the set is unbounded above.
 
                 +code.
                     let inf_a : exp = Inf set_a
-                    (* \(\inf \{ x : \mathbb{R} \mid x > 0 \} = 0\) *)
                 +tex.
-                    Computes the infimum, \(\inf \{ x > 0 \} = 0\), the greatest lower bound.
+                    Computes the infimum, $\inf \{ x > 0 \} = 0$, the greatest lower bound.
 
                 h2 Intervals and Measures
                 +code.
                     let interval_a_b (a : exp) (b : exp) : exp =
-                        Set (Lam ("x", Real, And (RealIneq (Lte, a, Var "x"), RealIneq (Lte, Var "x", b))))
-                    (* \(\{ x : \mathbb{R} \mid a \leq x \leq b \}\) *)
+                      Set (Lam ("x", Real,
+                        And (RealIneq (Lte, a, Var "x"),
+                             RealIneq (Lte, Var "x", b))))
                 +tex.
-                    Defines the closed interval \([a, b] = \{ x \mid a \leq x \leq b \}\).
+                    Defines the closed interval $[a, b] = \{ x \mid a \leq x \leq b \}$.
 
                 +code.
                     let lebesgue_measure (a : exp) (b : exp) : exp =
-                        Mu (Real, Power (Set Real),
-                            Lam ("A", Set Real,
-                                If (RealIneq (Lte, a, b), RealOps (Minus, b, a), Infinity)))
-                    (* \(\mu([a, b]) = b - a\) if \(a \leq b\), else \(\infty\)) *)
+                      Mu (Real, Power (Set Real),
+                        Lam ("A", Set Real,
+                          If (RealIneq (Lte, a, b),
+                              RealOps (Minus, b, a),
+                              Infinity)))
                 +tex.
-                    Constructs the Lebesgue measure: \(\mu(A) = b - a\) for \(A = [a, b]\), \(\infty\) otherwise.
+                    Constructs the Lebesgue measure: $\mu(A) = b - a$ for $A = [a, b]$, $\infty$ otherwise.
 
                 h2 Integration
                 +code.
                     let integral_term : exp =
-                        Lam ("f", Forall ("x", Real, Real),
-                            Lam ("a", Real, Lam ("b", Real,
-                                Lebesgue (Var "f", Mu (Real, Power (Set Real),
-                                    Lam ("A", Set Real,
-                                        If (And (RealIneq (Lte, Var "a", Var "b"), SetEq (Var "A", interval_a_b (Var "a") (Var "b"))),
-                                            RealOps (Minus, Var "b", Var "a"), Zero))),
-                                    interval_a_b (Var "a") (Var "b")))))
-                    (* \(\int_{[a,b]} f \, d\mu = \int_a^b f(x) \, dx\)) *)
+                      Lam ("f", Forall ("x", Real, Real),
+                        Lam ("a", Real, Lam ("b", Real,
+                          Lebesgue (Var "f",
+                            Mu (Real, Power (Set Real),
+                              Lam ("A", Set Real,
+                                If (And (RealIneq (Lte, Var "a", Var "b"),
+                                SetEq (Var "A", interval_a_b (Var "a") (Var "b"))),
+                            RealOps (Minus, Var "b", Var "a"), Zero))),
+                            interval_a_b (Var "a") (Var "b")))))
                 +tex.
-                    Defines the Lebesgue integral \(\int_{[a,b]} f \, d\mu\), with \(\mu([a, b]) = b - a\).
+                    Defines the Lebesgue integral $\int_{[a,b]} f \, d\mu$, with $\mu([a, b]) = b - a$.
 
                 +code.
                     let integral_sig : exp =
-                        Forall ("f", Forall ("x", Real, Real), Forall ("a", Real, Forall ("b", Real, Real)))
-                    (* \(\forall f : (\forall x : \mathbb{R}, \mathbb{R}) . \forall a, b : \mathbb{R} . \mathbb{R}\)) *)
+                      Forall ("f", Forall ("x", Real, Real),
+                        Forall ("a", Real, Forall ("b", Real, Real)))
                 +tex.
-                    Type signature for the integral: \(f : \mathbb{R} \to \mathbb{R} \to a, b : \mathbb{R} \to \mathbb{R}\).
+                    Type signature for the integral: $f : \mathbb{R} \to \mathbb{R} \to a, b : \mathbb{R} \to \mathbb{R}$.
 
                 +code.
                     let l2_space : exp =
-                        Lam ("f", Forall ("x", Real, Real),
-                            RealIneq (Lt, Lebesgue (Lam ("x", Real, RealOps (Pow, RealOps (Abs, App (Var "f", Var "x"), Zero), RealOps (Plus, One, One))),
-                                lebesgue_measure Zero Infinity, interval_a_b Zero Infinity), Infinity))
-                    (* \(\{ f : \mathbb{R} \to \mathbb{R} \mid \int_0^\infty |f(x)|^2 \, dx < \infty \}\)) *)
+                      Lam ("f", Forall ("x", Real, Real),
+                        RealIneq (Lt, Lebesgue (Lam ("x", Real,
+                          RealOps (Pow, RealOps (Abs, App (Var "f", Var "x"), Zero),
+                          RealOps (Plus, One, One))),
+                          lebesgue_measure Zero Infinity,
+                          interval_a_b Zero Infinity), Infinity))
                 +tex.
-                    Defines the \(L^2\) space: \(\int_0^\infty |f(x)|^2 \, d\mu < \infty\).
+                    Defines the $L^2$ space: $\int_0^\infty |f(x)|^2$, $d\mu < \infty$.
 
                 h2 Sequences and Limits
                 +code.
                     let sequence_a : exp =
                         Lam ("n", Nat, RealOps (Div, One, NatToReal (Var "n")))
-                    (* \(a_n = \frac{1}{n}\)) *)
                 +tex.
-                    Sequence \(a_n = \frac{1}{n}\), converging to 0.
+                    Sequence $a_n = \frac{1}{n}$, converging to 0.
 
                 +code.
                     let limit_a : exp =
-                        Limit (Seq sequence_a, Infinity, Zero,
-                            Lam ("ε", Real, Lam ("p", RealIneq (Gt, Var "ε", Zero),
-                                Pair (RealOps (Div, One, Var "ε"),
-                                    Lam ("n", Nat, Lam ("q", RealIneq (Gt, Var "n", Var "N"),
-                                        RealIneq (Lt, RealOps (Abs, RealOps (Minus, App (sequence_a, Var "n"), Zero), Zero), Var "ε")))))))
-                    (* \(\lim_{n \to \infty} \frac{1}{n} = 0\)) *)
+                      Limit (Seq sequence_a, Infinity, Zero,
+                        Lam ("ε", Real, Lam ("p", RealIneq (Gt, Var "ε", Zero),
+                          Pair (RealOps (Div, One, Var "ε"),
+                            Lam ("n", Nat, Lam ("q", RealIneq (Gt, Var "n", Var "N"),
+                              RealIneq (Lt, RealOps (Abs,
+                              RealOps (Minus, App (sequence_a, Var "n"), Zero), Zero),
+                                Var "ε")))))))
                 +tex.
-                    Proves \(\lim_{n \to \infty} \frac{1}{n} = 0\): \(\forall \varepsilon > 0, \exists N = \frac{1}{\varepsilon}, \forall n > N, |\frac{1}{n}| < \varepsilon\).
+                    Proves $\lim_{n \to \infty} \frac{1}{n} = 0$:
+                    $\forall \varepsilon > 0$, $\exists N = \frac{1}{\varepsilon}$, $\forall n > N$, $|\frac{1}{n}| < \varepsilon$.
 
                 +code.
                     let sequence_e : exp =
-                        Lam ("n", Nat, RealOps (Pow, RealOps (Plus, One, RealOps (Div, One, NatToReal (Var "n"))), NatToReal (Var "n")))
-                    (* \(e_n = (1 + \frac{1}{n})^n\)) *)
+                      Lam ("n", Nat,
+                        RealOps (Pow,
+                          RealOps (Plus, One,
+                            RealOps (Div, One, NatToReal (Var "n"))),
+                            NatToReal (Var "n")))
                 +tex.
-                    Sequence for \(e\): \(e_n = (1 + \frac{1}{n})^n\).
+                    Sequence for $e: e_n = (1 + \frac{1}{n})^n$.
 
                 +code.
                     let e : exp =
-                        Fst (Pair (RealOps (Exp, One, One),
-                            Limit (Seq sequence_e, Infinity, RealOps (Exp, One, One), ...)))
-                    (* \(e = \lim_{n \to \infty} (1 + \frac{1}{n})^n\)) *)
+                      Fst (Pair (RealOps (Exp, One, One),
+                        Limit (Seq sequence_e, Infinity,
+                          RealOps (Exp, One, One), ...)))
                 +tex.
-                    Defines \(e = \exp(1)\), with limit proof truncated for brevity.
+                    Defines $e = \exp(1)$, with limit proof truncated for brevity.
 
                 h2 Testing and Verification
                 +code.
                     let test_set_eq : exp =
-                        Forall ("x", Real, iff_intro (Lam ("x", RealIneq (Lte, Var "x", One), ...)) ...)
-                    (* \(\forall x, (x \leq 1 \iff x < 1 \lor x = 1)\)) *)
+                      Forall ("x", Real, iff_intro (Lam ("x",
+                        RealIneq (Lte, Var "x", One), ...
                 +tex.
-                    Verifies set equality: \(\{ x \mid x \leq 1 \} = \{ x \mid x < 1 \lor x = 1 \}\).
+                    Verifies set equality: ${ x \mid x \leq 1 \} = \{ x \mid x < 1 \lor x = 1 \}$.
 
-                +code.
-                    let test_all () =
-                        test_type env ctx limit_a Prop "limit_a";
-                        test_type env ctx l2_space (Forall ("f", Forall ("x", Real, Real), Prop)) "l_2 space";
-                        ...
                 +tex.
-                    Runs type and term tests, ensuring correctness (e.g., \(\lim_{n \to \infty} \frac{1}{n} : \text{Prop}\)).
+                    Runs type and term tests, ensuring correctness (e.g.,
+                    $\lim_{n \to \infty} \frac{1}{n} : \text{Prop})$.
 
 include ../../footer
