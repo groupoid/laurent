@@ -52,8 +52,12 @@ block content
                     Limits are handled via $\text{Limit}$, avoiding explicit construction.
                 +tex(true).
                     $$
-                        \forall a : \text{Seq}(\mathbb{R}), \\
-                        (\forall \varepsilon > 0, \exists N, \forall m, n > N, |a_m - a_n| < \varepsilon) \\
+                        \forall a : \text{Seq}(\mathbb{R}),
+                    $$
+                    $$
+                        \forall \varepsilon > 0, \exists N, \forall m, n > N, |a_m - a_n| < \varepsilon
+                    $$
+                    $$
                         \implies \exists l, \lim_{n \to \infty} a_n = l.
                     $$
                 +code.
@@ -92,7 +96,10 @@ block content
                     $L < U$ and $L \cup U = \mathbb{Q}$. This would enable constructive reals if needed.
                 +tex(true).
                     $$
-                        \mathbb{R} =_{def} \text{Quotient}(\{ (L, U) \mid L, U : \mathcal{P}(\mathbb{Q}), L < U, L \cup U = \mathbb{Q} \}, \sim).
+                        \mathbb{R} =_{def} \text{Quotient}(\{ (L, U) \mid L, U : \mathcal{P}(\mathbb{Q}),
+                    $$
+                    $$
+                        L < U, L \cup U = \mathbb{Q} \}, \sim).
                     $$
                 +tex.
                     Such detalisation is deferred, as current axiomatic $\mathbb{R}$ suffices for
