@@ -259,10 +259,8 @@ and infer env (ctx : context) (e : exp) : exp =
       let t_typ = infer env ctx f in let _ = check env ctx t t_typ in t_typ
     | Vec (n, field, a, b) -> let _ = check env ctx field (Universe 0) in let _ = check env ctx a field in let _ = check env ctx b field in Universe 0
     | RealIneq (op, a, b) ->
-      let a_ty = infer env ctx a in
-      let b_ty = infer env ctx b in
-      let _ = check env ctx a_ty Prop in
-      let _ = check env ctx b_ty Prop in
+      let _ = infer env ctx a in
+      let _ = infer env ctx b in
       Prop
     | RealOps (op, a, b) ->
         let _ = check env ctx a Real in
@@ -488,7 +486,7 @@ let lebesgue_measure (a : exp) (b : exp) : exp =
         Lam ("A", Set Real,
           If (RealIneq (Lte, a, b),
               RealOps (Minus, b, a),
-              Zero)))
+              Infinity)))
 
 let integral_term : exp =
     Lam ("f", Forall ("x", Real, Real),
