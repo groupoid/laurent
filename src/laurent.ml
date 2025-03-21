@@ -135,7 +135,6 @@ let rec z3_of_exp ctx = function
 
 let smt_verify_iff ctx p q =
   let solver = Solver.mk_solver ctx None in
-  let x = Arithmetic.Real.mk_const_s ctx "x" in
   let p_z3 = z3_of_exp ctx p in
   let q_z3 = z3_of_exp ctx q in
   let not_iff = Boolean.mk_not ctx (Boolean.mk_iff ctx p_z3 q_z3) in
@@ -262,6 +261,8 @@ and infer env (ctx : context) (e : exp) : exp =
     | RealIneq (op, a, b) ->
       let a_ty = infer env ctx a in
       let b_ty = infer env ctx b in
+      let _ = check env ctx a_ty Prop in
+      let _ = check env ctx b_ty Prop in
       Prop
     | RealOps (op, a, b) ->
         let _ = check env ctx a Real in
@@ -399,7 +400,7 @@ and equal' env ctx t1 t2 =
     | _ -> t1 = t2
 
 and reduce env ctx t =
-    if trace then Printf.printf "Reduce: %s\n" (string_of_exp t); 
+    if trace then Printf.printf "Reduce: %s\n" (string_of_exp t);
     match t with
     | SetEq (Set (Lam (x1, Real, p1)), Set (Lam (x2, Real, p2))) -> smt_verify_iff ctx_z3 p1 p2
     | SetEq (s, s') when equal env ctx s s' -> True
@@ -460,9 +461,8 @@ and string_of_exp = function
   | Union a -> "Union (" ^ string_of_exp a ^ ")"
   | Intersect (a, b) -> "Intersect (" ^ string_of_exp a ^ ", " ^ string_of_exp b ^ ")"
   | Power a -> "Power (" ^ string_of_exp a ^ ")"
-  | Or (a, b) -> "Or (" ^ string_of_exp a ^ ", " ^ string_of_exp b ^ ")"
-  | And (a, b) -> "And (" ^ string_of_exp a ^ ", " ^ string_of_exp b ^ ")"
-  | Or (a, b) -> "Or (" ^ string_of_exp a ^ ", " ^ string_of_exp b ^ ")"
+  | Or (a, b) -> "(" ^ string_of_exp a ^ " ∨ " ^ string_of_exp b ^ ")"
+  | And (a, b) -> "(" ^ string_of_exp a ^ " ∧ " ^ string_of_exp b ^ ")"
   | Ordinal -> "Ordinal"
   | Mu (b, s, f) -> "μ (" ^ string_of_exp b ^ ", " ^ string_of_exp s ^ ")" ^ ", " ^ string_of_exp f
   | Measure (sp, s) -> "Measure (" ^ string_of_exp sp ^ ", " ^ string_of_exp s ^ ")"
@@ -536,7 +536,6 @@ let limit_a : exp =
             Lam ("q", RealIneq (Gt, Var "n", Var "N"),
               RealIneq (Lt, RealOps (Abs, RealOps (Minus, App (sequence_a, Var "n"), Zero), Zero), Var "ε")))))))
 
-
 (* ∃l:R,∀ε>0,∃N:R,∀n>N,∣(1+1/n)^n − l∣<ε *)
 
 let sequence_e : exp =
@@ -560,8 +559,6 @@ let measurable =
     (Lam ("x", Real, RealOps (Pow, RealOps (Abs, App (Var "f", Var "x"), Zero), NatToReal (S (S Z)))))
 
 let test_set_eq : exp =
-  let s1 = Set (Lam ("x", Real, RealIneq (Lte, Var "x", One))) (* {x | x ≤ 1} *)
-  and s2 = Set (Lam ("x", Real, Or (RealIneq (Lt, Var "x", One), RealIneq (Eq, Var "x", One)))) (* {x | x < 1 ∨ x = 1} *) in
   let p = RealIneq (Lte, Var "x", One) (* x ≤ 1 *)
   and q = Or (RealIneq (Lt, Var "x", One), RealIneq (Eq, Var "x", One)) (* x < 1 ∨ x = 1 *)  in
   let f = Lam ("x", p, q) (* Proof: x ≤ 1 → x < 1 ∨ x = 1 *)
@@ -575,7 +572,7 @@ let test_set_eq_correct : exp =
 
 let test_set_eq_incorrect : exp =
   let s1 = Set (Lam ("x", Real, RealIneq (Lte, Var "x", One))) (* {x | x ≤ 1} *)
-  and s2 = Set (Lam ("x", Real, And (RealIneq (Lt, Var "x", One),  RealIneq (Eq, Var "x", One)))) (* {x | x < 1 ∨ x = 1} *)
+  and s2 = Set (Lam ("x", Real, And (RealIneq (Lt, Var "x", One),  RealIneq (Eq, Var "x", One)))) (* {x | x < 1 ∧ x = 1} *)
   in SetEq (s1, s2)
 
 (* suite *)
