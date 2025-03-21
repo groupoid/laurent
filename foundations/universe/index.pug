@@ -39,13 +39,12 @@ block content
                     a separate propositional universe.
                 +tex(true).
                     $$
-                        U_0 : U_1, \quad \text{Prop} : \text{Type}, \quad \text{Prop} \not : U_0.
+                        U_0 : U_1, \quad \text{Prop} : U_0.
                     $$
                 +code.
                     type exp =
-                      | U0       (* U_0 *)
-                      | U1       (* U_1 *)
-                      | Prop     (* Prop *)
+                      | Univrse i (* i in [0,1] *)
+                      | Prop
 
                 h2 Nuances of $U_0 : U_1$
                 +tex.
