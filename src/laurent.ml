@@ -246,14 +246,6 @@ and infer env (ctx : context) (e : exp) : exp =
       else raise (TypeError "Power expects a type")
     | And (a, b) -> let _ = check env ctx a Prop in let _ = check env ctx b Prop in Prop
     | Ordinal -> Universe 0
-    | Mu (base, sigma, measure_func) ->
-      Printf.printf "Mu measure function: ";
-      Printf.printf "%s\n" (string_of_exp (measure_func));
-      let _ = check env ctx base (Universe 0) in
-      let _ = check env ctx sigma (Set (Set base)) in
-      let _ = check env ctx measure_func (Forall ("A", Forall ("x", base, Prop), Real)) in
-      Measure (base, Set (Set base))
-    | Measure (space, sigma) -> let _ = check env ctx space (Universe 0) in let _ = check env ctx sigma (Set (Set space)) in Universe 0
     | Seq a ->
       let a_ty = infer env ctx a in
       (match a_ty with
@@ -281,15 +273,20 @@ and infer env (ctx : context) (e : exp) : exp =
     | Limit _ -> raise (TypeError "Limit expects a Seq argument")
     | Sup s -> let _ = check env ctx s (Set Real) in Real
     | Inf s -> let _ = check env ctx s (Set Real) in Real
+    | Mu (base, sigma, measure_func) ->
+      let _ = check env ctx base (Universe 0) in
+      let _ = check env ctx sigma (Set (Set base)) in
+      let _ = check env ctx measure_func (Forall ("A", Set Real, Real)) in
+      Measure (base, Set (Set base))
+    | Measure (space, sigma) -> let _ = check env ctx space (Universe 0) in let _ = check env ctx sigma (Set (Set space)) in Universe 0
     | Lebesgue (f, mu, set) ->
+      let base = match infer env ctx mu with
+        | Measure (b, _) -> b
+        | _ -> raise (TypeError "Lebesgue expects a measure") in
       let _ = check env ctx f (Forall ("x", Real, Real)) in
       let _ = check env ctx mu (Measure (Real, Set (Set Real))) in
-      let set_ty = infer env ctx set in
-      (match set_ty with
-      | Forall (x, Real, Prop) -> Real
-      | Set Real -> Real
-(*      | _ -> check env ctx set (Forall ("x", Real, Prop)); Real) *)
-      | _ -> check env ctx set (Set Real); Real)
+      let _ = check env ctx set (Set base) in
+      Real
 
 and universe env ctx t =
     match infer env ctx t with
@@ -436,13 +433,29 @@ let interval_a_b (a : exp) (b : exp) : exp =
 
 let lebesgue_measure (a : exp) (b : exp) : exp =
     Mu (Real,
-        Power (Set Real),
-        Lam ("A", Forall ("x", Real, Prop), RealOps (Minus, b, a)))
+      Power (Set Real),
+        Lam ("A", Set Real,
+          If (RealIneq (Leq, a, b),
+              RealOps (Minus, b, a),
+              Zero)))
+
+let integral_term : exp =
+    Lam ("f", Forall ("x", Real, Real),
+      Lam ("a", Real,
+        Lam ("b", Real,
+          Lebesgue (Var "f",
+            Mu (Real,
+              Power (Set Real),
+                Lam ("A", Set Real,
+                  If (RealIneq (Leq, Var "a", Var "b"),
+                      RealOps (Minus, Var "b", Var "a"),
+                      Zero))),
+                  interval_a_b (Var "a") (Var "b")))))
 
 let integral_sig : exp =
     Forall ("f", Forall ("x", Real, Real), Forall ("a", Real, Forall ("b", Real, Real)))
 
-let integral_term : exp =
+let integral_term2 : exp =
     Lam ("f", Forall ("x", Real, Real),
         Lam ("a", Real,
             Lam ("b", Real,
@@ -524,6 +537,7 @@ let test_all () =
     test_term env (add_var ctx "f" (Forall ("x", Real, Real))) measurable (Prop) "measurable";
     test_term env ctx (interval_a_b Zero One) (Set Real) "interval_[a,b]";
     test_term env ctx integral_term integral_sig "integral_term";
+    test_term env ctx (lebesgue_measure Zero One) (Measure (Real, Set (Set Real))) "lebesgue_measure";
     Printf.printf "All tests passed!\n"
 
 let () = test_all ()
