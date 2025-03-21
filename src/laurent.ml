@@ -122,27 +122,62 @@ let is_measurable sigma f =
             Exists ("_", RealIneq (Lt, Var "a", App (f, Var "x")),
                          RealIneq (Lt, App (f, Var "x"), Var "b"))))))))
 
-let rec z3_of_exp ctx = function
-  | Var x -> Arithmetic.Real.mk_const_s ctx x
-  | RealIneq (Lte, e1, e2) -> Arithmetic.mk_le ctx (z3_of_exp ctx e1) (z3_of_exp ctx e2)
-  | RealIneq (Lt, e1, e2) -> Arithmetic.mk_lt ctx (z3_of_exp ctx e1) (z3_of_exp ctx e2)
-  | RealIneq (Eq, e1, e2) -> Boolean.mk_eq ctx (z3_of_exp ctx e1) (z3_of_exp ctx e2)
-  | And (e1, e2) -> Boolean.mk_and ctx [z3_of_exp ctx e1; z3_of_exp ctx e2]
-  | Or (e1, e2) -> Boolean.mk_or ctx [z3_of_exp ctx e1; z3_of_exp ctx e2]
-  | One -> Arithmetic.Real.mk_numeral_i ctx 1
-  | Zero -> Arithmetic.Real.mk_numeral_i ctx 0
-  | _ -> failwith "Unsupported expression in Z3 conversion"
+let rec string_of_exp = function
+  | SetEq (s1, s2) -> string_of_exp s1 ^ " =s " ^ string_of_exp s2
+  | True -> "True"
+  | False -> "False"
+  | Universe i -> "Universe " ^ string_of_int i
+  | Var x -> x
+  | Forall (x, a, b) -> "Forall (" ^ (x) ^ ", " ^ (string_of_exp a) ^ ", " ^ (string_of_exp b) ^ ")"
+  | Exists (x, a, b) -> "Exists (" ^ (x) ^ ", " ^ (string_of_exp a) ^ ", " ^ (string_of_exp b) ^ ")"
+  | Lam (x, a, b)    -> "Lam ("    ^ (x) ^ ", " ^ (string_of_exp a) ^ ", " ^ (string_of_exp b) ^ ")"
+  | App (f, arg) -> "App (" ^ string_of_exp f ^ ", " ^ string_of_exp arg ^ ")"
+  | Pair (a, b) -> "Pair (" ^ string_of_exp a ^ ", " ^ string_of_exp b ^ ")"
+  | Fst t -> (string_of_exp t) ^ ".1"
+  | Snd t -> (string_of_exp t) ^ ".2"
+  | S e -> "S " ^ string_of_exp e ^ ""
+  | Z -> "Z"
+  | Zero -> "0"
+  | One -> "1"
+  | Infinity -> "∞"
+  | Prop -> "Prop"
+  | Bool -> "𝟚"
+  | Integer -> "ℤ"
+  | Nat -> "ℕ"
+  | Real -> "ℝ"
+  | Rational -> "ℚ"
+  | Octanionic -> "𝕆"
+  | Quaternionic -> "ℍ"
+  | NatToReal e -> "ℝ(" ^ string_of_exp e ^ ")"
+  | Complex -> "ℂ"
+  | If (c, t, f) -> "If (" ^ string_of_exp c ^ ", " ^ string_of_exp t ^ ", " ^ string_of_exp f ^ ")"
+  | Vec (n, f, a, b) -> "𝕍 (" ^ string_of_int n ^ ", " ^ string_of_exp f ^ ", " ^ string_of_exp a ^ ", " ^ string_of_exp b ^ ")"
+  | RealIneq (op, a, b) -> "RealIneq (" ^ (match op with Lt -> "<" | Gt -> ">" | Lte -> "<=" | Gte -> ">=" | Eq -> "=" | Neq -> "Neq") ^ ", " ^ string_of_exp a ^ ", " ^ string_of_exp b ^ ")"
+  | RealOps (op, a, b) ->
+    let op_str = match op with
+      | Plus -> "+ℝ" | Minus -> "-ℝ" | Times -> "*ℝ" | Div -> "/ℝ" | Pow -> "^ℝ"
+      | Abs -> "Abs" | Ln -> "Ln" | Sin -> "Sin" | Cos -> "Cos" | Exp -> "Exp" | Neg -> "Neg"
+    in "RealOps (" ^ op_str ^ ", " ^ string_of_exp a ^ ", " ^ string_of_exp b ^ ")"
+  | ComplexOps (op, a, b) -> "ComplexOps (" ^ (match op with CPlus -> "+C" | CMinus -> "-C" | CTimes -> "*C" | CDiv -> "/C") ^ ", " ^ string_of_exp a ^ ", " ^ string_of_exp b ^ ")"
+  | Closure s -> "Closure (" ^ string_of_exp s ^ ")"
+  | Set a -> "Set (" ^ string_of_exp a ^ ")"
+  | Complement a -> "Complement (" ^ string_of_exp a ^ ")"
+  | Sum a -> "Sum (" ^ string_of_exp a ^ ")"
+  | Union a -> "Union (" ^ string_of_exp a ^ ")"
+  | Intersect (a, b) -> "Intersect (" ^ string_of_exp a ^ ", " ^ string_of_exp b ^ ")"
+  | Power a -> "Power (" ^ string_of_exp a ^ ")"
+  | Or (a, b) -> "(" ^ string_of_exp a ^ " ∨ " ^ string_of_exp b ^ ")"
+  | And (a, b) -> "(" ^ string_of_exp a ^ " ∧ " ^ string_of_exp b ^ ")"
+  | Ordinal -> "Ordinal"
+  | Mu (b, s, f) -> "μ (" ^ string_of_exp b ^ ", " ^ string_of_exp s ^ ")" ^ ", " ^ string_of_exp f
+  | Measure (sp, s) -> "Measure (" ^ string_of_exp sp ^ ", " ^ string_of_exp s ^ ")"
+  | Seq a -> "Seq (" ^ string_of_exp a ^ ")"
+  | Limit (f, x, l, p) -> "Limit (" ^ string_of_exp f ^ ", " ^ string_of_exp x ^ ", " ^ string_of_exp l ^ ", " ^ string_of_exp p ^ ")"
+  | Sup s -> "Sup (" ^ string_of_exp s ^ ")"
+  | Inf s -> "Inf (" ^ string_of_exp s ^ ")"
+  | Lebesgue (f, m, set) -> "Lebesgue (" ^ string_of_exp f ^ ", " ^ string_of_exp m ^ ")"
 
-let smt_verify_iff ctx p q =
-  let solver = Solver.mk_solver ctx None in
-  let p_z3 = z3_of_exp ctx p in
-  let q_z3 = z3_of_exp ctx q in
-  let not_iff = Boolean.mk_not ctx (Boolean.mk_iff ctx p_z3 q_z3) in
-  Solver.add solver [not_iff];
-  match Solver.check solver [] with
-  | Solver.UNSATISFIABLE -> True
-  | Solver.SATISFIABLE -> False
-  | Solver.UNKNOWN -> failwith "Z3 returned UNKNOWN"
+
 
 let rec subst_many m t =
     match t with
@@ -404,6 +439,7 @@ and reduce env ctx t =
     | SetEq (s, s') when equal env ctx s s' -> True
     | Intersect (Set (Lam (x1, Real, p1)), Set (Lam (x2, Real, p2))) ->
       Set (Lam ("x", Real, And (subst x1 (Var "x") p1, subst x2 (Var "x") p2)))
+    | Intersect (a, b) -> Intersect (reduce env ctx a, reduce env ctx b)
     | App (Lam (x, domain, body), arg) -> subst x arg body
     | Set (Lam (x, domain, body)) -> True
     | App (f, arg) -> let f' = reduce env ctx f in let arg' = reduce env ctx arg in App (f', arg')
@@ -417,60 +453,31 @@ and normalize env ctx t =
     let t' = reduce env ctx t in
     if equal' env ctx t t' then t else normalize env ctx t'
 
-and string_of_exp = function
-  | SetEq (s1, s2) -> string_of_exp s1 ^ " =s " ^ string_of_exp s2
-  | True -> "True"
-  | False -> "False"
-  | Universe i -> "Universe " ^ string_of_int i
-  | Var x -> x
-  | Forall (x, a, b) -> "Forall (" ^ (x) ^ ", " ^ (string_of_exp a) ^ ", " ^ (string_of_exp b) ^ ")"
-  | Exists (x, a, b) -> "Exists (" ^ (x) ^ ", " ^ (string_of_exp a) ^ ", " ^ (string_of_exp b) ^ ")"
-  | Lam (x, a, b)    -> "Lam ("    ^ (x) ^ ", " ^ (string_of_exp a) ^ ", " ^ (string_of_exp b) ^ ")"
-  | App (f, arg) -> "App (" ^ string_of_exp f ^ ", " ^ string_of_exp arg ^ ")"
-  | Pair (a, b) -> "Pair (" ^ string_of_exp a ^ ", " ^ string_of_exp b ^ ")"
-  | Fst t -> (string_of_exp t) ^ ".1"
-  | Snd t -> (string_of_exp t) ^ ".2"
-  | S e -> "S " ^ string_of_exp e ^ ""
-  | Z -> "Z"
-  | Zero -> "0"
-  | One -> "1"
-  | Infinity -> "∞"
-  | Prop -> "Prop"
-  | Bool -> "𝟚"
-  | Integer -> "ℤ"
-  | Nat -> "ℕ"
-  | Real -> "ℝ"
-  | Rational -> "ℚ"
-  | Octanionic -> "𝕆"
-  | Quaternionic -> "ℍ"
-  | NatToReal e -> "ℝ(" ^ string_of_exp e ^ ")"
-  | Complex -> "ℂ"
-  | If (c, t, f) -> "If (" ^ string_of_exp c ^ ", " ^ string_of_exp t ^ ", " ^ string_of_exp f ^ ")"
-  | Vec (n, f, a, b) -> "𝕍 (" ^ string_of_int n ^ ", " ^ string_of_exp f ^ ", " ^ string_of_exp a ^ ", " ^ string_of_exp b ^ ")"
-  | RealIneq (op, a, b) -> "RealIneq (" ^ (match op with Lt -> "<" | Gt -> ">" | Lte -> "<=" | Gte -> ">=" | Eq -> "=" | Neq -> "Neq") ^ ", " ^ string_of_exp a ^ ", " ^ string_of_exp b ^ ")"
-  | RealOps (op, a, b) ->
-    let op_str = match op with
-      | Plus -> "+ℝ" | Minus -> "-ℝ" | Times -> "*ℝ" | Div -> "/ℝ" | Pow -> "^ℝ"
-      | Abs -> "Abs" | Ln -> "Ln" | Sin -> "Sin" | Cos -> "Cos" | Exp -> "Exp" | Neg -> "Neg"
-    in "RealOps (" ^ op_str ^ ", " ^ string_of_exp a ^ ", " ^ string_of_exp b ^ ")"
-  | ComplexOps (op, a, b) -> "ComplexOps (" ^ (match op with CPlus -> "+C" | CMinus -> "-C" | CTimes -> "*C" | CDiv -> "/C") ^ ", " ^ string_of_exp a ^ ", " ^ string_of_exp b ^ ")"
-  | Closure s -> "Closure (" ^ string_of_exp s ^ ")"
-  | Set a -> "Set (" ^ string_of_exp a ^ ")"
-  | Complement a -> "Complement (" ^ string_of_exp a ^ ")"
-  | Sum a -> "Sum (" ^ string_of_exp a ^ ")"
-  | Union a -> "Union (" ^ string_of_exp a ^ ")"
-  | Intersect (a, b) -> "Intersect (" ^ string_of_exp a ^ ", " ^ string_of_exp b ^ ")"
-  | Power a -> "Power (" ^ string_of_exp a ^ ")"
-  | Or (a, b) -> "(" ^ string_of_exp a ^ " ∨ " ^ string_of_exp b ^ ")"
-  | And (a, b) -> "(" ^ string_of_exp a ^ " ∧ " ^ string_of_exp b ^ ")"
-  | Ordinal -> "Ordinal"
-  | Mu (b, s, f) -> "μ (" ^ string_of_exp b ^ ", " ^ string_of_exp s ^ ")" ^ ", " ^ string_of_exp f
-  | Measure (sp, s) -> "Measure (" ^ string_of_exp sp ^ ", " ^ string_of_exp s ^ ")"
-  | Seq a -> "Seq (" ^ string_of_exp a ^ ")"
-  | Limit (f, x, l, p) -> "Limit (" ^ string_of_exp f ^ ", " ^ string_of_exp x ^ ", " ^ string_of_exp l ^ ", " ^ string_of_exp p ^ ")"
-  | Sup s -> "Sup (" ^ string_of_exp s ^ ")"
-  | Inf s -> "Inf (" ^ string_of_exp s ^ ")"
-  | Lebesgue (f, m, set) -> "Lebesgue (" ^ string_of_exp f ^ ", " ^ string_of_exp m ^ ")"
+and z3_of_exp ctx = function
+  | Var x -> Arithmetic.Real.mk_const_s ctx x
+  | RealIneq (Lte, e1, e2) -> Arithmetic.mk_le ctx (z3_of_exp ctx e1) (z3_of_exp ctx e2)
+  | RealIneq (Lt, e1, e2) -> Arithmetic.mk_lt ctx (z3_of_exp ctx e1) (z3_of_exp ctx e2)
+  | RealIneq (Eq, e1, e2) -> Boolean.mk_eq ctx (z3_of_exp ctx e1) (z3_of_exp ctx e2)
+  | And (e1, e2) -> Boolean.mk_and ctx [z3_of_exp ctx e1; z3_of_exp ctx e2]
+  | Or (e1, e2) -> Boolean.mk_or ctx [z3_of_exp ctx e1; z3_of_exp ctx e2]
+  | One -> Arithmetic.Real.mk_numeral_i ctx 1
+  | Zero -> Arithmetic.Real.mk_numeral_i ctx 0
+  | Set (Lam (_, Real, body)) -> z3_of_exp ctx body
+  | RealOps (Plus, e1, e2) -> Arithmetic.mk_add ctx [z3_of_exp ctx e1; z3_of_exp ctx e2]
+  | Intersect (Set (Lam (x1, Real, p1)), Set (Lam (x2, Real, p2))) -> Boolean.mk_and ctx [z3_of_exp ctx p1; z3_of_exp ctx p2]
+  | App (Set (Lam (x, Real, body)), arg) -> z3_of_exp ctx (subst x arg body)
+  | x -> failwith ("Unsupported expression in Z3 conversion: " ^ (string_of_exp x))
+
+and smt_verify_iff ctx p q =
+  let solver = Solver.mk_solver ctx None in
+  let p_z3 = z3_of_exp ctx p in
+  let q_z3 = z3_of_exp ctx q in
+  let not_iff = Boolean.mk_not ctx (Boolean.mk_iff ctx p_z3 q_z3) in
+  Solver.add solver [not_iff];
+  match Solver.check solver [] with
+  | Solver.UNSATISFIABLE -> True
+  | Solver.SATISFIABLE -> False
+  | Solver.UNKNOWN -> failwith "Z3 returned UNKNOWN"
 
 (* canonical examples *)
 
@@ -598,6 +605,22 @@ let test_term env ctx (term : exp) (expected_type : exp) (name : string) : unit 
         )
     with TypeError msg -> Printf.printf "Error in %s: %s\n" name msg
 
+let test_z3 () =
+    let ctx = (add_var ctx "x" Real) in
+    let a = (interval_a_b Zero One) in
+    let b = (interval_a_b One (RealOps (Plus, One, One))) in
+    let c = (Intersect (a,b)) in
+    let d = And (App (a, Var "x"), App (b, Var "x")) in
+    let one_point = interval_a_b One One in
+    (* Property 1: C = [1, 1] *)
+    let prop1 = SetEq (c,one_point) in
+    test_term env ctx (normalize env ctx prop1) True "C = [1, 1]";
+    (* Property 2: D ⇔ (x = 1) *)
+    let x_eq_one = RealIneq (Eq, Var "x", One) in
+    let prop2 = smt_verify_iff ctx_z3 d x_eq_one in
+    test_term env ctx prop2 True "D ⇔ x = 1";
+    Printf.printf "Z3 tests passed!\n"
+
 let test_all () =
     let ctx = add_var ctx "f" (Forall ("x", Real, Real)) in
     test_type env ctx integral_sig (Universe 0) "integral_sig";
@@ -619,6 +642,7 @@ let test_all () =
     test_term env ctx (normalize env ctx test_set_eq_incorrect) False "set_eq_s1_s2_incorrect";
     test_type env ctx test_set_eq_correct Prop "set_eq_s1_s2_correct";
     test_term env ctx (normalize env ctx test_set_eq_correct) True "set_eq_s1_s2_correct";
+    test_z3();
     Printf.printf "All tests passed!\n"
 
 let () = test_all ()
