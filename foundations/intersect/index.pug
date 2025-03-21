@@ -1,0 +1,114 @@
+include ../../header
+
+html
+    head
+        meta(property='og:title'       content='INTERSECT')
+        meta(property='og:description' content='Set Intersection')
+        meta(property='og:url'         content='https://laurent.groupoid.space/foundations/intersect/')
+
+block title
+    title INTERSECT
+
+block content
+    nav
+        <a href='../../index.html'>LAURENT</a>
+        <a href='#'>INTERSECT</a>
+    article.main
+        .exe
+            section
+                h1 SET INTERSECTION
+                span.
+        aside
+            time Published: 21 MAR 2025
+        .exe
+            section
+                +tex.
+                    $\text{Intersect}$-type constructs the intersection of two sets, forming a set
+                    of elements common to both based on the conjunction of their predicates. It is
+                    vital for defining measurable sets and refining domains in analysis.
+                +tex.
+                    In this system, $\text{Intersect}$ complements $\text{Union}$, leveraging
+                    $\text{Set}$ and $\text{SetEq}$ with Z3 verification to ensure precise set operations.
+
+                h2 Formation
+                +tex.
+                    $\mathbf{Definition\ 1.1}$ ($\text{Intersect}$-Formation). The intersection of
+                    two sets $S, T : \text{Set}(A)$ forms a new set containing elements in both $S$ and $T$.
+                +tex(true).
+                    $$
+                        \text{Intersect} : \text{Set}(A) =_{def} S \cap T.
+                    $$
+                +code.
+                    type exp =
+                      | Intersect of exp * exp  (* S ∩ T *)
+
+                h2 Introduction
+                +tex.
+                    $\mathbf{Definition\ 1.2}$ ($\text{Intersect}$-Introduction). The intersection of
+                    $S = \{ x : A \mid P(x) \}$ and $T = \{ x : A \mid Q(x) \}$ is introduced as
+                    $S \cap T = \{ x : A \mid P(x) \land Q(x) \}$.
+                +tex(true).
+                    $$
+                        S \cap T : \text{Set}(A) =_{def} \text{Intersect}(S, T).
+                    $$
+                +code.
+                    let intersect_sets (s : exp) (t : exp) : exp =
+                      Intersect (s, t)
+
+                h2 Elimination
+                +tex.
+                    $\mathbf{Definition\ 1.3}$ ($\text{Intersect}$-Elimination). Membership in
+                    $S \cap T$ holds if an element satisfies both $S$’s and $T$’s predicates.
+                +tex(true).
+                    $$
+                        (S \cap T)(a) : \text{Prop} =_{def} S(a) \land T(a).
+                    $$
+                +code.
+                    let reduce env ctx = function
+                      | App (Intersect (Set (Lam (x1, _, p)), Set (Lam (x2, _, q))), a) ->
+                          And (subst x1 a p, subst x2 a q)
+                      | _ -> ...
+
+                h2 Computation
+                +tex.
+                    $\mathbf{Definition\ 1.4}$ ($\text{Intersect}$-Computation). Applying $S \cap T$
+                    to an element reduces to a conjunction, verifiable by Z3 for specific predicates.
+                +tex(true).
+                    $$
+                        (S \cap T)(a) =_{\text{Prop}} P(a) \land Q(a).
+                    $$
+                +code.
+                    let infer env ctx (Intersect (s, t)) =
+                      check env ctx s (Set a); check env ctx t (Set a); Set a
+
+                h2 Uniqueness
+                +tex.
+                    $\mathbf{Definition\ 1.5}$ ($\text{Intersect}$-Uniqueness). The intersection
+                    $S \cap T$ is uniquely determined by its predicate, equal to another set $U$ if
+                    $\forall x : A, (S(x) \land T(x)) \iff U(x)$, provable via $\text{SetEq}$.
+                +tex(true).
+                    $$
+                        S \cap T =_{\text{Set}(A)} U \iff \forall x : A, S(x) \land T(x) =_{\text{Prop}} U(x).
+                    $$
+                +code.
+                    let equal env ctx (Intersect (s1, t1)) (Intersect (s2, t2)) =
+                      equal env ctx s1 s2 && equal env ctx t1 t2
+
+                h2 Theorems
+                +tex.
+                    $\mathbf{Theorem\ 1.6}$ (Associativity). Intersection is associative:
+                    $(S \cap T) \cap U = S \cap (T \cap U)$, provable by predicate equivalence.
+                +tex(true).
+                    $$
+                        (S \cap T) \cap U =_{\text{Set}(A)} S \cap (T \cap U).
+                    $$
+                +tex.
+                    $\mathbf{Theorem\ 1.7}$ (Measure Subadditivity). For a measure
+                    $\mu : \text{Measure}(A, \Sigma)$ and sets $S, T : \Sigma$,
+                    $\mu(S \cap T) \leq \min(\mu(S), \mu(T))$, reflecting inclusion.
+                +code.
+                    let measure_subadditivity (mu : exp) (s : exp) (t : exp) =
+                      RealIneq (Lte, App (mu, Intersect (s, t)),
+                                    RealMin (App (mu, s), App (mu, t)))
+
+include ../../footer

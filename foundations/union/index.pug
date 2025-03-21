@@ -1,0 +1,113 @@
+include ../../header
+
+html
+    head
+        meta(property='og:title'       content='UNION')
+        meta(property='og:description' content='Set Union')
+        meta(property='og:url'         content='https://laurent.groupoid.space/foundations/union/')
+
+block title
+    title UNION
+
+block content
+    nav
+        <a href='../../index.html'>LAURENT</a>
+        <a href='#'>UNION</a>
+    article.main
+        .exe
+            section
+                h1 SET UNION
+                span.
+        aside
+            time Published: 21 MAR 2025
+        .exe
+            section
+                +tex.
+                    $\text{Union}$-type constructs the union of two sets, combining their elements
+                    into a single set based on logical disjunction of predicates. It is essential
+                    for building $\sigma$-algebras and measurable spaces in analysis.
+                +tex.
+                    In this system, $\text{Union}$ integrates with $\text{Set}$ and $\text{SetEq}$,
+                    using Z3 to verify properties like membership and equality, grounding classical set operations.
+
+                h2 Formation
+                +tex.
+                    $\mathbf{Definition\ 2.1}$ ($\text{Union}$-Formation). The union of two sets
+                    $S, T : \text{Set}(A)$ forms a new set containing elements in either $S$ or $T$.
+                +tex(true).
+                    $$
+                        \text{Union} : \text{Set}(A) =_{def} S \cup T.
+                    $$
+                +code.
+                    type exp =
+                      | Union of exp * exp  (* S ∪ T *)
+
+                h2 Introduction
+                +tex.
+                    $\mathbf{Definition\ 2.2}$ ($\text{Union}$-Introduction). The union of
+                    $S = \{ x : A \mid P(x) \}$ and $T = \{ x : A \mid Q(x) \}$ is introduced as
+                    $S \cup T = \{ x : A \mid P(x) \lor Q(x) \}$.
+                +tex(true).
+                    $$
+                        S \cup T : \text{Set}(A) =_{def} \text{Union}(S, T).
+                    $$
+                +code.
+                    let union_sets (s : exp) (t : exp) : exp =
+                      Union (s, t)
+
+                h2 Elimination
+                +tex.
+                    $\mathbf{Definition\ 2.3}$ ($\text{Union}$-Elimination). Membership in
+                    $S \cup T$ holds if an element satisfies either $S$’s or $T$’s predicate.
+                +tex(true).
+                    $$
+                        (S \cup T)(a) : \text{Prop} =_{def} S(a) \lor T(a).
+                    $$
+                +code.
+                    let reduce env ctx = function
+                      | App (Union (Set (Lam (x1, _, p)), Set (Lam (x2, _, q))), a) ->
+                          Or (subst x1 a p, subst x2 a q)
+                      | _ -> ...
+
+                h2 Computation
+                +tex.
+                    $\mathbf{Definition\ 2.4}$ ($\text{Union}$-Computation). Applying $S \cup T$
+                    to an element reduces to a disjunction, verifiable by Z3 for specific predicates.
+                +tex(true).
+                    $$
+                        (S \cup T)(a) =_{\text{Prop}} P(a) \lor Q(a).
+                    $$
+                +code.
+                    let infer env ctx (Union (s, t)) =
+                      check env ctx s (Set a); check env ctx t (Set a); Set a
+
+                h2 Uniqueness
+                +tex.
+                    $\mathbf{Definition\ 2.5}$ ($\text{Union}$-Uniqueness). The union $S \cup T$
+                    is uniquely determined by its predicate, equal to another set $U$ if
+                    $\forall x : A, (S(x) \lor T(x)) \iff U(x)$, provable via $\text{SetEq}$.
+                +tex(true).
+                    $$
+                        S \cup T =_{\text{Set}(A)} U \iff \forall x : A, S(x) \lor T(x) =_{\text{Prop}} U(x).
+                    $$
+                +code.
+                    let equal env ctx (Union (s1, t1)) (Union (s2, t2)) =
+                      equal env ctx s1 s2 && equal env ctx t1 t2
+
+                h2 Theorems
+                +tex.
+                    $\mathbf{Theorem\ 2.6}$ (Associativity). Union is associative:
+                    $(S \cup T) \cup U = S \cup (T \cup U)$, provable by predicate equivalence.
+                +tex(true).
+                    $$
+                        (S \cup T) \cup U =_{\text{Set}(A)} S \cup (T \cup U).
+                    $$
+                +tex.
+                    $\mathbf{Theorem\ 2.7}$ (Measure Additivity). For a measure $\mu : \text{Measure}(A, \Sigma)$
+                    and disjoint sets $S, T : \Sigma$, $\mu(S \cup T) = \mu(S) + \mu(T)$.
+                +code.
+                    let measure_additivity (mu : exp) (s : exp) (t : exp) =
+                      SetEq (App (mu, Union (s, t)),
+                             RealOps (Plus, App (mu, s), App (mu, t)))
+
+include ../../footer

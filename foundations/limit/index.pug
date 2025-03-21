@@ -1,0 +1,119 @@
+include ../../header
+
+html
+    head
+        meta(property='og:title'       content='LIMIT')
+        meta(property='og:description' content='Sequence Limits')
+        meta(property='og:url'         content='https://laurent.groupoid.space/foundations/limit/')
+
+block title
+    title LIMIT
+
+block content
+    nav
+        <a href='../../index.html'>LAURENT</a>
+        <a href='#'>LIMIT</a>
+    article.main
+        .exe
+            section
+                h1 SEQUENCE LIMITS
+                span.
+        aside
+            time Published: 21 MAR 2025
+        .exe
+            section
+                +tex.
+                    $\text{Limit}$-type formalizes the limit of a sequence, capturing the value
+                    to which a sequence converges in $\mathbb{R}$ or $\mathbb{C}$. It is a cornerstone
+                    of analysis, enabling precise definitions of continuity and integration.
+                +tex.
+                    In this system, $\text{Limit}$ operates on sequences, leveraging $\text{Seq}$
+                    and Z3 to verify convergence properties, aligning with classical and constructive analysis.
+
+                h2 Formation
+                +tex.
+                    $\mathbf{Definition\ 1.1}$ ($\text{Limit}$-Formation). A limit is a proposition
+                    asserting that a sequence $a : \text{Seq}(A)$ converges to a value $l : A$
+                    as the index approaches infinity or another point.
+                +tex(true).
+                    $$
+                        \text{Limit} : \text{Prop} =_{def} \lim_{n \to \infty} a_n = l.
+                    $$
+                +code.
+                    type exp =
+                      | Limit of exp * exp * exp * exp  (* Limit (a, p, l, Prop) *)
+
+                h2 Introduction
+                +tex.
+                    $\mathbf{Definition\ 1.2}$ ($\text{Limit}$-Introduction). A limit is introduced
+                    by proving that for all $\varepsilon > 0$, there exists an $N : \mathbb{N}$ such
+                    that for all $n > N$, $|a_n - l| < \varepsilon$, forming a propositional term.
+                +tex(true).
+                    $$
+                        \lim_{n \to \infty} a_n = l =_{def} \forall \varepsilon > 0, \exists N : \mathbb{N}, \forall n > N, |a_n - l| < \varepsilon.
+                    $$
+                +code.
+                    let limit_a (a : exp) (l : exp) : exp =
+                      Limit (a, Infinity, l,
+                             Forall ("eps", Real,
+                               And (RealIneq (Gt, Var "eps", Zero),
+                                    Exists ("N", Nat,
+                                      Forall ("n", Nat,
+                                        Implies (RealIneq (Gt, NatToReal (Var "n"), NatToReal (Var "N")),
+                                                 RealIneq (Lt, RealOps (Abs, RealOps (Minus, App (a, Var "n"), l), Zero), Var "eps"))))))
+
+                h2 Elimination
+                +tex.
+                    $\mathbf{Definition\ 1.3}$ ($\text{Limit}$-Elimination). If $\lim_{n \to \infty} a_n = l$,
+                    then $l$ can be used as the limiting value in further propositions or computations.
+                +tex(true).
+                    $$
+                        \lim_{n \to \infty} a_n = l \implies a_n \approx l \text{ for large } n.
+                    $$
+                +code.
+                    let infer env ctx (Limit (a, p, l, prop)) =
+                      check env ctx a (Seq Real); check env ctx l Real; Prop
+
+                h2 Computation
+                +tex.
+                    $\mathbf{Definition\ 1.4}$ ($\text{Limit}$-Computation). The limit proposition
+                    is verified by Z3, reducing to $\text{True}$ if the $\varepsilon$-$N$ condition holds,
+                    otherwise $\text{False}$.
+                +tex(true).
+                    $$
+                        \lim_{n \to \infty} a_n = l =_{\text{Prop}} \text{Z3}(\forall \varepsilon > 0, \exists N, \forall n > N, |a_n - l| < \varepsilon).
+                    $$
+                +code.
+                    let reduce env ctx (Limit (a, Infinity, l, prop)) =
+                      smt_verify_iff ctx_z3 prop True
+
+                h2 Uniqueness
+                +tex.
+                    $\mathbf{Definition\ 1.5}$ ($\text{Limit}$-Uniqueness). The limit of a sequence
+                    $a : \text{Seq}(A)$ is unique in $A$ (e.g., $\mathbb{R}$), as any two limits must be equal.
+                +tex(true).
+                    $$
+                        \lim_{n \to \infty} a_n = l_1 \land \lim_{n \to \infty} a_n = l_2 \implies l_1 =_A l_2.
+                    $$
+                +code.
+                    let equal env ctx (Limit (a1, p1, l1, _)) (Limit (a2, p2, l2, _)) =
+                      equal env ctx a1 a2 && equal env ctx p1 p2 && equal env ctx l1 l2
+
+                h2 Theorems
+                +tex.
+                    $\mathbf{Theorem\ 1.6}$ (Cauchy Criterion). A sequence $a : \text{Seq}(\mathbb{R})$
+                    converges if and only if it is Cauchy, i.e., $\forall \varepsilon > 0, \exists N,
+                    \forall m, n > N, |a_m - a_n| < \varepsilon$.
+                +tex(true).
+                    $$
+                        \exists l, \lim_{n \to \infty} a_n = l \iff \forall \varepsilon > 0, \exists N, \forall m, n > N, |a_m - a_n| < \varepsilon.
+                    $$
+                +tex.
+                    $\mathbf{Theorem\ 1.7}$ (Limit of Bounded Monotone). Every bounded, monotone sequence
+                    in $\mathbb{R}$ has a limit, by completeness.
+                +code.
+                    let monotone_limit (a : exp) (l : exp) =
+                      And (Forall ("n", Nat, RealIneq (Lte, App (a, Var "n"), App (a, NatOps (Plus, Var "n", One)))),
+                           Limit (a, Infinity, l, True))
+
+include ../../footer
