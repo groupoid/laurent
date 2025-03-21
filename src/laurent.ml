@@ -60,6 +60,9 @@ type exp =                         (* MLTT-72 Vibe Check                     *)
   | RealOps of real_op * exp * exp          (* Real +, -, *, etc.            *)
   | ComplexOps of complex_op * exp * exp    (* Complex +, -, *, etc.         *)
   | Closure of exp
+  | SetEq of exp * exp
+  | True
+  | False
   | Set of exp              (* Term level: { x : A | P } Set Lam, Type Level: Set Real *)
   | UnionSet of exp * exp   (* A ∪ B *)
   | Complement of exp       (* ℝ \ A *)
@@ -90,6 +93,12 @@ let env : env = []
 let ctx : context = []
 let add_var ctx x ty = (x, ty) :: ctx
 
+let iff (p : exp) (q : exp) : exp =
+  Exists ("f", Forall ("x", p, q), Forall ("y", q, p))
+
+let iff_intro (f : exp) (g : exp) : exp =
+  Pair (f, g)
+
 let is_sigma_algebra sigma =
   Exists ("_",
     Exists ("_", App (sigma, Set Real),
@@ -111,6 +120,9 @@ let is_measurable sigma f =
 
 let rec subst_many m t =
     match t with
+    | SetEq (s1, s2) -> SetEq (subst_many m s1, subst_many m s2)
+    | True -> True
+    | False -> False
     | Var x -> (try List.assoc x m with Not_found -> t)
     | Forall (x, a, b) -> let m' = List.filter (fun (y, _) -> y <> x) m in Forall (x, subst_many m a, subst_many m' b)
     | Exists (x, a, b) -> let m' = List.filter (fun (y, _) -> y <> x) m in Exists (x, subst_many m a, subst_many m' b)
@@ -156,6 +168,14 @@ and lookup_var ctx x =
 
 and infer env (ctx : context) (e : exp) : exp =
     match e with
+    | SetEq (s1, s2) ->
+      let s1_ty = infer env ctx s1 in
+      let s2_ty = infer env ctx s2 in
+      (match s1_ty, s2_ty with
+       | Set base1, Set base2 when equal env ctx base1 base2 -> Prop
+       | _ -> raise (TypeError "SetEq requires two sets"))
+    | True -> Prop
+    | False -> Prop
     | Universe 0 -> Universe 1
     | Universe 1 -> Universe 1
     | Universe i -> raise (TypeError "Invalid Universe (index should be less than 2)")
@@ -186,7 +206,6 @@ and infer env (ctx : context) (e : exp) : exp =
       | _ -> (match domain_ty with
               | Universe i -> Forall (x, domain, body_ty)
               | Real -> if equal env ctx body_ty Prop then Set Real else Forall (x, domain, body_ty)
-              | Real -> Forall (x, domain, body_ty)
               | Prop -> Forall (x, domain, body_ty)
               | _ -> raise (TypeError "Lambda domain must be a type or proposition")))
     | Pair (a, b) -> let a_ty = infer env ctx a in let b_ty = infer env (add_var ctx "N" a_ty) b in Exists ("N", a_ty, b_ty)
@@ -357,6 +376,9 @@ and equal' env ctx t1 t2 =
 and reduce env ctx t =
 (*  if trace then Printf.printf "Reduce: %s\n" (string_of_exp t); *)
     match t with
+    | SetEq (Set (Lam (x1, Real, p1)), Set (Lam (x2, Real, p2))) -> Forall ("x", Real, iff (subst x1 (Var "x") p1) (subst x2 (Var "x") p2))
+    | SetEq (s, s') when equal env ctx s s' -> True
+    | Forall (x, Real, Exists (f, Forall (x', p, q), Forall (y, q', p'))) when equal env ctx p p' && equal env ctx q q' && equal env ctx p q -> True
     | App (Lam (x, domain, body), arg) -> subst x arg body
     | App (f, arg) -> let f' = reduce env ctx f in let arg' = reduce env ctx arg in App (f', arg')
     | Fst (Pair (a, b)) -> a
@@ -370,6 +392,9 @@ and normalize env ctx t =
     if equal' env ctx t t' then t else normalize env ctx t'
 
 and string_of_exp = function
+  | SetEq (s1, s2) -> string_of_exp s1 ^ " =s " ^ string_of_exp s2
+  | True -> "True"
+  | False -> "False"
   | Universe i -> "Universe " ^ string_of_int i
   | Var x -> x
   | Lam (x, a, b) -> "Lam (" ^ string_of_exp a ^ ", (" ^ x ^ ", " ^ string_of_exp b ^ "))"
@@ -447,7 +472,7 @@ let integral_term : exp =
             Mu (Real,
               Power (Set Real),
                 Lam ("A", Set Real,
-                  If (RealIneq (Leq, Var "a", Var "b"),
+                  If (And (RealIneq (Leq, Var "a", Var "b"), SetEq (Var "A", interval_a_b (Var "a") (Var "b"))),
                       RealOps (Minus, Var "b", Var "a"),
                       Zero))),
                   interval_a_b (Var "a") (Var "b")))))
@@ -484,6 +509,7 @@ let limit_a : exp =
           Lam ("n", Nat,
             Lam ("q", RealIneq (Gt, Var "n", Var "N"),
               RealIneq (Lt, RealOps (Abs, RealOps (Minus, App (sequence_a, Var "n"), Zero), Zero), Var "ε")))))))
+
 
 (* ∃l:R,∀ε>0,∃N:R,∀n>N,∣(1+1/n)^n − l∣<ε *)
 
