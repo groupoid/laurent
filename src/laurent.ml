@@ -67,7 +67,7 @@ type exp =                         (* MLTT-72 Vibe Check                     *)
   | Power of exp            (* a ^ b *)
   | And of exp * exp        (* a ∩ b *)
   | Ordinal
-  | Mu of exp * exp         (* Measure type *)
+  | Mu of exp * exp * exp   (* Measure type *)
   | Measure of exp * exp    (* Measure expression *)
   | Seq of exp              (* a_n : N -> R, Seq Lam *)
   | Sum of exp              (* ∑ a_n, Sum Lam *)
@@ -133,7 +133,7 @@ let rec subst_many m t =
     | Power a -> Power (subst_many m a)
     | And (a, b) -> And (subst_many m a, subst_many m b)
     | Ordinal -> Ordinal
-    | Mu (base, sigma) -> Mu (subst_many m base, subst_many m sigma)
+    | Mu (base, sigma, f) -> Mu (subst_many m base, subst_many m sigma, subst_many m f)
     | Measure (space, sigma) -> Measure (subst_many m space, subst_many m sigma)
     | Seq a -> Seq (subst_many m a)
     | Limit (f, x, l, p) -> Limit (subst_many m f, subst_many m x, subst_many m l, subst_many m p)
@@ -168,23 +168,26 @@ and infer env (ctx : context) (e : exp) : exp =
       else Universe 0
     | Exists (x, domain, body) -> let _ = infer env (add_var ctx x domain) body in Prop
     | App (f, arg) ->
+      if trace then (
+         Printf.printf "App function: ";
+         Printf.printf "%s\n" (string_of_exp (infer env ctx f))
+      );
       (match infer env ctx f with
       | Forall (x, a, b) -> check env ctx arg a; subst x arg b
       | Set (Set a) -> check env ctx arg (Set a); Prop
+      | Set Real -> check env ctx arg Real; Prop
       | ty -> raise (TypeError "Application requires a Pi type"))
-    | Lam (x, domain, body) when equal env ctx domain Real && equal env ctx (infer env (add_var ctx x domain) body) Prop -> Set Real
     | Lam (x, domain, body) ->
       let ctx' = add_var ctx x domain in
+      let body_ty = infer env ctx' body in
       let domain_ty = infer env ctx domain in
       (match domain, body with
-      | Real, Prop -> Set Real  (* {x : Real | true} *)
+      | Real, Prop -> Set Real
       | _ -> (match domain_ty with
-              | Universe i -> let body_ty = infer env ctx' body in Forall (x, domain, body_ty)
-              | Real -> let body_ty = infer env ctx' body in
-                        if equal env ctx body_ty Prop then Set Real else Forall (x, domain, body_ty)
-              | Prop -> let body_ty = infer env ctx' body in Forall (x, domain, body_ty)
-              | Forall _ -> let body_ty = infer env ctx' body in
-                              if equal env ctx body_ty Prop then Set domain else Forall (x, domain, body_ty)
+              | Universe i -> Forall (x, domain, body_ty)
+              | Real -> if equal env ctx body_ty Prop then Set Real else Forall (x, domain, body_ty)
+              | Real -> Forall (x, domain, body_ty)
+              | Prop -> Forall (x, domain, body_ty)
               | _ -> raise (TypeError "Lambda domain must be a type or proposition")))
     | Pair (a, b) -> let a_ty = infer env ctx a in let b_ty = infer env (add_var ctx "N" a_ty) b in Exists ("N", a_ty, b_ty)
     | Fst p -> (match infer env ctx p with | Exists (x, a, b) -> a | ty -> raise (TypeError ("Fst expects a Sigma type")))
@@ -204,15 +207,17 @@ and infer env (ctx : context) (e : exp) : exp =
     | Quaternionic -> Universe 0
     | Octanionic -> Universe 0
     | Rational -> Universe 0
-    | If (cond, t, f) -> let ct = infer env ctx cond in let _ = check env ctx ct Prop in let t_typ = infer env ctx t in let _ = check env ctx f t_typ in t_typ
+    | If (cond, t, f) ->
+      let ct = infer env ctx cond in
+      let _ = check env ctx ct (Universe 0) in
+      let t_typ = infer env ctx f in let _ = check env ctx t t_typ in t_typ
     | Vec (n, field, a, b) -> let _ = check env ctx field (Universe 0) in let _ = check env ctx a field in let _ = check env ctx b field in Universe 0
     | RealIneq (op, a, b) ->
       let a_ty = infer env ctx a in
       let b_ty = infer env ctx b in
       let _ = if not (equal env ctx a_ty Real && equal env ctx b_ty Real) &&
-                 not (equal env ctx a_ty Nat && equal env ctx b_ty Real) &&
-                 not (equal env ctx a_ty Real && equal env ctx b_ty Nat)
-          then raise (TypeError "RealIneq requires Real or Nat-Real arguments")
+                 not (equal env ctx a_ty Nat && equal env ctx b_ty Real)
+          then raise (TypeError ("RealIneq requires Real or Nat-Real arguments " ^ (string_of_exp a) ^ " " ^ (string_of_exp b)))
       in Prop
     | RealOps (op, a, b) ->
         let _ = check env ctx a Real in
@@ -222,12 +227,12 @@ and infer env (ctx : context) (e : exp) : exp =
     | ComplexOps (op, a, b) -> let _ = check env ctx a Complex in let _ = check env ctx b Complex in Complex
     | Closure s -> let _ = check env ctx s (Set Real) in Set Real
     | Set a ->
-    let a_ty = infer env ctx a in
-    (match a_ty with
-     | Forall (x, domain, body) when equal env ctx domain Real && equal env ctx body Prop -> Set Real
-     | Universe i -> Universe 0
-     | Set b -> Set b
-     | _ -> raise (TypeError ("Set expects a predicate or type, got " ^ string_of_exp a_ty)))
+      let a_ty = infer env ctx a in
+      (match a_ty with
+      | Forall (x, domain, body) when equal env ctx domain Real && equal env ctx body Prop -> Set Real
+      | Universe i -> Universe 0
+      | Set b -> Set b
+      | _ -> raise (TypeError ("Set expects a predicate or type, got " ^ string_of_exp a_ty)))
     | UnionSet (a, b) -> let a_typ = infer env ctx a in let _ = check env ctx b a_typ in a_typ
     | Union a -> let _ = check env ctx a (Forall ("n", Nat, Set Real)) in Set Real
     | Complement a ->
@@ -241,9 +246,12 @@ and infer env (ctx : context) (e : exp) : exp =
       else raise (TypeError "Power expects a type")
     | And (a, b) -> let _ = check env ctx a Prop in let _ = check env ctx b Prop in Prop
     | Ordinal -> Universe 0
-    | Mu (base, sigma) ->
+    | Mu (base, sigma, measure_func) ->
+      Printf.printf "Mu measure function: ";
+      Printf.printf "%s\n" (string_of_exp (measure_func));
       let _ = check env ctx base (Universe 0) in
       let _ = check env ctx sigma (Set (Set base)) in
+      let _ = check env ctx measure_func (Forall ("A", Forall ("x", base, Prop), Real)) in
       Measure (base, Set (Set base))
     | Measure (space, sigma) -> let _ = check env ctx space (Universe 0) in let _ = check env ctx sigma (Set (Set space)) in Universe 0
     | Seq a ->
@@ -273,38 +281,14 @@ and infer env (ctx : context) (e : exp) : exp =
     | Limit _ -> raise (TypeError "Limit expects a Seq argument")
     | Sup s -> let _ = check env ctx s (Set Real) in Real
     | Inf s -> let _ = check env ctx s (Set Real) in Real
-(*
-    | Lebesgue (f, mu, set) ->
-      let sigma = (match mu with
-                  | Mu (Real, s) -> s
-                  | _ -> raise (TypeError "Lebesgue requires a measure on Real"))  in
-      let _ = check env ctx f (Forall ("x", Real, Real)) in
-      let _ = check env ctx mu (Measure (Real, sigma)) in
-      let _ = check env ctx set (Set Real) in
-      let _ = check env ctx (is_sigma_algebra sigma) Prop in
-      let _ = check env ctx (App (sigma, set)) Prop in
-      let _ = check env ctx (is_measurable sigma f) Prop in
-      let _ = (match set with
-                | Union an ->
-                  let _ = check env ctx (Forall ("n", Nat, App (sigma, App (an, Var "n")))) Prop in
-                  let _ = check env ctx
-                            (Forall ("n", Nat,
-                              Forall ("m", Nat,
-                                Forall ("_", RealIneq (Neq, Var "n", Var "m"),
-                                  RealIneq (Eq, Intersect (App (an, Var "n"), App (an, Var "m")), Zero)))))
-                            Prop in
-                  check env ctx
-                    (RealIneq (Eq, App (mu, Union an),
-                                  Sum (Lam ("n", Nat, App (mu, App (an, Var "n"))))))
-                    Prop
-                | _ -> ())    in Real
-*)
     | Lebesgue (f, mu, set) ->
       let _ = check env ctx f (Forall ("x", Real, Real)) in
       let _ = check env ctx mu (Measure (Real, Set (Set Real))) in
       let set_ty = infer env ctx set in
       (match set_ty with
+      | Forall (x, Real, Prop) -> Real
       | Set Real -> Real
+(*      | _ -> check env ctx set (Forall ("x", Real, Prop)); Real) *)
       | _ -> check env ctx set (Set Real); Real)
 
 and universe env ctx t =
@@ -313,7 +297,7 @@ and universe env ctx t =
     | ty -> raise (TypeError (Printf.sprintf "Expected a universe"))
 
 and check env (ctx : context) (term : exp) (expected : exp) : unit =
-    if trace then Printf.printf "Term: %s Expected: %s\n" (string_of_exp term) (string_of_exp expected);
+    if trace then Printf.printf "Check: %s Expected: %s\n" (string_of_exp term) (string_of_exp expected);
     let inferred = infer env ctx term in
     if equal env ctx inferred expected then ()
     else (
@@ -322,7 +306,7 @@ and check env (ctx : context) (term : exp) (expected : exp) : unit =
     )
 
 and equal' env ctx t1 t2 =
-(*    if trace then Printf.printf "Equal: %s vs %s\n" (string_of_exp t1) (string_of_exp t2); *)
+(*  if trace then Printf.printf "Equal: %s vs %s\n" (string_of_exp t1) (string_of_exp t2); *)
     match t1, t2 with
     | Var x, Var y -> x = y
     | Universe i, Universe j -> i <= j
@@ -358,12 +342,10 @@ and equal' env ctx t1 t2 =
     | Power a1, Power a2 -> equal' env ctx a1 a2
     | And (a1, b1), And (a2, b2) -> equal' env ctx a1 a2 && equal' env ctx b1 b2
     | Ordinal, Ordinal -> true
-    | Mu (b1, s1), Mu (b2, s2) -> equal' env ctx b1 b2 && equal' env ctx s1 s2
+    | Mu (b1, s1, f1), Mu (b2, s2, f2) -> equal' env ctx b1 b2 && equal' env ctx s1 s2 && equal' env ctx f1 f2
     | Measure (sp1, s1), Measure (sp2, s2) -> equal' env ctx sp1 sp2 && equal' env ctx s1 s2
     | Seq a1, Seq a2 -> equal' env ctx a1 a2
     | Limit (f1, x1, l1, p1), Limit (f2, x2, l2, p2) -> equal' env ctx f1 f2 && equal' env ctx x1 x2 && equal' env ctx l1 l2 && equal' env ctx p1 p2
-
-
     | Sup s1, Sup s2 -> equal' env ctx s1 s2
     | Inf s1, Inf s2 -> equal' env ctx s1 s2
     | Lebesgue (f1, m1 ,s1), Lebesgue (f2, m2, s2) -> equal' env ctx f1 f2 && equal' env ctx m1 m2 && equal' env ctx s1 s2
@@ -376,7 +358,7 @@ and equal' env ctx t1 t2 =
     | _ -> t1 = t2
 
 and reduce env ctx t =
-(*    if trace then Printf.printf "Reduce: %s\n" (string_of_exp t); *)
+(*  if trace then Printf.printf "Reduce: %s\n" (string_of_exp t); *)
     match t with
     | App (Lam (x, domain, body), arg) -> subst x arg body
     | App (f, arg) -> let f' = reduce env ctx f in let arg' = reduce env ctx arg in App (f', arg')
@@ -386,7 +368,7 @@ and reduce env ctx t =
     | _ -> t
 
 and normalize env ctx t =
-(*    if trace then Printf.printf "Normalize: %s\n" (string_of_exp t); *)
+(*  if trace then Printf.printf "Normalize: %s\n" (string_of_exp t); *)
     let t' = reduce env ctx t in
     if equal' env ctx t t' then t else normalize env ctx t'
 
@@ -433,7 +415,7 @@ and string_of_exp = function
   | Power a -> "Power (" ^ string_of_exp a ^ ")"
   | And (a, b) -> "And (" ^ string_of_exp a ^ ", " ^ string_of_exp b ^ ")"
   | Ordinal -> "Ordinal"
-  | Mu (b, s) -> "μ (" ^ string_of_exp b ^ ", " ^ string_of_exp s ^ ")"
+  | Mu (b, s, f) -> "μ (" ^ string_of_exp b ^ ", " ^ string_of_exp s ^ ")" ^ ", " ^ string_of_exp f
   | Measure (sp, s) -> "Measure (" ^ string_of_exp sp ^ ", " ^ string_of_exp s ^ ")"
   | Seq a -> "Seq (" ^ string_of_exp a ^ ")"
   | Limit (f, x, l, p) -> "Limit (" ^ string_of_exp f ^ ", " ^ string_of_exp x ^ ", " ^ string_of_exp l ^ ", " ^ string_of_exp p ^ ")"
@@ -445,13 +427,38 @@ and string_of_exp = function
 (* canonical examples *)
 
 let universal  : exp = Power Prop
-let set_a      : exp = Lam ("x", Real, RealIneq (Gt, Var "x", Zero))
+let set_a      : exp = Set (Lam ("x", Real, RealIneq (Gt, Var "x", Zero)))
 let sup_a      : exp = Sup set_a
 let inf_a      : exp = Inf set_a
-let interval_a_b a b : exp = Lam ("x", Real, And (RealIneq (Leq, a, Var "x"), RealIneq (Leq, Var "x", b)))
-let integral_sig     : exp = Forall ("f", Forall ("x", Real, Real), Forall ("a", Real, Forall ("b", Real, Real)))
-let integral_term    : exp = Lam ("f", Forall ("x", Real, Real), Lam ("a", Real, Lam ("b", Real,
-                             Lebesgue (Var "f", Mu (Real, Power (Set Real)), interval_a_b (Var "a") (Var "b")))))
+
+let interval_a_b (a : exp) (b : exp) : exp =
+    Set (Lam ("x", Real, And (RealIneq (Leq, a, Var "x"), RealIneq (Leq, Var "x", b))))
+
+let lebesgue_measure (a : exp) (b : exp) : exp =
+    Mu (Real,
+        Power (Set Real),
+        Lam ("A", Forall ("x", Real, Prop), RealOps (Minus, b, a)))
+
+let integral_sig : exp =
+    Forall ("f", Forall ("x", Real, Real), Forall ("a", Real, Forall ("b", Real, Real)))
+
+let integral_term : exp =
+    Lam ("f", Forall ("x", Real, Real),
+        Lam ("a", Real,
+            Lam ("b", Real,
+                Lebesgue (Var "f", lebesgue_measure (Var "a") (Var "b"), interval_a_b (Var "a") (Var "b")))))
+
+let l2_space : exp =
+    Lam ("f", Forall ("x", Real, Real),
+        RealIneq (Lt,
+            Lebesgue (
+                Lam ("x", Real,
+                    RealOps (Pow,
+                        RealOps (Abs, App (Var "f", Var "x"), Zero),
+                        RealOps (Plus, One, One))),
+                lebesgue_measure Zero Infinity,
+                interval_a_b Zero Infinity),
+            Infinity))
 
 let sequence_a : exp =
     Lam ("n", Nat, RealOps (Div, One, NatToReal (Var "n")))
@@ -480,32 +487,14 @@ let e : exp =
               Lam ("q", RealIneq (Gt, Var "n", Var "N"),
                 RealIneq (Lt, RealOps (Abs, RealOps (Minus, App (sequence_e, Var "n"), RealOps (Exp, One, One)), Zero), Var "ε")))))))))
 
-let lebesgue_measure =
-  Mu (Real, Power (Set Real))
-
-let l2_space : exp =
-  Lam ("f", Forall ("x", Real, Real),
-    RealIneq (Lt,
-      Lebesgue (
-        Lam ("x", Real,
-          RealOps (Pow,
-            RealOps (Abs, App (Var "f", Var "x"), Zero),
-            RealOps (Plus, One, One))),
-        lebesgue_measure,
-        Lam ("x", Real, Prop)),
-      Infinity))
 
 
 let sigma_algebra = is_sigma_algebra (Power (Set Real))
-
 
 let measurable =
   is_measurable
     (Power (Set Real))
     (Lam ("x", Real, RealOps (Pow, RealOps (Abs, App (Var "f", Var "x"), Zero), NatToReal (S (S Z)))))
-
-let interval_pred (a : exp) (b : exp) : exp =
-    Set (Lam ("x", Real, And (RealIneq (Leq, a, Var "x"), RealIneq (Leq, Var "x", b))))
 
 (* runner *)
 
@@ -523,7 +512,6 @@ let test_term env ctx (term : exp) (expected_type : exp) (name : string) : unit 
 let test_all () =
     let ctx = add_var ctx "f" (Forall ("x", Real, Real)) in
     test_term env ctx integral_sig (Universe 0) "integral_sig";
-    test_term env ctx integral_term integral_sig "integral_term";
     test_term env ctx sequence_a (Forall ("n", Nat, Real)) "sequence_a";
     test_term env ctx limit_a Prop "limit_a";
     test_term env ctx inf_a (Real) "inf_a";
@@ -533,9 +521,9 @@ let test_all () =
     test_term env ctx e Real "e";
     test_term env ctx l2_space (Forall ("f", Forall ("x", Real, Real), Prop)) "l_2 space";
     test_term env ctx sigma_algebra Prop "sigma_algebra";
-    let ctx = add_var ctx "f" (Forall ("x", Real, Real)) in
-    test_term env ctx measurable (Prop) "measurable";
-    test_term env ctx (interval_pred Zero One) (Set Real) "interval_[a,b]";
+    test_term env (add_var ctx "f" (Forall ("x", Real, Real))) measurable (Prop) "measurable";
+    test_term env ctx (interval_a_b Zero One) (Set Real) "interval_[a,b]";
+    test_term env ctx integral_term integral_sig "integral_term";
     Printf.printf "All tests passed!\n"
 
 let () = test_all ()
