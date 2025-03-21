@@ -1,0 +1,134 @@
+include header
+
+html
+    head
+        meta(property='og:title'       content='LAURENT')
+        meta(property='og:description' content='Analytical Type Theory')
+        meta(property='og:url'         content='https://laurent.groupoid.space/')
+
+block title
+    title LAURENT
+
+block content
+    nav
+        <a href='#'>LAURENT</a>
+        <a href='foundations/index.html'>ANALYSIS</a>
+        <a href='mathematics/index.html'>DISTRIBUTIONS</a>
+    article.main
+        .exe
+            section
+                h1 ANALYTICAL TYPE SYSTEM
+            aside
+                time Published: 28 FEB 2025 LOSAR
+                +tex.
+                    MLTT-72 based Type Theory for mechanical formalization
+                    of Théorie des Distributions and Analyse Mathematique
+                    by Laurent Schwartz and Foundation of Constructive Analysis by Errett Bishop.
+
+                +tex.
+                    We omit identity types Id, idp, J (HoTT, MLTT-80, MLTT-75) to keep
+                    the system lean with Pi and Set truncated Sigma relying instead on
+                    Prop predicates. Also we have explicitly built in set theory with
+                    open sets and topology to have more classical core.
+                    Built-in inequalities propositional resolution by reduction
+                    is handled by external Z3 SMT solver.
+
+
+            section
+                .macro
+                    .macro__col
+                        h3#hts <b>MLTT</b>
+                        ol
+                            li: a(href='#universe') PROP
+                            li: a(href='#universe') U<sub>0</sub>
+                            li: a(href='#universe') U<sub>1</sub>
+                            li: a(href='https://anders.groupoid.space/foundations/mltt/forall/') FORALL
+                            li: a(href='https://anders.groupoid.space/foundations/mltt/exists/') EXISTS
+                    .macro__col
+                        h3#mltt <b>SET</b>
+                        ol
+                            li: a(href='https://laurent.groupoid.space/foundations/set/set/') SET
+                            li: a(href='https://laurent.groupoid.space/foundations/set/complement/') \
+                            li: a(href='https://laurent.groupoid.space/foundations/set/and/') AND
+                            li: a(href='https://laurent.groupoid.space/foundations/set/or/') OR
+                            li: a(href='https://laurent.groupoid.space/foundations/set/power/') POWER
+                    .macro__col
+                        h3#mltt <b>MU</b>
+                        ol
+                            li: a(href='https://laurent.groupoid.space/foundations/mu/mu/') MU
+                            li: a(href='https://laurent.groupoid.space/foundations/mu/measure/') MEASURE
+                            li: a(href='https://laurent.groupoid.space/foundations/mu/lebesgue/') LEBESGUE
+                    .macro__col
+                        h3#mltt <b>LIM</b>
+                        ol
+                            li: a(href='https://laurent.groupoid.space/foundations/lim/seq/') SEQ
+                            li: a(href='https://laurent.groupoid.space/foundations/lim/inf/') INF
+                            li: a(href='https://laurent.groupoid.space/foundations/lim/sup/') SUP
+                            li: a(href='https://laurent.groupoid.space/foundations/lim/lim/') LIM
+                            li: a(href='https://laurent.groupoid.space/foundations/lim/sum/') SUM
+                            li: a(href='https://laurent.groupoid.space/foundations/lim/union/') UNION
+                br
+                br
+                +tex.
+                    $\mathbf{Installation}$.
+
+                +code.
+                    $ git clone git@github.com:groupoid/laurent
+                    $ opam install z3
+                    $ ocamlfind ocamlc -o laurent \
+                      -package z3 -linkpkg src/laurent.ml
+
+            section
+                h1 SYNTAX
+
+                +tex(true).
+                    $$
+                    \begin{array}{c} \\
+                       \mathrm{Laurent} := \mathrm{MLTT}\ |\ \mathrm{Base}\ |\ \mathrm{Set}\ |\ \mathrm{Mu}\ |\ \mathrm{Lim} \\
+                       \mathrm{MLTT} := \mathrm{cosmos}\ |\ \mathrm{var}\ |\ \mathrm{forall}\ |\ \mathrm{exists}\ \\
+                       \\
+                       \mathrm{cosmos} := \mathbf{Prop}\ :\ \mathbf{U_0}\ :\ \mathbf{U_1} \\
+                       \mathrm{var} := \mathbf{var}\ \mathrm{ident}\ |\ \mathbf{hole} \\
+                       \mathrm{forall} := \forall\ \mathrm{ident}\ \mathrm{E}\ \mathrm{E}\ |\ \lambda\ \mathrm{ident}\ \mathrm{E}\ \mathrm{E}\ |\ \mathrm{E}\ \mathrm{E} \\
+                       \mathrm{exists} := \exists\ \mathrm{ident}\ \mathrm{E}\ \mathrm{E}\ |\ (\mathrm{E}, \mathrm{E})\ |\ \mathrm{E}\mathbf{.1}\ |\ \mathrm{E}\mathbf{.2} \\
+                       \mathrm{Base} := \mathbf{𝟚}\ |\ \mathbf{ℕ}\ |\ \mathrm{ℤ}\ |\ \mathrm{ℚ}\ |\ \mathrm{ℝ}\ |\ \mathrm{ℂ}\ |\ \mathrm{ℍ}\ |\ \mathrm{𝕆}\ |\ \mathrm{𝕍}\ \\
+                       \mathrm{Set} := \mathbf{Set}\ |\ \mathbf{Complement}\ |\ \mathbf{Intersect}\ \\
+                               |\ \mathbf{Power}\ |\ \mathbf{And}\ |\ \mathbf{Or}\ |\ \mathbf{Cardinal}\ \\
+                       \mathrm{Mu} := \mathbf{Mu}\ |\ \mathbf{Measure}\ |\ \mathbf{Lebesgue}\ \\
+                       \mathrm{Lim} := \mathbf{Seq}\ |\ \mathbf{Sup}\ |\ \mathbf{Inf}\ |\ \mathbf{Lim}\ |\ \mathbf{Sum}\ |\ \mathbf{Union}\ \\
+                       \\
+                    \end{array}
+                    $$
+
+                h1 SEMANTICS
+
+                br
+
+                h2 MLTT
+
+                +tex.
+                    $\mathbf{Definition\ 1}$ ($\forall$-Formation, Dependent Product).
+                    $\forall$-types represents the way we create the spaces of dependent functions $f: \forall\ (x:A), B(x)$
+                    with domain in $A$ and codomain in type family $B : A \rightarrow U$ over $A$.
+                +tex(true).
+                    $$
+                       \forall : U_0 =_{def} \prod_{A:U}\prod_{x:A}B(x).
+                    $$
+
+                +tex.
+                    $\mathbf{Definition\ 2}$ ($\exists$-Formation, Dependent Sum). The dependent sum
+                    type is indexed over type $A$ in the sense of coproduct or disjoint union,
+                    where only one fiber codomain $B(x)$ is present in pair.
+                +tex(true).
+                    $$
+                       \exists : Prop =_{def} || \sum_{x:A} B(x) ||_0.
+                    $$
+
+                center.
+                    <br>🧊 <br><br><br>
+
+                +tex.
+                    Присвячується Володимиру Олександровичу Клименку. Механізована ферифікація теорем
+                    функціонального аналізу і теорії розподілів Лорана Шварца.
+
+include footer
