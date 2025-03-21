@@ -53,6 +53,8 @@ block content
                     $\mu(\bigcup_{n} S_n) = \sum_{n} \mu(S_n)$.
                 +code.
                     let measure_union (mu : exp) (s : exp) =
-                      SetEq (App (mu, Union (Nat, s)), Sum (Nat, Lam ("n", Nat, App (mu, App (s, Var "n")))))
+                      SetEq (App (mu, Union (Nat, s)),
+                        Sum (Nat, Lam ("n", Nat,
+                          App (mu, App (s, Var "n")))))
 
 include ../../footer

@@ -55,7 +55,7 @@ block content
                     $$
                 +code.
                     let series (a : exp) : exp =
-                      Sum (Nat, a)  (* e.g., a = λn. 1/n^2 *)
+                      Sum (Nat, a)
 
                 h2 Elimination
                 +tex.
@@ -66,9 +66,6 @@ block content
                     $$
                         \sum_{n : \mathbb{N}} a_n = l \implies \lim_{n \to \infty} s_n = l, \text{ where } s_n = \sum_{k=0}^{n-1} a_k.
                     $$
-                +code.
-                    let infer env ctx (Sum (i, a)) =
-                      check env ctx i U; check env ctx a (Seq Real); Real
 
                 h2 Computation
                 +tex.
@@ -79,12 +76,6 @@ block content
                     $$
                         \sum_{n=0}^\infty \frac{1}{2^n} =_{\mathbb{R}} 2.
                     $$
-                +code.
-                    let reduce env ctx = function
-                      | Sum (Nat, Seq (Lam ("n", Nat, RealOps (Div, One, RealOps (Pow, Two, Var "n"))))) ->
-                          RealNum 2  (* Example: geometric series *)
-                      | Sum (i, a) -> Limit (Seq (Lam ("n", Nat, finite_sum 0 (Var "n") a)), Infinity, l, True)
-                      | _ -> ...
 
                 h2 Uniqueness
                 +tex.
@@ -114,6 +105,7 @@ block content
                 +code.
                     let measure_series (mu : exp) (s : exp) =
                       SetEq (App (mu, Union (Seq s)),
-                             Sum (Nat, Seq (Lam ("n", Nat, App (mu, App (s, Var "n"))))))
+                        Sum (Nat, Seq (Lam ("n", Nat,
+                          App (mu, App (s, Var "n"))))))
 
 include ../../footer
