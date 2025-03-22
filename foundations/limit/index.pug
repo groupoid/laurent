@@ -50,7 +50,10 @@ block content
                     that for all $n > N$, $|a_n - l| < \varepsilon$, forming a propositional term.
                 +tex(true).
                     $$
-                        \lim_{n \to \infty} a_n = l =_{def} \forall \varepsilon > 0, \exists N : \mathbb{N}, \forall n > N, |a_n - l| < \varepsilon.
+                        \lim_{n \to \infty} a_n = l =_{def}
+                    $$
+                    $$
+                        \forall \varepsilon > 0, \exists N : \mathbb{N}, \forall n > N, |a_n - l| < \varepsilon.
                     $$
                 +code.
                     let limit_a (a : exp) (l : exp) : exp =
@@ -81,7 +84,10 @@ block content
                     otherwise $\text{False}$.
                 +tex(true).
                     $$
-                        \lim_{n \to \infty} a_n = l =_{\text{Prop}} \text{Z3}(\forall \varepsilon > 0, \exists N, \forall n > N, |a_n - l| < \varepsilon).
+                        \lim_{n \to \infty} a_n = l =_{\text{Prop}}
+                    $$
+                    $$
+                        \text{Z3}(\forall \varepsilon > 0, \exists N, \forall n > N, |a_n - l| < \varepsilon).
                     $$
                 +code.
                     let reduce env ctx (Limit (a, Infinity, l, prop)) =
@@ -106,7 +112,10 @@ block content
                     \forall m, n > N, |a_m - a_n| < \varepsilon$.
                 +tex(true).
                     $$
-                        \exists l, \lim_{n \to \infty} a_n = l \iff \forall \varepsilon > 0, \exists N, \forall m, n > N, |a_m - a_n| < \varepsilon.
+                        \exists l, \lim_{n \to \infty} a_n = l
+                    $$
+                    $$
+                        \iff \forall \varepsilon > 0, \exists N, \forall m, n > N, |a_m - a_n| < \varepsilon.
                     $$
                 +tex.
                     $\mathbf{Theorem\ 5.4.7}$ (Limit of Bounded Monotone). Every bounded, monotone sequence

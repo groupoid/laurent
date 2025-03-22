@@ -61,7 +61,10 @@ block content
                     acts as a lower bound, provable via its defining properties.
                 +tex(true).
                     $$
-                        \forall x : S, \inf S \leq x \land \forall y : \mathbb{R}, (\inf S < y \implies \exists x : S, x < y).
+                        \forall x : S, \inf S \leq x \land \forall y : \mathbb{R},
+                    $$
+                    $$
+                        (\inf S < y \implies \exists x : S, x < y).
                     $$
                 +code.
                     let lower_bound (s : exp) (inf_s : exp) =

@@ -61,7 +61,10 @@ block content
                     serves as an upper bound, provable via its defining properties.
                 +tex(true).
                     $$
-                        \forall x : S, x \leq \sup S \land \forall y : \mathbb{R}, (y < \sup S \implies \exists x : S, y < x).
+                        \forall x : S, x \leq \sup S \land \forall y : \mathbb{R},
+                    $$
+                    $$
+                        (y < \sup S \implies \exists x : S, y < x).
                     $$
                 +code.
                     let upper_bound (s : exp) (sup_s : exp) =
