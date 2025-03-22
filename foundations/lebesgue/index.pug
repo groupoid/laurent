@@ -57,7 +57,9 @@ block content
                       Lam ("f", Forall ("x", Real, Real),
                         Lam ("a", Real,
                           Lam ("b", Real,
-                            Lebesgue (Var "f", lebesgue_measure (Var "a") (Var "b"), interval_a_b (Var "a") (Var "b")))))
+                            Lebesgue (Var "f",
+                              lebesgue_measure (Var "a") (Var "b"),
+                              interval_a_b (Var "a") (Var "b")))))
 
                 h2 Elimination
                 +tex.
