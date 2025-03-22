@@ -33,10 +33,10 @@ block content
 
                 h2 Formation
                 +tex.
-                    $\mathbf{Definition\ 2.4.1}$ ($\text{Real}$-Formation). The real numbers are a type
-                    $\mathbb{R} : U_0$, equipped with constants $(0,1)$, casting functions $\mathbf{NatToReal}$,
-                    $\mathbf{RationalToReal}$, $\mathbf{RealConst}$
-                    order $(<, \leq, >, \geq, =$ and arithmetic $(+, -, \times, \div, \ln, \exp, \sin, \cos, \neg, |\_|, x^y )$,
+                    $\text{Definition 2.4.1}$ ($\text{Real}$-Formation). The real numbers are a type
+                    $\mathbb{R} : U_0$, equipped with constants ($0$,$1$), casting functions $\text{NatToReal}$,
+                    $\text{RationalToReal}$, $\text{RealConst}$
+                    order ($<$, $\leq$, $>$, $\geq$, $=$) and arithmetic ($+$, $-$, $\times$, $\div$, $\ln$, $\exp$, $\sin$, $\cos$, $\neg$, $|\_|$, $x^y$),
                     satisfying completeness via limits.
                 +tex(true).
                     $$
@@ -73,11 +73,11 @@ block content
 
                 h2 Advantages
                 +tex.
-                    $\mathbf{Advantage\ 1}$: The limit-based approach simplifies analysis by assuming
+                    $\text{Advantage 1}$: The limit-based approach simplifies analysis by assuming
                     completeness axiomatically, enabling $\text{Lebesgue}$ integration and $\text{Measure}$
                     without constructing $\mathbb{R}$ from scratch.
                 +tex.
-                    $\mathbf{Advantage\ 2}$: Z3 integration verifies real arithmetic and inequalities
+                    $\text{Advantage 2}$: Z3 integration verifies real arithmetic and inequalities
                     (e.g., $x^2 \geq 0$), aligning with classical analysis and Schwartz’s needs.
                 +tex(true).
                     $$
@@ -86,11 +86,11 @@ block content
 
                 h2 Limitations
                 +tex.
-                    $\mathbf{Limitation\ 1}$: Lacking a constructive definition (e.g., Cauchy sequences
+                    $\text{Limitation 1}$: Lacking a constructive definition (e.g., Cauchy sequences
                     or Dedekind cuts), $\mathbb{R}$ relies on external solvers (Z3) for decidability,
                     limiting proof-theoretic introspection.
                 +tex.
-                    $\mathbf{Limitation\ 2}$: Fine-grained properties (e.g., distinguishing irrationality)
+                    $\text{Limitation 2}$: Fine-grained properties (e.g., distinguishing irrationality)
                     are not natively supported, as the focus is on functional limits over structural detail.
                 +code.
                     let real_order (x : exp) : exp =
@@ -114,14 +114,14 @@ block content
 
                 h2 Theorems
                 +tex.
-                    $\mathbf{Theorem\ 2.4.2}$ (Completeness). Every non-empty, bounded above subset
+                    $\text{Theorem 2.4.2}$ (Completeness). Every non-empty, bounded above subset
                     $S \subseteq \mathbb{R}$ has a supremum, axiomatized via $\text{Sup}$.
                 +tex(true).
                     $$
                         S \neq \emptyset \land \exists M, \forall x \in S, x \leq M \implies \exists \sup S.
                     $$
                 +tex.
-                    $\mathbf{Theorem\ 2.4.3}$ (Bolzano-Weierstrass). Every bounded sequence in $\mathbb{R}$
+                    $\text{Theorem 2.4.3}$ (Bolzano-Weierstrass). Every bounded sequence in $\mathbb{R}$
                     has a convergent subsequence, implicit in our limit axioms.
                 +code.
                     let bolzano_weierstrass (a : exp) : exp =
