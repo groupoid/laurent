@@ -34,7 +34,7 @@ block content
                 h2 Formation
                 +tex.
                     $\mathbf{Definition\ 1.1}$ ($\text{Real}$-Formation). The real numbers are a type
-                    $\mathbb{R} : U_0$, equipped with order ($<, \leq$) and arithmetic (+, -, \times, \div),
+                    $\mathbb{R} : U_0$, equipped with order $(<, \leq)$ and arithmetic $(+, -, \times, \div)$,
                     satisfying completeness via limits.
                 +tex(true).
                     $$
@@ -42,8 +42,10 @@ block content
                     $$
                 +code.
                     type exp =
-                      | Real       (* ℝ *)
-                      | RealNum of float  (* e.g., 1.0 *)
+                      | Real (* ℝ *)
+                      | RealIneq of real_ineq * exp * exp (* <, <=, >, >=, = *)
+                      | RealOps of real_op * exp * exp (* +, -, /, *, ^, exp, sin, cos, abs, neg, ln *)
+                      | NatToReal of exp (* casting *)
 
                 h2 Axiomatic Limit Level
                 +tex.
