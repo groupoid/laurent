@@ -33,7 +33,7 @@ block content
 
                 h2 Formation
                 +tex.
-                    $\mathbf{Definition\ 1.1}$ ($\text{Set}$-Formation). A set is formed over
+                    $\mathbf{Definition\ 3.1.1}$ ($\text{Set}$-Formation). A set is formed over
                     a base type $A : U$ with a predicate $P : A \rightarrow \text{Prop}$,
                     yielding a term-level set type.
                 +tex(true).
@@ -46,7 +46,7 @@ block content
 
                 h2 Introduction
                 +tex.
-                    $\mathbf{Definition\ 1.2}$ ($\text{Set}$-Introduction). A set is introduced
+                    $\mathbf{Definition\ 3.1.2}$ ($\text{Set}$-Introduction). A set is introduced
                     by a lambda abstraction $\lambda x. P(x)$, where $P(x) : \text{Prop}$ defines
                     membership for all $x : A$.
                 +tex(true).
@@ -59,7 +59,7 @@ block content
 
                 h2 Elimination
                 +tex.
-                    $\mathbf{Definition\ 1.3}$ ($\text{Set}$-Elimination). Membership in a set
+                    $\mathbf{Definition\ 3.1.3}$ ($\text{Set}$-Elimination). Membership in a set
                     $S = \{ x : A \mid P(x) \}$ is tested by applying $S$ to an element $a : A$,
                     yielding the proposition $P(a)$.
                 +tex(true).
@@ -72,7 +72,7 @@ block content
 
                 h2 Computation
                 +tex.
-                    $\mathbf{Definition\ 1.4}$ ($\text{Set}$-Computation). Applying a set to an
+                    $\mathbf{Definition\ 3.1.4}$ ($\text{Set}$-Computation). Applying a set to an
                     element reduces to the predicate with substitution.
                 +tex(true).
                     $$
@@ -85,7 +85,7 @@ block content
 
                 h2 Uniqueness
                 +tex.
-                    $\mathbf{Definition\ 1.5}$ ($\text{Set}$-Uniqueness). Two sets $S = \{ x : A \mid P(x) \}$
+                    $\mathbf{Definition\ 3.1.5}$ ($\text{Set}$-Uniqueness). Two sets $S = \{ x : A \mid P(x) \}$
                     and $T = \{ x : A \mid Q(x) \}$ are equal if their predicates are propositionally
                     equivalent, i.e., $\forall x : A, P(x) \iff Q(x)$.
                 +tex(true).
@@ -97,10 +97,10 @@ block content
 
                 h2 Theorems
                 +tex.
-                    $\mathbf{Theorem\ 1.6}$ (Set Comprehension). Any predicate $P : A \rightarrow \text{Prop}$
+                    $\mathbf{Theorem\ 3.1.6}$ (Set Comprehension). Any predicate $P : A \rightarrow \text{Prop}$
                     defines a valid set $\{ x : A \mid P(x) \}$, with membership $S(a) \iff P(a)$.
                 +tex.
-                    $\mathbf{Theorem\ 1.7}$ (Power Set). The power set of a type $A$ is the set of all
+                    $\mathbf{Theorem\ 3.1.7}$ (Power Set). The power set of a type $A$ is the set of all
                     subsets, represented as $\text{Power}(A) = \text{Set}(\text{Set}(A))$.
                 +tex(true).
                     $$

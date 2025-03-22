@@ -32,7 +32,7 @@ block content
 
                 h2 Formation
                 +tex.
-                    $\mathbf{Definition\ 2.1}$ ($\text{Complement}$-Formation). The complement of
+                    $\mathbf{Definition\ 3.3.1}$ ($\text{Complement}$-Formation). The complement of
                     a set $S : \text{Set}(A)$ with respect to $A$ forms a new set of elements not in $S$.
                 +tex(true).
                     $$
@@ -44,7 +44,7 @@ block content
 
                 h2 Introduction
                 +tex.
-                    $\mathbf{Definition\ 2.2}$ ($\text{Complement}$-Introduction). The complement
+                    $\mathbf{Definition\ 3.3.2}$ ($\text{Complement}$-Introduction). The complement
                     of $S = \{ x : A \mid P(x) \}$ in $A$ is introduced as $A \setminus S = \{ x : A \mid \neg P(x) \}$.
                 +tex(true).
                     $$
@@ -56,7 +56,7 @@ block content
 
                 h2 Elimination
                 +tex.
-                    $\mathbf{Definition\ 2.3}$ ($\text{Complement}$-Elimination). Membership in
+                    $\mathbf{Definition\ 3.3.3}$ ($\text{Complement}$-Elimination). Membership in
                     $A \setminus S$ holds if an element is in $A$ but not in $S$, expressed as negation.
                 +tex(true).
                     $$
@@ -70,7 +70,7 @@ block content
 
                 h2 Computation
                 +tex.
-                    $\mathbf{Definition\ 2.4}$ ($\text{Complement}$-Computation). Applying
+                    $\mathbf{Definition\ 3.3.4}$ ($\text{Complement}$-Computation). Applying
                     $A \setminus S$ to an element reduces to the negation of $S$’s predicate,
                     verifiable by Z3 for concrete cases.
                 +tex(true).
@@ -83,7 +83,7 @@ block content
 
                 h2 Uniqueness
                 +tex.
-                    $\mathbf{Definition\ 2.5}$ ($\text{Complement}$-Uniqueness). The complement
+                    $\mathbf{Definition\ 3.3.5}$ ($\text{Complement}$-Uniqueness). The complement
                     $A \setminus S$ is uniquely determined by its predicate, equal to another set
                     $U$ if $\forall x : A, \neg S(x) \iff U(x)$, provable via $\text{SetEq}$.
                 +tex(true).
@@ -96,14 +96,14 @@ block content
 
                 h2 Theorems
                 +tex.
-                    $\mathbf{Theorem\ 2.6}$ (Double Complement). For a set $S : \text{Set}(A)$,
+                    $\mathbf{Theorem\ 3.3.6}$ (Double Complement). For a set $S : \text{Set}(A)$,
                     the double complement equals the original set: $A \setminus (A \setminus S) = S$.
                 +tex(true).
                     $$
                         A \setminus (A \setminus S) =_{\text{Set}(A)} S.
                     $$
                 +tex.
-                    $\mathbf{Theorem\ 2.7}$ (Measure of Complement). For a measure
+                    $\mathbf{Theorem\ 3.3.7}$ (Measure of Complement). For a measure
                     $\mu : \text{Measure}(A, \Sigma)$ with finite total measure $\mu(A)$,
                     $\mu(A \setminus S) = \mu(A) - \mu(S)$, assuming $S : \Sigma$.
                 +code.

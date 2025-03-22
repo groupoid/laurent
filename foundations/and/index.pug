@@ -32,7 +32,7 @@ block content
 
                 h2 Formation
                 +tex.
-                    $\mathbf{Definition\ 2.1}$ ($\text{And}$-Formation). Conjunction is formed over
+                    $\mathbf{Definition\ 1.5.1}$ ($\text{And}$-Formation). Conjunction is formed over
                     two propositions $P, Q : \text{Prop}$, yielding their logical "and".
                 +tex(true).
                     $$
@@ -44,7 +44,7 @@ block content
 
                 h2 Introduction
                 +tex.
-                    $\mathbf{Definition\ 2.2}$ ($\text{And}$-Introduction). Conjunction $P \land Q$
+                    $\mathbf{Definition\ 1.5.2}$ ($\text{And}$-Introduction). Conjunction $P \land Q$
                     is introduced by providing proofs of both $P$ and $Q$.
                 +tex(true).
                     $$
@@ -56,7 +56,7 @@ block content
 
                 h2 Elimination
                 +tex.
-                    $\mathbf{Definition\ 2.3}$ ($\text{And}$-Elimination). From $P \land Q$, one can
+                    $\mathbf{Definition\ 1.5.3}$ ($\text{And}$-Elimination). From $P \land Q$, one can
                     derive $P$ or $Q$ individually, reflecting classical conjunction rules.
                 +tex(true).
                     $$
@@ -72,7 +72,7 @@ block content
 
                 h2 Computation
                 +tex.
-                    $\mathbf{Definition\ 2.4}$ ($\text{And}$-Computation). Conjunction reduces to
+                    $\mathbf{Definition\ 1.5.4}$ ($\text{And}$-Computation). Conjunction reduces to
                     $\text{True}$ if both $P$ and $Q$ are $\text{True}$, otherwise $\text{False}$,
                     verifiable by Z3.
                 +tex(true).
@@ -87,26 +87,23 @@ block content
 
                 h2 Uniqueness
                 +tex.
-                    $\mathbf{Definition\ 2.5}$ ($\text{And}$-Uniqueness). As a proposition,
+                    $\mathbf{Definition\ 1.5.5}$ ($\text{And}$-Uniqueness). As a proposition,
                     $P \land Q$ is unique in $\text{Prop}$, with all proofs equal due to 0-truncation.
                 +tex(true).
                     $$
                         p, q : P \land Q \implies p =_{\text{Prop}} q.
                     $$
-                +code.
-                    let equal env ctx (And (p1, q1)) (And (p2, q2)) =
-                      equal env ctx p1 p2 && equal env ctx q1 q2
 
                 h2 Theorems
                 +tex.
-                    $\mathbf{Theorem\ 2.6}$ (Commutativity). Conjunction is commutative:
+                    $\mathbf{Theorem\ 1.5.6}$ (Commutativity). Conjunction is commutative:
                     $P \land Q = Q \land P$, provable by logical equivalence.
                 +tex(true).
                     $$
                         P \land Q =_{\text{Prop}} Q \land P.
                     $$
                 +tex.
-                    $\mathbf{Theorem\ 2.7}$ (Intersection Definition). For sets $S, T : \text{Set}(A)$,
+                    $\mathbf{Theorem\ 1.5.7}$ (Intersection Definition). For sets $S, T : \text{Set}(A)$,
                     membership in $S \cap T$ is defined as $S(x) \land T(x)$, using $\text{And}$.
                 +code.
                     let intersect_member (s : exp) (t : exp) (x : exp) =

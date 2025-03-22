@@ -32,7 +32,7 @@ block content
 
                 h2 Formation
                 +tex.
-                    $\mathbf{Definition\ 2.1}$ ($\text{SetEq}$-Formation). Set equality is a proposition
+                    $\mathbf{Definition\ 3.2.1}$ ($\text{SetEq}$-Formation). Set equality is a proposition
                     asserting that two sets $S, T : \text{Set}(A)$ are equal, defined by predicate equivalence.
                 +tex(true).
                     $$
@@ -44,7 +44,7 @@ block content
 
                 h2 Introduction
                 +tex.
-                    $\mathbf{Definition\ 2.2}$ ($\text{SetEq}$-Introduction). Equality between sets
+                    $\mathbf{Definition\ 3.2.2}$ ($\text{SetEq}$-Introduction). Equality between sets
                     $S = \{ x : A \mid P(x) \}$ and $T = \{ x : A \mid Q(x) \}$ is introduced by proving
                     $\forall x : A, P(x) \iff Q(x)$, enforced by Z3.
                 +tex(true).
@@ -57,7 +57,7 @@ block content
 
                 h2 Elimination
                 +tex.
-                    $\mathbf{Definition\ 2.3}$ ($\text{SetEq}$-Elimination). If $S =_{\text{Set}(A)} T$,
+                    $\mathbf{Definition\ 3.2.3}$ ($\text{SetEq}$-Elimination). If $S =_{\text{Set}(A)} T$,
                     then for any $a : A$, membership $S(a)$ implies $T(a)$, and vice versa, validated by Z3.
                 +tex(true).
                     $$
@@ -71,7 +71,7 @@ block content
 
                 h2 Computation
                 +tex.
-                    $\mathbf{Definition\ 2.4}$ ($\text{SetEq}$-Computation). The Z3 solver reduces
+                    $\mathbf{Definition\ 3.2.4}$ ($\text{SetEq}$-Computation). The Z3 solver reduces
                     $\text{SetEq}(S, T)$ to $\text{True}$ if $\forall x, P(x) \iff Q(x)$ is unsatisfiable
                     when negated, otherwise $\text{False}$.
                 +tex(true).
@@ -92,25 +92,23 @@ block content
 
                 h2 Uniqueness
                 +tex.
-                    $\mathbf{Definition\ 2.5}$ ($\text{SetEq}$-Uniqueness). As a proposition,
+                    $\mathbf{Definition\ 3.2.5}$ ($\text{SetEq}$-Uniqueness). As a proposition,
                     $\text{SetEq}(S, T)$ is 0-truncated; all proofs of equality are equivalent in $\text{Prop}$.
                 +tex(true).
                     $$
                         p, q : S =_{\text{Set}(A)} T \implies p =_{\text{Prop}} q.
                     $$
-                +code.
-                    (* Implicit in Prop *)
 
                 h2 Theorems
                 +tex.
-                    $\mathbf{Theorem\ 2.6}$ (Extensionality). Two sets are equal if and only if their
+                    $\mathbf{Theorem\ 3.2.6}$ (Extensionality). Two sets are equal if and only if their
                     predicates are logically equivalent, as verified by Z3 over real arithmetic.
                 +tex(true).
                     $$
                         S =_{\text{Set}(A)} T \iff \forall x : A, S(x) \iff T(x).
                     $$
                 +tex.
-                    $\mathbf{Theorem\ 2.7}$ (Z3 Soundness). If Z3 returns $\text{True}$ for
+                    $\mathbf{Theorem\ 3.2.7}$ (Z3 Soundness). If Z3 returns $\text{True}$ for
                     $\text{SetEq}(S, T)$, then $S$ and $T$ are equal in the classical sense over $\mathbb{R}$.
                 +code.
                     let test_set_eq_correct =

@@ -32,7 +32,7 @@ block content
 
                 h2 Formation
                 +tex.
-                    $\mathbf{Definition\ 3.1}$ ($\text{Or}$-Formation). Disjunction is formed over
+                    $\mathbf{Definition\ 1.6.1}$ ($\text{Or}$-Formation). Disjunction is formed over
                     two propositions $P, Q : \text{Prop}$, yielding their logical "or".
                 +tex(true).
                     $$
@@ -44,7 +44,7 @@ block content
 
                 h2 Introduction
                 +tex.
-                    $\mathbf{Definition\ 3.2}$ ($\text{Or}$-Introduction). Disjunction $P \lor Q$
+                    $\mathbf{Definition\ 1.6.2}$ ($\text{Or}$-Introduction). Disjunction $P \lor Q$
                     is introduced by providing a proof of either $P$ or $Q$.
                 +tex(true).
                     $$
@@ -56,7 +56,7 @@ block content
 
                 h2 Elimination
                 +tex.
-                    $\mathbf{Definition\ 3.3}$ ($\text{Or}$-Elimination). From $P \lor Q$ and proofs
+                    $\mathbf{Definition\ 1.6.3}$ ($\text{Or}$-Elimination). From $P \lor Q$ and proofs
                     that $P \implies R$ and $Q \implies R$, one derives $R$, reflecting classical disjunction.
                 +tex(true).
                     $$
@@ -70,7 +70,7 @@ block content
 
                 h2 Computation
                 +tex.
-                    $\mathbf{Definition\ 3.4}$ ($\text{Or}$-Computation). Disjunction reduces to
+                    $\mathbf{Definition\ 1.6.4}$ ($\text{Or}$-Computation). Disjunction reduces to
                     $\text{True}$ if either $P$ or $Q$ is $\text{True}$, verifiable by Z3.
                 +tex(true).
                     $$
@@ -85,7 +85,7 @@ block content
 
                 h2 Uniqueness
                 +tex.
-                    $\mathbf{Definition\ 3.5}$ ($\text{Or}$-Uniqueness). As a proposition,
+                    $\mathbf{Definition\ 1.6.5}$ ($\text{Or}$-Uniqueness). As a proposition,
                     $P \lor Q$ is unique in $\text{Prop}$, with all proofs equal due to 0-truncation.
                 +tex(true).
                     $$
@@ -97,14 +97,14 @@ block content
 
                 h2 Theorems
                 +tex.
-                    $\mathbf{Theorem\ 3.6}$ (Commutativity). Disjunction is commutative:
+                    $\mathbf{Theorem\ 1.6.6}$ (Commutativity). Disjunction is commutative:
                     $P \lor Q = Q \lor P$, provable by logical equivalence.
                 +tex(true).
                     $$
                         P \lor Q =_{\text{Prop}} Q \lor P.
                     $$
                 +tex.
-                    $\mathbf{Theorem\ 3.7}$ (Union Definition). For sets $S, T : \text{Set}(A)$,
+                    $\mathbf{Theorem\ 1.6.7}$ (Union Definition). For sets $S, T : \text{Set}(A)$,
                     membership in $S \cup T$ is defined as $S(x) \lor T(x)$, using $\text{Or}$.
                 +code.
                     let union_member (s : exp) (t : exp) (x : exp) =
