@@ -33,7 +33,7 @@ block content
 
                 h2 Formation
                 +tex.
-                    $\mathbf{Definition\ 1.1}$ ($\forall$-Formation). The universal quantification
+                    $\mathbf{Definition\ 1.3.1}$ ($\forall$-Formation). The universal quantification
                     type is formed over a domain $A : U$ and a body $B(x) : U$ or $\text{Prop}$,
                     representing "for all $x : A$, $B(x)$ holds."
                 +tex(true).
@@ -46,7 +46,7 @@ block content
 
                 h2 Introduction
                 +tex.
-                    $\mathbf{Definition\ 1.2}$ ($\forall$-Introduction). A term of type
+                    $\mathbf{Definition\ 1.3.2}$ ($\forall$-Introduction). A term of type
                     $\forall (x : A), B(x)$ is introduced via a lambda abstraction $\lambda x. b$,
                     where $b : B(x)$ for all $x : A$.
                 +tex(true).
@@ -59,7 +59,7 @@ block content
 
                 h2 Elimination
                 +tex.
-                    $\mathbf{Definition\ 1.3}$ ($\forall$-Elimination). Given $f : \forall (x : A), B(x)$
+                    $\mathbf{Definition\ 1.3.3}$ ($\forall$-Elimination). Given $f : \forall (x : A), B(x)$
                     and $a : A$, the application $f(a)$ yields $B(a)$.
                 +tex(true).
                     $$
@@ -71,7 +71,7 @@ block content
 
                 h2 Computation
                 +tex.
-                    $\mathbf{Definition\ 1.4}$ ($\forall$-Computation). The β-rule states that
+                    $\mathbf{Definition\ 1.3.4}$ ($\forall$-Computation). The β-rule states that
                     applying a lambda abstraction reduces to substitution.
                 +tex(true).
                     $$
@@ -84,7 +84,7 @@ block content
 
                 h2 Uniqueness
                 +tex.
-                    $\mathbf{Definition\ 1.5}$ ($\forall$-Uniqueness). The η-rule states that
+                    $\mathbf{Definition\ 1.3.5}$ ($\forall$-Uniqueness). The η-rule states that
                     any function $f$ equals its eta-expanded form.
                 +tex(true).
                     $$
@@ -97,14 +97,14 @@ block content
 
                 h2 Theorems
                 +tex.
-                    $\mathbf{Theorem\ 1.6}$ (Predicate Logic). If $\forall x : A, P(x)$ holds
+                    $\mathbf{Theorem\ 1.3.6}$ (Predicate Logic). If $\forall x : A, P(x)$ holds
                     and $a : A$, then $P(a)$ holds (modus ponens in type theory).
                 +tex(true).
                     $$
                         \forall x : A, P(x) \implies P(a).
                     $$
                 +tex.
-                    $\mathbf{Theorem\ 1.7}$ (Set Definition). Sets in this system are defined as
+                    $\mathbf{Theorem\ 1.3.7}$ (Set Definition). Sets in this system are defined as
                     $\forall$-types with a propositional body, e.g., $\{ x : \mathbb{R} \mid P(x) \}$.
                 +code.
                     let set_a = Set (Lam ("x", Real, RealIneq (Gt, Var "x", Zero)))

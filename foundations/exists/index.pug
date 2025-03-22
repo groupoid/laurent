@@ -28,7 +28,7 @@ block content
 
             h2 Formation
             +tex.
-                $\mathbf{Definition\ 2.1}$ ($\exists$-Formation, Dependent Sum). The existential
+                $\mathbf{Definition\ 1.4.1}$ ($\exists$-Formation, Dependent Sum). The existential
                 type is indexed over a type $A : U$ with a family $B(x) : \text{Prop}$, formed
                 as a 0-truncated dependent sum.
             +tex(true).
@@ -41,7 +41,7 @@ block content
 
             h2 Introduction
             +tex.
-                $\mathbf{Definition\ 2.2}$ (Witness Pair). A pair $(a, b)$ where $a : A$
+                $\mathbf{Definition\ 1.4.2}$ (Witness Pair). A pair $(a, b)$ where $a : A$
                 and $b : B(a)$ introduces a term proving $\exists (x : A), B(x)$.
             +tex(true).
                 $$
@@ -53,7 +53,7 @@ block content
 
             h2 Elimination
             +tex.
-                $\mathbf{Definition\ 2.3}$ (Projections). The projections $\text{fst}$
+                $\mathbf{Definition\ 1.4.3}$ (Projections). The projections $\text{fst}$
                 and $\text{snd}$ extract the witness and proof from an existential term.
             +tex(true).
                 $$
@@ -69,7 +69,7 @@ block content
 
             h2 Computation
             +tex.
-                $\mathbf{Definition\ 2.4}$ ($\exists$-Computation). The β-rules for projections
+                $\mathbf{Definition\ 1.4.4}$ ($\exists$-Computation). The β-rules for projections
                 reduce pairs to their components.
             +tex(true).
                 $$
@@ -83,7 +83,7 @@ block content
 
             h2 Uniqueness
             +tex.
-                $\mathbf{Definition\ 2.5}$ ($\exists$-Uniqueness). As a proposition,
+                $\mathbf{Definition\ 1.4.5}$ ($\exists$-Uniqueness). As a proposition,
                 $\exists (x : A), B(x)$ is 0-truncated, so any two proofs are equal up to
                 propositional equality.
             +tex(true).
@@ -96,14 +96,14 @@ block content
 
             h2 Theorems
             +tex.
-                $\mathbf{Theorem\ 2.6}$ (Classical Logic). If $\exists x : A, P(x)$ holds,
+                $\mathbf{Theorem\ 1.4.6}$ (Classical Logic). If $\exists x : A, P(x)$ holds,
                 there exists some $a : A$ such that $P(a)$ is true, validated by Z3 reduction.
             +tex(true).
                 $$
                     \exists x : A, P(x) \implies \text{fst}(p) : A \land P(\text{fst}(p)).
                 $$
             +tex.
-                $\mathbf{Theorem\ 2.7}$ (Axiom of Choice). If for all $x : A$ there exists
+                $\mathbf{Theorem\ 1.4.7}$ (Axiom of Choice). If for all $x : A$ there exists
                 $y : B(x)$ such that $R(x, y)$, then a choice function exists.
             +code.
                 let ac (a : exp) (b : exp) (r : exp) =

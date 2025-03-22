@@ -32,7 +32,7 @@ block content
 
                 h2 Formation
                 +tex.
-                    $\mathbf{Definition\ 4.1}$ ($\text{Prop}$-Formation). The propositional universe
+                    $\mathbf{Definition\ 1.1.1}$ ($\text{Prop}$-Formation). The propositional universe
                     classifies terms that are propositions, distinct from higher universes like $U$.
                 +tex(true).
                     $$
@@ -44,7 +44,7 @@ block content
 
                 h2 Introduction
                 +tex.
-                    $\mathbf{Definition\ 4.2}$ ($\text{Prop}$-Introduction). A proposition is introduced
+                    $\mathbf{Definition\ 1.1.2}$ ($\text{Prop}$-Introduction). A proposition is introduced
                     via logical constructs like $\text{And}$, $\text{Or}$, $\exists$, or inequalities,
                     typed as $\text{Prop}$.
                 +tex(true).
@@ -57,7 +57,7 @@ block content
 
                 h2 Elimination
                 +tex.
-                    $\mathbf{Definition\ 4.3}$ ($\text{Prop}$-Elimination). A term $p : \text{Prop}$
+                    $\mathbf{Definition\ 1.1.3}$ ($\text{Prop}$-Elimination). A term $p : \text{Prop}$
                     can be used in logical rules (e.g., modus ponens) or reduced to $\text{True}$/$\text{False}$.
                 +tex(true).
                     $$
@@ -69,7 +69,7 @@ block content
 
                 h2 Computation
                 +tex.
-                    $\mathbf{Definition\ 4.4}$ ($\text{Prop}$-Computation). Propositions reduce via
+                    $\mathbf{Definition\ 1.1.4}$ ($\text{Prop}$-Computation). Propositions reduce via
                     logical rules or Z3 verification, yielding $\text{True}$ or $\text{False}$ in decidable cases.
                 +tex(true).
                     $$
@@ -82,7 +82,7 @@ block content
 
                 h2 Uniqueness
                 +tex.
-                    $\mathbf{Definition\ 4.5}$ ($\text{Prop}$-Uniqueness). All proofs of a proposition
+                    $\mathbf{Definition\ 1.1.5}$ ($\text{Prop}$-Uniqueness). All proofs of a proposition
                     $P : \text{Prop}$ are equal, due to 0-truncation, ensuring propositional extensionality.
                 +tex(true).
                     $$
@@ -94,14 +94,14 @@ block content
 
                 h2 Theorems
                 +tex.
-                    $\mathbf{Theorem\ 4.6}$ (Classical Logic). $\text{Prop}$ supports excluded middle:
+                    $\mathbf{Theorem\ 1.1.6}$ (Classical Logic). $\text{Prop}$ supports excluded middle:
                     for any $P : \text{Prop}$, $P \lor \neg P$, aligning with Z3’s classical reasoning.
                 +tex(true).
                     $$
                         P \lor \neg P =_{\text{Prop}} \text{True}.
                     $$
                 +tex.
-                    $\mathbf{Theorem\ 4.7}$ (Set Predicate). A set $S : \text{Set}(A)$ is defined by
+                    $\mathbf{Theorem\ 1.1.7}$ (Set Predicate). A set $S : \text{Set}(A)$ is defined by
                     a predicate $P : A \rightarrow \text{Prop}$, where $S(x) : \text{Prop}$.
                 +code.
                     let set_predicate (a : exp) (p : exp) =
