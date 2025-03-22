@@ -98,10 +98,16 @@ block content
                     they agree on all sets in $\Sigma$.
                 +tex(true).
                     $$
-                        \text{Measure}(A, \Sigma) =_U \text{Measure}(A', \Sigma') \iff A =_U A' \land \Sigma =_{\text{Set}(\text{Set}(A))} \Sigma'.
+                        \text{Measure}(A, \Sigma) =_U \text{Measure}(A', \Sigma')
                     $$
                     $$
-                        \mu_1 =_{\text{Measure}(A, \Sigma)} \mu_2 \iff \forall S : \Sigma, \mu_1(S) =_{\mathbb{R}} \mu_2(S).
+                        \iff A =_U A' \land \Sigma =_{\text{Set}(\text{Set}(A))} \Sigma'.
+                    $$
+                    $$
+                        \mu_1 =_{\text{Measure}(A, \Sigma)} \mu_2
+                    $$
+                    $$
+                        \iff \forall S : \Sigma, \mu_1(S) =_{\mathbb{R}} \mu_2(S).
                     $$
                 +code.
                     let equal_measure env ctx (Mu (a1, s1, f1)) (Mu (a2, s2, f2)) =
