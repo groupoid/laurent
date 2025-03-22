@@ -107,6 +107,9 @@ block content
                     $\sup \{ a_n \mid n : \mathbb{N} \}$ exists if the sequence is bounded above.
                 +code.
                     let seq_sup (s : exp) =
-                      Sup (Set (Lam ("x", Real, Exists ("n", Nat, RealIneq (Eq, Var "x", App (s, Var "n"))))))
+                      Sup (Set (Lam ("x", Real,
+                        Exists ("n", Nat,
+                          RealIneq (Eq, Var "x",
+                            App (s, Var "n"))))))
 
 include ../../footer
