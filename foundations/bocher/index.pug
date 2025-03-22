@@ -1,0 +1,126 @@
+include ../../header
+
+html
+    head
+        meta(property='og:title'       content='BOCHNER')
+        meta(property='og:description' content='Bochner Integration')
+        meta(property='og:url'         content='https://laurent.groupoid.space/foundations/bochner/')
+
+block title
+    title BOCHNER
+
+block content
+    nav
+        <a href='../../index.html'>LAURENT</a>
+        <a href='#'>BOCHNER</a>
+    article.main
+        .exe
+            section
+                h1 BOCHNER INTEGRATION
+                span.
+        aside
+            time Published: 22 MAR 2025
+        .exe
+            section
+                +tex.
+                    $\text{Bochner}$-type defines integration over a measurable set with respect
+                    to a measure, yielding a vector in a Banach space $Vec_n$. It generalizes the
+                    Lebesgue integral to vector-valued functions and is crucial for functional
+                    analysis and PDEs.
+                +tex.
+                    In this system, $\text{Bochner}$ leverages $\text{Measure}$ and $\mu$ to
+                    formalize vector integration, building on scalar Lebesgue integration for
+                    norm integrability.
+
+                h2 Formation
+                +tex.
+                    $\mathbf{Definition\ 4.9.1}$ ($\text{Bochner}$-Formation). Bochner integration
+                    is formed over a function $f : A \to Vec_n$, a measure $\mu : \text{Measure}(A, \Sigma)$,
+                    and a Banach space $B = Vec_n$, resulting in a vector value in $Vec_n$.
+                +tex(true).
+                    $$
+                        \text{Bochner} : Vec_n =_{def} \int_A f \, d\mu.
+                    $$
+                +code.
+                    type exp =
+                      | Bochner of exp * exp * exp  (* ∫ f dμ in Vec_n *)
+
+                h2 Introduction
+                +tex.
+                    $\mathbf{Definition\ 4.9.2}$ ($\text{Bochner}$-Introduction). An integral is
+                    introduced as $\text{Bochner}(f, \mu, B)$, where $f$ is Bochner measurable,
+                    $\mu$ is a measure, and $B = Vec_n$ is a Banach space of dimension $n$.
+                +tex(true).
+                    $$
+                        \int_A f \, d\mu : Vec_n =_{def} \text{Bochner}(f, \mu, Vec_n).
+                    $$
+                +code.
+                    let vector_integral_term : exp =
+                      Lam ("f", Forall ("x", Real, Vec (Var "n", Real, Var "scalar_mult", Var "vec_plus")),
+                        Lam ("mu", Measure (Real, Set (Set Real)),
+                          Bochner (Var "f", Var "mu", Vec (Var "n", Real, Var "scalar_mult", Var "vec_plus"))))
+
+                h2 Elimination
+                +tex.
+                    $\mathbf{Definition\ 4.9.3}$ ($\text{Bochner}$-Elimination). The integral
+                    $\int_A f \, d\mu$ yields a vector in $Vec_n$, usable in vector operations or norms.
+                +tex(true).
+                    $$
+                        \int_A f \, d\mu : Vec_n
+                    $$
+                +tex.
+                    satisfies properties like
+                +tex(true).
+                    $$
+                        \left\| \int_A f \, d\mu \right\|_{Vec_n} \leq \int_A \|f\|_{Vec_n} \, d\mu.
+                    $$
+                +code.
+                    let infer env ctx (Bochner (f, mu, vec)) = vec
+
+                h2 Computation
+                +tex.
+                    $\mathbf{Definition\ 4.9.4}$ ($\text{Bochner}$-Computation). For simple cases
+                    (e.g., step functions), $\text{Bochner}$ reduces via the measure to a vector sum.
+                +tex(true).
+                    $$
+                        \int_A \left( \sum_{i=1}^n v_i \chi_{E_i} \right) \, d\mu =_{Vec_n} \sum_{i=1}^n \mu(E_i) v_i.
+                    $$
+                +code.
+                    let reduce env ctx = function
+                      | Bochner (f, Mu (_, _, Lam ("S", _, body)), vec) when is_simple f ->
+                          (* Compute ∑ μ(E_i) v_i in Vec_n *)
+                          vector_sum ctx f body
+                      | _ -> ...
+
+                h2 Uniqueness
+                +tex.
+                    $\mathbf{Definition\ 4.9.5}$ ($\text{Bochner}$-Uniqueness). The Bochner integral
+                    is unique for a given $f$, $\mu$, and $Vec_n$, determined by the measure and space.
+                +tex(true).
+                    $$
+                        \int_A f \, d\mu_1 = \int_A f \, d\mu_2 \iff \mu_1 = \mu_2.
+                    $$
+                +code.
+                    let equal env ctx (Bochner (f1, m1, v1)) (Bochner (f2, m2, v2)) =
+                      equal env ctx f1 f2 && equal env ctx m1 m2 && equal env ctx v1 v2
+
+                h2 Theorems
+                +tex.
+                    $\mathbf{Theorem\ 4.9.6}$ (Linearity). For $f, g : A \to Vec_n$ and scalars
+                    $a, b \in \mathbb{R}$,
+                    $\int_A (a f + b g) \, d\mu = a \int_A f \, d\mu + b \int_A g \, d\mu$.
+                +tex(true).
+                    $$
+                        \int_A (a f + b g) \, d\mu =_{Vec_n} a \int_A f \, d\mu + b \int_A g \, d\mu.
+                    $$
+                +tex.
+                    $\mathbf{Theorem\ 4.9.7}$ (Dominated Convergence). For a sequence $f_n : \text{Seq}(A \to Vec_n)$
+                    converging to $f$ with $\|f_n\|_{Vec_n} \leq g$ and $\int_A g \, d\mu < \infty$,
+                    $\lim_{n \to \infty} \int_A f_n \, d\mu = \int_A f \, d\mu$.
+                +code.
+                    let dom_conv_vec (fn : exp) (f : exp) (g : exp) (mu : exp) (vec : exp) =
+                      And (Limit (Seq (Lam ("n", Nat, Bochner (App (fn, Var "n"), mu, vec))), Infinity,
+                                 Bochner (f, mu, vec), True),
+                           Lebesgue (Lam ("x", Real, App (Var "norm", App (g, Var "x"))), mu, Set Real))
+
+include ../../footer
