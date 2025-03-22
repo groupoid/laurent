@@ -32,7 +32,7 @@ block content
 
                 h2 Formation
                 +tex.
-                    $\mathbf{Definition\ 5.2.1}$ ($\text{Inf}$-Formation). The infinum is defined
+                    $\mathbf{Definition\ 4.2.1}$ ($\text{Inf}$-Formation). The infinum is defined
                     over a set $S : \text{Set}(\mathbb{R})$, yielding a real number.
                 +tex(true).
                     $$
@@ -44,7 +44,7 @@ block content
 
                 h2 Introduction
                 +tex.
-                    $\mathbf{Definition\ 5.2.2}$ ($\text{Inf}$-Introduction). The infinum of a set
+                    $\mathbf{Definition\ 4.2.2}$ ($\text{Inf}$-Introduction). The infinum of a set
                     $S = \{ x : \mathbb{R} \mid P(x) \}$ is introduced as $\text{Inf}(S)$, assuming
                     $S$ is non-empty and bounded below.
                 +tex(true).
@@ -57,7 +57,7 @@ block content
 
                 h2 Elimination
                 +tex.
-                    $\mathbf{Definition\ 5.2.3}$ ($\text{Inf}$-Elimination). The infinum $\inf S$
+                    $\mathbf{Definition\ 4.2.3}$ ($\text{Inf}$-Elimination). The infinum $\inf S$
                     acts as a lower bound, provable via its defining properties.
                 +tex(true).
                     $$
@@ -72,7 +72,7 @@ block content
 
                 h2 Computation
                 +tex.
-                    $\mathbf{Definition\ 5.2.4}$ ($\text{Inf}$-Computation). The infinum is
+                    $\mathbf{Definition\ 4.2.4}$ ($\text{Inf}$-Computation). The infinum is
                     characterized as the greatest lower bound, verifiable via Z3 for specific sets.
                 +tex(true).
                     $$
@@ -83,7 +83,7 @@ block content
 
                 h2 Uniqueness
                 +tex.
-                    $\mathbf{Definition\ 5.2.5}$ ($\text{Inf}$-Uniqueness). The infinum of a set
+                    $\mathbf{Definition\ 4.2.5}$ ($\text{Inf}$-Uniqueness). The infinum of a set
                     $S$ is unique in $\mathbb{R}$, as any two greatest lower bounds are equal.
                 +tex(true).
                     $$
@@ -95,14 +95,14 @@ block content
 
                 h2 Theorems
                 +tex.
-                    $\mathbf{Theorem\ 5.2.6}$ (Completeness). Every non-empty set of real numbers
+                    $\mathbf{Theorem\ 4.2.6}$ (Completeness). Every non-empty set of real numbers
                     bounded below has an infinum in $\mathbb{R}$, by the system’s completeness.
                 +tex(true).
                     $$
                         S \neq \emptyset \land \exists M, \forall x : S, M \leq x \implies \exists \inf S.
                     $$
                 +tex.
-                    $\mathbf{Theorem\ 5.2.7}$ (Duality with Sup). For a set $S$, $\inf S = -\sup (-S)$,
+                    $\mathbf{Theorem\ 4.2.7}$ (Duality with Sup). For a set $S$, $\inf S = -\sup (-S)$,
                     where $-S = \{ -x \mid x : S \}$, linking $\text{Inf}$ and $\text{Sup}$.
                 +code.
                     let inf_sup_dual (s : exp) =

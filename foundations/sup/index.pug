@@ -32,7 +32,7 @@ block content
 
                 h2 Formation
                 +tex.
-                    $\mathbf{Definition\ 5.3.1}$ ($\text{Sup}$-Formation). The supremum is defined
+                    $\mathbf{Definition\ 4.3.1}$ ($\text{Sup}$-Formation). The supremum is defined
                     over a set $S : \text{Set}(\mathbb{R})$, yielding a real number.
                 +tex(true).
                     $$
@@ -44,7 +44,7 @@ block content
 
                 h2 Introduction
                 +tex.
-                    $\mathbf{Definition\ 5.3.2}$ ($\text{Sup}$-Introduction). The supremum of a set
+                    $\mathbf{Definition\ 4.3.2}$ ($\text{Sup}$-Introduction). The supremum of a set
                     $S = \{ x : \mathbb{R} \mid P(x) \}$ is introduced as $\text{Sup}(S)$, assuming
                     $S$ is non-empty and bounded above.
                 +tex(true).
@@ -57,7 +57,7 @@ block content
 
                 h2 Elimination
                 +tex.
-                    $\mathbf{Definition\ 5.3.3}$ ($\text{Sup}$-Elimination). The supremum $\sup S$
+                    $\mathbf{Definition\ 4.3.3}$ ($\text{Sup}$-Elimination). The supremum $\sup S$
                     serves as an upper bound, provable via its defining properties.
                 +tex(true).
                     $$
@@ -72,7 +72,7 @@ block content
 
                 h2 Computation
                 +tex.
-                    $\mathbf{Definition\ 5.3.4}$ ($\text{Sup}$-Computation). The supremum does not
+                    $\mathbf{Definition\ 4.3.4}$ ($\text{Sup}$-Computation). The supremum does not
                     reduce directly but is characterized by its least upper bound property,
                     verifiable via Z3 for concrete sets.
                 +tex(true).
@@ -84,7 +84,7 @@ block content
 
                 h2 Uniqueness
                 +tex.
-                    $\mathbf{Definition\ 5.3.5}$ ($\text{Sup}$-Uniqueness). The supremum of a set
+                    $\mathbf{Definition\ 4.3.5}$ ($\text{Sup}$-Uniqueness). The supremum of a set
                     $S$ is unique in $\mathbb{R}$, as any two least upper bounds must be equal.
                 +tex(true).
                     $$
@@ -96,14 +96,14 @@ block content
 
                 h2 Theorems
                 +tex.
-                    $\mathbf{Theorem\ 5.3.6}$ (Completeness). Every non-empty set of real numbers
+                    $\mathbf{Theorem\ 4.3.6}$ (Completeness). Every non-empty set of real numbers
                     bounded above has a supremum in $\mathbb{R}$, ensured by this system’s design.
                 +tex(true).
                     $$
                         S \neq \emptyset \land \exists M, \forall x : S, x \leq M \implies \exists \sup S.
                     $$
                 +tex.
-                    $\mathbf{Theorem\ 5.3.7}$ (Sequence Supremum). For a sequence $a : \text{Seq}(\mathbb{R})$,
+                    $\mathbf{Theorem\ 4.3.7}$ (Sequence Supremum). For a sequence $a : \text{Seq}(\mathbb{R})$,
                     $\sup \{ a_n \mid n : \mathbb{N} \}$ exists if the sequence is bounded above.
                 +code.
                     let seq_sup (s : exp) =

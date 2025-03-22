@@ -32,7 +32,7 @@ block content
 
                 h2 Formation
                 +tex.
-                    $\mathbf{Definition\ 5.1.1}$ ($\text{Seq}$-Formation). A sequence is a function
+                    $\mathbf{Definition\ 4.1.1}$ ($\text{Seq}$-Formation). A sequence is a function
                     from $\mathbb{N}$ to a type $A : U$, typically $\mathbb{R}$ or $\mathbb{C}$.
                 +tex(true).
                     $$
@@ -44,7 +44,7 @@ block content
 
                 h2 Introduction
                 +tex.
-                    $\mathbf{Definition\ 5.1.2}$ ($\text{Seq}$-Introduction). A sequence is introduced
+                    $\mathbf{Definition\ 4.1.2}$ ($\text{Seq}$-Introduction). A sequence is introduced
                     by a lambda abstraction $\lambda n. a_n$, where $a_n : A$ for each $n : \mathbb{N}$.
                 +tex(true).
                     $$
@@ -56,7 +56,7 @@ block content
 
                 h2 Elimination
                 +tex.
-                    $\mathbf{Definition\ 5.1.3}$ ($\text{Seq}$-Elimination). Evaluating a sequence
+                    $\mathbf{Definition\ 4.1.3}$ ($\text{Seq}$-Elimination). Evaluating a sequence
                     $a : \text{Seq}(A)$ at $n : \mathbb{N}$ yields the term $a_n : A$.
                 +tex(true).
                     $$
@@ -68,7 +68,7 @@ block content
 
                 h2 Computation
                 +tex.
-                    $\mathbf{Definition\ 5.1.4}$ ($\text{Seq}$-Computation). Applying a sequence
+                    $\mathbf{Definition\ 4.1.4}$ ($\text{Seq}$-Computation). Applying a sequence
                     reduces to substituting the index into the sequence body.
                 +tex(true).
                     $$
@@ -81,7 +81,7 @@ block content
 
                 h2 Uniqueness
                 +tex.
-                    $\mathbf{Definition\ 5.1.5}$ ($\text{Seq}$-Uniqueness). Two sequences
+                    $\mathbf{Definition\ 4.1.5}$ ($\text{Seq}$-Uniqueness). Two sequences
                     $a, b : \text{Seq}(A)$ are equal if they agree on all indices,
                     i.e., $\forall n : \mathbb{N}, a_n =_A b_n$.
                 +tex(true).
@@ -94,11 +94,11 @@ block content
 
                 h2 Theorems
                 +tex.
-                    $\mathbf{Theorem\ 5.1.6}$ (Pointwise Convergence). A sequence $a : \text{Seq}(A)$
+                    $\mathbf{Theorem\ 4.1.6}$ (Pointwise Convergence). A sequence $a : \text{Seq}(A)$
                     converges to $l : A$ if $\forall \varepsilon > 0, \exists N : \mathbb{N},
                     \forall n > N, |a_n - l| < \varepsilon$, formalized via $\text{Limit}$.
                 +tex.
-                    $\mathbf{Theorem\ 5.1.7}$ (Boundedness). A sequence $a : \text{Seq}(\mathbb{R})$
+                    $\mathbf{Theorem\ 4.1.7}$ (Boundedness). A sequence $a : \text{Seq}(\mathbb{R})$
                     is bounded if $\exists M : \mathbb{R}, \forall n : \mathbb{N}, |a_n| \leq M$.
                 +code.
                     let bounded_seq (s : exp) (m : exp) =
