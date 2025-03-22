@@ -26,10 +26,11 @@ block content
                     The $\text{Quotient}$ type constructs a type from a base type and an equivalence
                     relation, quotienting the base type by the relation. It is a fundamental construct
                     in type theory for defining types modulo equivalence, supporting applications like
-                    setoids and modular arithmetic. Following Lean’s quotient module, this type is
-                    formed via $\text{Quotient}$, introduced via $\text{Quot}$, and eliminated via
-                    the dependent eliminator $\text{QuotInd}$, ensuring computational and logical
-                    consistency.
+                    setoids and modular arithmetic.
+                +tex.
+                    Following Lean’s quotient module, this type is formed via $\text{Quotient}$,
+                    introduced via $\text{Quot}$, and eliminated via the dependent eliminator
+                    $\text{QuotInd}$, ensuring computational and logical consistency.
                 +tex.
                     This system assumes the quotient type is built into the core, matching Lean’s
                     design, where $\text{Quotient}$ defines the type, $\text{Quot}$ maps elements to
@@ -40,11 +41,15 @@ block content
                 h2 Formation
                 +tex.
                     $\mathbf{Definition\ 7.1.1}$ ($\text{Quotient}$-Formation). The quotient type is
-                    formed over a base type $\alpha : \text{Sort}\ u$ and a relation $r : \alpha \to
-                    \alpha \to \text{Prop}$, yielding a new type $\text{Quotient}\ \alpha\ r : \text{Sort}\ u$.
+                    formed over a base type $\alpha : U$ and a relation
+                    $r : \alpha \to \alpha \to \text{Prop}$, yielding a new type
+                    $\text{Quotient}\ \alpha\ r : U$.
                 +tex(true).
                     $$
-                        \text{Quotient} : \Pi (\alpha : \text{Sort}\ u)\ (r : \alpha \to \alpha \to \text{Prop}),\ \text{Sort}\ u.
+                        \text{Quotient} :
+                    $$
+                    $$
+                        \prod_{\alpha : U} \prod_{r : \alpha \to \alpha \to \text{Prop}} U.
                     $$
                 +code.
                     type exp =
@@ -60,25 +65,40 @@ block content
                     maps an element $a : \alpha$ to its equivalence class under $r$.
                 +tex(true).
                     $$
-                        \text{Quot} : \Pi (\alpha : \text{Sort}\ u)\ (r : \alpha \to \alpha \to \text{Prop})\ (a : \alpha),\ \text{Quotient}\ \alpha\ r.
+                        \text{Quot} :
+                    $$
+                    $$
+                        \prod_{\alpha : U} \prod_{r : \alpha \to \alpha \to \text{Prop}}
+                        \prod_{a : \alpha} \text{Quotient}\ \alpha\ r.
                     $$
                 +code.
-                    let quot_intro (alpha : exp) (r : exp) (a : exp) : exp =
-                      Quot (alpha, r, a)  (* Quot α r a *)
+                    let quot_intro (alpha : exp)
+                      (r : exp) (a : exp) : exp =
+                        Quot (alpha, r, a)
 
                 h2 Elimination
                 +tex.
-                    $\mathbf{Definition\ 7.1.3}$ ($\text{Quotient}$-Elimination). Theestradiol dependent
-                    eliminator $\text{QuotInd}$ allows proving a property $\beta : \text{Quotient}\ \alpha\ r \to \text{Prop}$
-                    for all $q : \text{Quotient}\ \alpha\ r$, given it holds for all $\text{Quot}\ \alpha\ r\ a$.
+                    $\mathbf{Definition\ 7.1.3}$ ($\text{Quotient}$-Elimination). The dependent
+                    eliminator $\text{QuotInd}$ allows proving a property
+                    $\beta : \text{Quotient}\ \alpha\ r \to \text{Prop}$ for all
+                    $q : \text{Quotient}\ \alpha\ r$, given it holds for all
+                    $\text{Quot}\ \alpha\ r\ a$.
                 +tex(true).
                     $$
-                        \text{QuotInd} : \Pi (\alpha : \text{Sort}\ u)\ \{r : \alpha \to \alpha \to \text{Prop}\}\ (\beta : \text{Quotient}\ \alpha\ r \to \text{Prop}),
-                        \ (\Pi (a : \alpha),\ \beta\ (\text{Quot}\ \alpha\ r\ a)) \to \Pi (q : \text{Quotient}\ \alpha\ r),\ \beta\ q.
+                        \text{QuotInd} :
+                    $$
+                    $$
+                        \prod_{\alpha : U} \prod_{r : \alpha \to \alpha \to \text{Prop}}
+                        \prod_{\beta : \text{Quotient}\ \alpha\ r \to \text{Prop}}
+                    $$
+                    $$
+                        \left( \prod_{a : \alpha} \beta\ (\text{Quot}\ \alpha\ r\ a) \right) \to
+                        \prod_{q : \text{Quotient}\ \alpha\ r} \beta\ q.
                     $$
                 +code.
-                    let quot_ind (alpha : exp) (r : exp) (beta : exp) (h : exp) : exp =
-                      QuotInd (alpha, r, beta, h)  (* QuotInd α r β h *)
+                    let quot_ind (alpha : exp) (r : exp)
+                      (beta : exp) (h : exp) : exp =
+                        QuotInd (alpha, r, beta, h)
 
                 h2 Computation
                 +tex.
@@ -87,7 +107,10 @@ block content
                     of the hypothesis $h$ to $a$, ensuring computational soundness.
                 +tex(true).
                     $$
-                        \text{QuotInd}\ \alpha\ r\ \beta\ h\ (\text{Quot}\ \alpha\ r\ a) =_{\beta\ (\text{Quot}\ \alpha\ r\ a)} h\ a.
+                        \text{QuotInd}\ \alpha\ r\ \beta\ h\ (\text{Quot}\ \alpha\ r\ a)
+                    $$
+                    $$
+                        =_{\beta\ (\text{Quot}\ \alpha\ r\ a)}\ h\ a.
                     $$
                 +code.
                     let reduce env ctx = function
@@ -98,15 +121,25 @@ block content
                 +tex.
                     $\mathbf{Definition\ 7.1.5}$ ($\text{Quotient}$-Uniqueness). Two quotient types
                     $\text{Quotient}\ \alpha\ r$ and $\text{Quotient}\ \alpha'\ r'$ are equal if
-                    $\alpha = \alpha'$ and $r = r'$. For terms, $\text{Quot}\ \alpha\ r\ a = \text{Quot}\ \alpha\ r\ b$
-                    if $r\ a\ b$ holds, reflecting the quotient’s identification.
+                    $\alpha = \alpha'$ and $r = r'$.
                 +tex(true).
                     $$
-                        \text{Quotient}\ \alpha\ r =_U \text{Quotient}\ \alpha'\ r' \iff \alpha =_U \alpha' \land r =_{\alpha \to \alpha \to \text{Prop}} r'.
+                        \text{Quotient}\ \alpha\ r =_U \text{Quotient}\ \alpha'\ r'
                     $$
                     $$
-                        \text{Quot}\ \alpha\ r\ a =_{\text{Quotient}\ \alpha\ r} \text{Quot}\ \alpha\ r\ b \iff r\ a\ b.
+                        \iff \alpha =_U \alpha' \land r =_{\alpha \to \alpha \to \text{Prop}} r'.
                     $$
+                +tex.
+                    For terms, $\text{Quot}\ \alpha\ r\ a = \text{Quot}\ \alpha\ r\ b$ if $r\ a\ b$
+                    holds, reflecting the quotient’s identification.
+                +tex(true).
+                    $$
+                        \text{Quot}\ \alpha\ r\ a =_{\text{Quotient}\ \alpha\ r} \text{Quot}\ \alpha\ r\ b
+                    $$
+                    $$
+                        \iff r\ a\ b.
+                    $$
+
                 +code.
                     let equal_quotient env ctx (Quotient (a1, r1)) (Quotient (a2, r2)) =
                       equal env ctx a1 a2 && equal env ctx r1 r2
@@ -114,23 +147,42 @@ block content
                 h2 Theorems
                 +tex.
                     $\mathbf{Theorem\ 7.1.6}$ (Non-Dependent Elimination). The non-dependent eliminator
-                    $\text{QuotLift}$ lifts a function $f : \alpha MAGICAL SYMBOL \to \beta$ to a function
+                    $\text{QuotLift}$ lifts a function $f : \alpha \to \beta$ to a function
                     $\text{Quotient}\ \alpha\ r \to \beta$, provided $f$ respects the relation $r$, and
                     is derivable from $\text{QuotInd}$.
+
                 +tex(true).
                     $$
-                        \text{QuotLift} : \Pi (\alpha : \text{Sort}\ u)\ \{r : \alpha \to \alpha \to \text{Prop}\}\ (\beta : \text{Sort}\ v)\ (f : \alpha \to \beta),
-                        \ (\Pi (a\ b : \alpha),\ r\ a\ b \to f\ a = f\ b) \to \text{Quotient}\ \alpha\ r \to \beta.
+                        \text{QuotLift} :
                     $$
+                    $$
+                        \prod_{\alpha : U} \prod_{r : \alpha \to \alpha \to \text{Prop}}
+                        \prod_{\beta : U} \prod_{f : \alpha \to \beta}
+                    $$
+                    $$
+                        \left( \prod_{a : \alpha} \prod_{b : \alpha} r\ a\ b \to f\ a = f\ b \right) \to
+                        \text{Quotient}\ \alpha\ r \to \beta.
+                    $$
+
                 +code.
-                    let quot_lift (alpha : exp) (r : exp) (beta : exp) (f : exp) (h : exp) : exp =
-                      QuotLift (alpha, r, beta, f, h)  (* QuotLift α r β f h *)
+                    let quot_lift (alpha : exp) (r : exp)
+                      (beta : exp) (f : exp) (h : exp) : exp =
+                        QuotLift (alpha, r, beta, f, h)
+
                 +tex.
                     $\mathbf{Theorem\ 7.1.7}$ (Soundness of Lift). The lifted function respects the
-                    equivalence relation: if $r\ a\ b$, then $\text{QuotLift}\ f\ h\ (\text{Quot}\ a) = \text{QuotLift}\ f\ h\ (\text{Quot}\ b)$.
+                    equivalence relation: if $r\ a\ b$, then
+                    $\text{QuotLift}\ f\ h\ (\text{Quot}\ a) = \text{QuotLift}\ f\ h\ (\text{Quot}\ b)$.
+
                 +tex(true).
                     $$
-                        r\ a\ b \implies \text{QuotLift}\ \alpha\ r\ \beta\ f\ h\ (\text{Quot}\ \alpha\ r\ a) =_{\beta} \text{QuotLift}\ \alpha\ r\ \beta\ f\ h\ (\text{Quot}\ \alpha\ r\ b).
+                        r\ a\ b \implies
+                    $$
+                    $$
+                        \text{QuotLift}\ \alpha\ r\ \beta\ f\ h\ (\text{Quot}\ \alpha\ r\ a) =_{\beta}
+                    $$
+                    $$
+                        \text{QuotLift}\ \alpha\ r\ \beta\ f\ h\ (\text{Quot}\ \alpha\ r\ b).
                     $$
 
 include ../../footer
