@@ -56,14 +56,17 @@ block content
                         \forall \varepsilon > 0, \exists N : \mathbb{N}, \forall n > N, |a_n - l| < \varepsilon.
                     $$
                 +code.
-                    let limit_a (a : exp) (l : exp) : exp =
-                      Limit (a, Infinity, l,
-                             Forall ("eps", Real,
-                               And (RealIneq (Gt, Var "eps", Zero),
-                                    Exists ("N", Nat,
-                                      Forall ("n", Nat,
-                                        Implies (RealIneq (Gt, NatToReal (Var "n"), NatToReal (Var "N")),
-                                                 RealIneq (Lt, RealOps (Abs, RealOps (Minus, App (a, Var "n"), l), Zero), Var "eps"))))))
+                    let limit_a : exp =
+                      Limit (Seq sequence_a, Infinity, Zero,
+                        Lam ("ε", Real,
+                          Lam ("p", RealIneq (Gt, Var "ε", Zero),
+                            Pair (RealOps (Div, One, Var "ε"),
+                              Lam ("n", Nat,
+                                Lam ("q", RealIneq (Gt, Var "n", Var "N"),
+                                  RealIneq (Lt,
+                                    RealOps (Abs,
+                                    RealOps (Minus, App (sequence_a, Var "n"),
+                                      Zero), Zero), Var "ε")))))))
 
                 h2 Elimination
                 +tex.
