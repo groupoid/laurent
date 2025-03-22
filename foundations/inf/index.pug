@@ -3,7 +3,7 @@ include ../../header
 html
     head
         meta(property='og:title'       content='INF')
-        meta(property='og:description' content='Infimum')
+        meta(property='og:description' content='Infinum')
         meta(property='og:url'         content='https://laurent.groupoid.space/foundations/inf/')
 
 block title
@@ -23,7 +23,7 @@ block content
         .exe
             section
                 +tex.
-                    $\text{Inf}$-type computes the infimum of a set of real numbers,
+                    $\text{Inf}$-type computes the infinum of a set of real numbers,
                     the greatest lower bound, critical for analysis alongside $\text{Sup}$.
                     It relies on the order completeness of $\mathbb{R}$ in this system.
                 +tex.
@@ -32,7 +32,7 @@ block content
 
                 h2 Formation
                 +tex.
-                    $\mathbf{Definition\ 5.2.1}$ ($\text{Inf}$-Formation). The infimum is defined
+                    $\mathbf{Definition\ 5.2.1}$ ($\text{Inf}$-Formation). The infinum is defined
                     over a set $S : \text{Set}(\mathbb{R})$, yielding a real number.
                 +tex(true).
                     $$
@@ -44,7 +44,7 @@ block content
 
                 h2 Introduction
                 +tex.
-                    $\mathbf{Definition\ 5.2.2}$ ($\text{Inf}$-Introduction). The infimum of a set
+                    $\mathbf{Definition\ 5.2.2}$ ($\text{Inf}$-Introduction). The infinum of a set
                     $S = \{ x : \mathbb{R} \mid P(x) \}$ is introduced as $\text{Inf}(S)$, assuming
                     $S$ is non-empty and bounded below.
                 +tex(true).
@@ -57,7 +57,7 @@ block content
 
                 h2 Elimination
                 +tex.
-                    $\mathbf{Definition\ 5.2.3}$ ($\text{Inf}$-Elimination). The infimum $\inf S$
+                    $\mathbf{Definition\ 5.2.3}$ ($\text{Inf}$-Elimination). The infinum $\inf S$
                     acts as a lower bound, provable via its defining properties.
                 +tex(true).
                     $$
@@ -69,7 +69,7 @@ block content
 
                 h2 Computation
                 +tex.
-                    $\mathbf{Definition\ 5.2.4}$ ($\text{Inf}$-Computation). The infimum is
+                    $\mathbf{Definition\ 5.2.4}$ ($\text{Inf}$-Computation). The infinum is
                     characterized as the greatest lower bound, verifiable via Z3 for specific sets.
                 +tex(true).
                     $$
@@ -80,7 +80,7 @@ block content
 
                 h2 Uniqueness
                 +tex.
-                    $\mathbf{Definition\ 5.2.5}$ ($\text{Inf}$-Uniqueness). The infimum of a set
+                    $\mathbf{Definition\ 5.2.5}$ ($\text{Inf}$-Uniqueness). The infinum of a set
                     $S$ is unique in $\mathbb{R}$, as any two greatest lower bounds are equal.
                 +tex(true).
                     $$
@@ -93,7 +93,7 @@ block content
                 h2 Theorems
                 +tex.
                     $\mathbf{Theorem\ 5.2.6}$ (Completeness). Every non-empty set of real numbers
-                    bounded below has an infimum in $\mathbb{R}$, by the system’s completeness.
+                    bounded below has an infinum in $\mathbb{R}$, by the system’s completeness.
                 +tex(true).
                     $$
                         S \neq \emptyset \land \exists M, \forall x : S, M \leq x \implies \exists \inf S.
