@@ -31,14 +31,14 @@ block content
                     This framework supports Lebesgue integration and custom measures, with evaluation tied
                     to real arithmetic and measure axioms.
                 +tex.
-                    Compared to Lean’s measure theory library (e.g., \texttt{measure\_theory.measure} in \texttt{mathlib}), 
-                    which defines measures as functions from a $\sigma$-algebra to the extended reals 
-                    $\overline{\mathbb{R}}$ with axioms encoded as typeclass constraints, our system emphasizes 
-                    a more explicit type-theoretic construction. Lean’s approach leverages its dependent type 
-                    system to integrate measures seamlessly with its calculus library, prioritizing automation 
-                    and proof reuse (e.g., for Lebesgue integrals). In contrast, our $\text{Measure}(A, \Sigma)$ 
-                    type and $\mu$ constructor offer a minimalist, MLTT-inspired design tailored for Schwartz’s 
-                    analysis, trading some of Lean’s generality and tooling for clarity in specifying custom 
+                    Compared to Lean’s measure theory library (e.g., $\texttt{measure\_theory.measure}$ in $\texttt{mathlib}$),
+                    which defines measures as functions from a $\sigma$-algebra to the extended reals
+                    $\overline{\mathbb{R}}$ with axioms encoded as typeclass constraints, our system emphasizes
+                    a more explicit type-theoretic construction. Lean’s approach leverages its dependent type
+                    system to integrate measures seamlessly with its calculus library, prioritizing automation
+                    and proof reuse (e.g., for Lebesgue integrals). In contrast, our $\text{Measure}(A, \Sigma)$
+                    type and $\mu$ constructor offer a minimalist, MLTT-inspired design tailored for Schwartz’s
+                    analysis, trading some of Lean’s generality and tooling for clarity in specifying custom
                     measures and their computational behavior.
 
                 h2 Formation
