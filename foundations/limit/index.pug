@@ -128,7 +128,10 @@ block content
                     in $\mathbb{R}$ has a limit, by completeness.
                 +code.
                     let monotone_limit (a : exp) (l : exp) =
-                      And (Forall ("n", Nat, RealIneq (Lte, App (a, Var "n"), App (a, NatOps (Plus, Var "n", One)))),
-                           Limit (a, Infinity, l, True))
+                      And (Forall ("n", Nat,
+                        RealIneq (Lte,
+                          App (a, Var "n"),
+                          App (a, NatOps (Plus, Var "n", One)))),
+                        Limit (a, Infinity, l, True))
 
 include ../../footer
