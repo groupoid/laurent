@@ -40,7 +40,7 @@ block content
 
                 h2 Formation
                 +tex.
-                    $\mathbf{Definition\ 7.1.1}$ ($\text{Quotient}$-Formation). The quotient type is
+                    $\mathbf{Definition\ 3.7.1}$ ($\text{Quotient}$-Formation). The quotient type is
                     formed over a base type $\alpha : U$ and a relation
                     $r : \alpha \to \alpha \to \text{Prop}$, yielding a new type
                     $\text{Quotient}\ \alpha\ r : U$.
@@ -60,7 +60,7 @@ block content
 
                 h2 Introduction
                 +tex.
-                    $\mathbf{Definition\ 7.1.2}$ ($\text{Quotient}$-Introduction). A term of type
+                    $\mathbf{Definition\ 3.7.2}$ ($\text{Quotient}$-Introduction). A term of type
                     $\text{Quotient}\ \alpha\ r$ is introduced by the constructor $\text{Quot}$, which
                     maps an element $a : \alpha$ to its equivalence class under $r$.
                 +tex(true).
@@ -78,7 +78,7 @@ block content
 
                 h2 Elimination
                 +tex.
-                    $\mathbf{Definition\ 7.1.3}$ ($\text{Quotient}$-Elimination). The dependent
+                    $\mathbf{Definition\ 3.7.3}$ ($\text{Quotient}$-Elimination). The dependent
                     eliminator $\text{QuotInd}$ allows proving a property
                     $\beta : \text{Quotient}\ \alpha\ r \to \text{Prop}$ for all
                     $q : \text{Quotient}\ \alpha\ r$, given it holds for all
@@ -102,7 +102,7 @@ block content
 
                 h2 Computation
                 +tex.
-                    $\mathbf{Definition\ 7.1.4}$ ($\text{Quotient}$-Computation). The application of
+                    $\mathbf{Definition\ 3.7.4}$ ($\text{Quotient}$-Computation). The application of
                     $\text{QuotInd}$ to a term $\text{Quot}\ \alpha\ r\ a$ reduces to the application
                     of the hypothesis $h$ to $a$, ensuring computational soundness.
                 +tex(true).
@@ -119,7 +119,7 @@ block content
 
                 h2 Uniqueness
                 +tex.
-                    $\mathbf{Definition\ 7.1.5}$ ($\text{Quotient}$-Uniqueness). Two quotient types
+                    $\mathbf{Definition\ 3.7.5}$ ($\text{Quotient}$-Uniqueness). Two quotient types
                     $\text{Quotient}\ \alpha\ r$ and $\text{Quotient}\ \alpha'\ r'$ are equal if
                     $\alpha = \alpha'$ and $r = r'$.
                 +tex(true).
@@ -146,7 +146,7 @@ block content
 
                 h2 Theorems
                 +tex.
-                    $\mathbf{Theorem\ 7.1.6}$ (Non-Dependent Elimination). The non-dependent eliminator
+                    $\mathbf{Theorem\ 3.7.6}$ (Non-Dependent Elimination). The non-dependent eliminator
                     $\text{QuotLift}$ lifts a function $f : \alpha \to \beta$ to a function
                     $\text{Quotient}\ \alpha\ r \to \beta$, provided $f$ respects the relation $r$, and
                     is derivable from $\text{QuotInd}$.
@@ -172,7 +172,7 @@ block content
                         QuotLift (alpha, r, beta, f, h)
 
                 +tex.
-                    $\mathbf{Theorem\ 7.1.7}$ (Non-Dependent Elimination Derivability). The non-dependent eliminator
+                    $\mathbf{Theorem\ 3.7.7}$ (Non-Dependent Elimination Derivability). The non-dependent eliminator
                     $\text{QuotLift}$ lifts a function $f : \alpha \to \beta$ to a function
                     $\text{Quotient}\ \alpha\ r \to \beta$, provided $f$ respects the relation $r$, and
                     is derivable from $\text{QuotInd}$ as follows:
@@ -192,7 +192,7 @@ block content
                          QuotInd (alpha, r, beta_prop, h_prime)
 
                 +tex.
-                    $\mathbf{Theorem\ 7.1.8}$ (Soundness of Lift). The lifted function respects the
+                    $\mathbf{Theorem\ 3.7.8}$ (Soundness of Lift). The lifted function respects the
                     equivalence relation: if $r\ a\ b$, then
                 +tex(true).
                     $$
