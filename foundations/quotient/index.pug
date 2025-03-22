@@ -172,7 +172,27 @@ block content
                         QuotLift (alpha, r, beta, f, h)
 
                 +tex.
-                    $\mathbf{Theorem\ 7.1.7}$ (Soundness of Lift). The lifted function respects the
+                    $\mathbf{Theorem\ 7.1.7}$ (Non-Dependent Elimination Derivability). The non-dependent eliminator
+                    $\text{QuotLift}$ lifts a function $f : \alpha \to \beta$ to a function
+                    $\text{Quotient}\ \alpha\ r \to \beta$, provided $f$ respects the relation $r$, and
+                    is derivable from $\text{QuotInd}$ as follows:
+
+                +tex(true).
+                    $$
+                        \text{QuotLift}\ \alpha\ r\ \beta\ f\ h =
+                    $$
+                    $$
+                        \text{QuotInd}\ \alpha\ r\ (\lambda q.\ \beta)\ (\lambda a.\ f\ a).
+                    $$
+
+                +code.
+                    let quot_lift_derivable alpha r beta f h =
+                       let beta_prop = Lam ("q", Quotient (alpha, r), beta) in
+                       let h_prime = Lam ("a", alpha, App (f, Var "a")) in
+                         QuotInd (alpha, r, beta_prop, h_prime)
+
+                +tex.
+                    $\mathbf{Theorem\ 7.1.8}$ (Soundness of Lift). The lifted function respects the
                     equivalence relation: if $r\ a\ b$, then
                 +tex(true).
                     $$
