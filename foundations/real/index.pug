@@ -43,6 +43,9 @@ block content
                         \mathbb{R} : U_0 =_{def} \text{Real}.
                     $$
                 +code.
+                    type real_ineq = Lt | Gt | Lte | Gte | Eq | Neq
+                    type real_op = Plus | Minus | Times | Div | Neg | Pow | Abs | Ln | Sin | Cos | Exp
+
                     type exp =
                       | Real (* ℝ *)
                       | RealIneq of real_ineq * exp * exp (* <, <=, >, >=, = *)
