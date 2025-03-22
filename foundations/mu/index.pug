@@ -32,7 +32,7 @@ block content
 
                 h2 Formation
                 +tex.
-                    $\mathbf{Definition\ 1.1}$ ($\mu$-Formation). A measure is formed over a base
+                    $\mathbf{Definition\ 4.2.1}$ ($\mu$-Formation). A measure is formed over a base
                     type $A : U$, a $\sigma$-algebra $\Sigma : \text{Set}(\text{Set}(A))$, and a
                     measure function $f : \text{Set}(A) \rightarrow \mathbb{R}$.
                 +tex(true).
@@ -45,7 +45,7 @@ block content
 
                 h2 Introduction
                 +tex.
-                    $\mathbf{Definition\ 1.2}$ ($\mu$-Introduction). A measure is introduced by
+                    $\mathbf{Definition\ 4.2.2}$ ($\mu$-Introduction). A measure is introduced by
                     specifying a base type $A$, a $\sigma$-algebra $\Sigma$, and a lambda function
                     $\lambda S. m(S)$ mapping sets to real numbers, satisfying measure axioms.
                 +tex(true).
@@ -60,7 +60,7 @@ block content
 
                 h2 Elimination
                 +tex.
-                    $\mathbf{Definition\ 1.3}$ ($\mu$-Elimination). Applying a measure $\mu$ to a
+                    $\mathbf{Definition\ 4.2.3}$ ($\mu$-Elimination). Applying a measure $\mu$ to a
                     set $S : \Sigma$ yields a real number $\mu(S)$, computed by the measure function.
                 +tex(true).
                     $$
@@ -72,7 +72,7 @@ block content
 
                 h2 Computation
                 +tex.
-                    $\mathbf{Definition\ 1.4}$ ($\mu$-Computation). The application of a measure
+                    $\mathbf{Definition\ 4.2.4}$ ($\mu$-Computation). The application of a measure
                     reduces to its function body with substitution, constrained by measure properties.
                 +tex(true).
                     $$
@@ -85,7 +85,7 @@ block content
 
                 h2 Uniqueness
                 +tex.
-                    $\mathbf{Definition\ 1.5}$ ($\mu$-Uniqueness). Two measures $\mu_1, \mu_2 :
+                    $\mathbf{Definition\ 4.2.5}$ ($\mu$-Uniqueness). Two measures $\mu_1, \mu_2 :
                     \text{Measure}(A, \Sigma)$ are equal if they assign the same values to all
                     sets in $\Sigma$, i.e., $\forall S : \Sigma, \mu_1(S) = \mu_2(S)$.
                 +tex(true).
@@ -97,14 +97,14 @@ block content
 
                 h2 Theorems
                 +tex.
-                    $\mathbf{Theorem\ 1.6}$ (Non-Negativity). For any measure $\mu : \text{Measure}(A, \Sigma)$
+                    $\mathbf{Theorem\ 4.2.6}$ (Non-Negativity). For any measure $\mu : \text{Measure}(A, \Sigma)$
                     and set $S : \Sigma$, $\mu(S) \geq 0$, ensured by the measure function’s definition.
                 +tex(true).
                     $$
                         \forall S : \Sigma, \mu(S) \geq 0.
                     $$
                 +tex.
-                    $\mathbf{Theorem\ 1.7}$ (Countable Additivity). If $\{ S_n \}_{n : \mathbb{N}}$
+                    $\mathbf{Theorem\ 4.2.7}$ (Countable Additivity). If $\{ S_n \}_{n : \mathbb{N}}$
                     is a countable collection of disjoint sets in $\Sigma$, then
                     $\mu(\bigcup_n S_n) = \sum_n \mu(S_n)$, assumed in the measure function.
                 +tex(true).

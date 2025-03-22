@@ -33,7 +33,7 @@ block content
 
                 h2 Formation
                 +tex.
-                    $\mathbf{Definition\ 1.1}$ ($\text{Sum}$-Formation). An infinite sum is formed
+                    $\mathbf{Definition\ 5.5.1}$ ($\text{Sum}$-Formation). An infinite sum is formed
                     over a sequence $a : \text{Seq}(\mathbb{R})$ or an indexed family
                     $\{ a_i \}_{i : I} : I \rightarrow \mathbb{R}$, yielding a real number if convergent.
                 +tex(true).
@@ -46,7 +46,7 @@ block content
 
                 h2 Introduction
                 +tex.
-                    $\mathbf{Definition\ 1.2}$ ($\text{Sum}$-Introduction). The infinite sum is
+                    $\mathbf{Definition\ 5.5.2}$ ($\text{Sum}$-Introduction). The infinite sum is
                     introduced as $\sum_{n : \mathbb{N}} a_n$, the limit of the sequence of partial
                     sums $s_n = a_0 + \cdots + a_{n-1}$, or over a general index $I$.
                 +tex(true).
@@ -59,7 +59,7 @@ block content
 
                 h2 Elimination
                 +tex.
-                    $\mathbf{Definition\ 1.3}$ ($\text{Sum}$-Elimination). The value of
+                    $\mathbf{Definition\ 5.5.3}$ ($\text{Sum}$-Elimination). The value of
                     $\sum_{i} a_i$ is the real number $l$ if the series converges, usable in
                     further computations or inequalities.
                 +tex(true).
@@ -69,7 +69,7 @@ block content
 
                 h2 Computation
                 +tex.
-                    $\mathbf{Definition\ 1.4}$ ($\text{Sum}$-Computation). The infinite sum reduces
+                    $\mathbf{Definition\ 5.5.4}$ ($\text{Sum}$-Computation). The infinite sum reduces
                     to its limit when convergent, characterized by partial sums and verifiable by Z3
                     for specific sequences (e.g., geometric series).
                 +tex(true).
@@ -79,7 +79,7 @@ block content
 
                 h2 Uniqueness
                 +tex.
-                    $\mathbf{Definition\ 1.5}$ ($\text{Sum}$-Uniqueness). The infinite sum
+                    $\mathbf{Definition\ 5.5.5}$ ($\text{Sum}$-Uniqueness). The infinite sum
                     $\sum_{i} a_i$ is unique in $\mathbb{R}$ if it converges, as the limit of
                     partial sums is well-defined.
                 +tex(true).
@@ -92,14 +92,14 @@ block content
 
                 h2 Theorems
                 +tex.
-                    $\mathbf{Theorem\ 1.6}$ (Absolute Convergence). If $\sum_{n} |a_n|$ converges,
+                    $\mathbf{Theorem\ 5.5.6}$ (Absolute Convergence). If $\sum_{n} |a_n|$ converges,
                     then $\sum_{n} a_n$ converges absolutely, ensuring a real limit.
                 +tex(true).
                     $$
                         \sum_{n} |a_n| < \infty \implies \exists l, \sum_{n} a_n = l.
                     $$
                 +tex.
-                    $\mathbf{Theorem\ 1.7}$ (Countable Additivity). For a measure
+                    $\mathbf{Theorem\ 5.5.7}$ (Countable Additivity). For a measure
                     $\mu : \text{Measure}(A, \Sigma)$ and a countable disjoint family
                     $\{ S_n \}_{n : \mathbb{N}} \subseteq \Sigma$, $\mu(\bigcup_{n} S_n) = \sum_{n} \mu(S_n)$.
                 +code.

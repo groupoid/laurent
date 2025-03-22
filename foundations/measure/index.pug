@@ -32,7 +32,7 @@ block content
 
                 h2 Formation
                 +tex.
-                    $\mathbf{Definition\ 2.1}$ ($\text{Measure}$-Formation). The measure type is
+                    $\mathbf{Definition\ 4.1.1}$ ($\text{Measure}$-Formation). The measure type is
                     formed over a base type $A : U$ and a $\sigma$-algebra $\Sigma : \text{Set}(\text{Set}(A))$,
                     classifying measure functions.
                 +tex(true).
@@ -45,7 +45,7 @@ block content
 
                 h2 Introduction
                 +tex.
-                    $\mathbf{Definition\ 2.2}$ ($\text{Measure}$-Introduction). A measure type is
+                    $\mathbf{Definition\ 4.1.2}$ ($\text{Measure}$-Introduction). A measure type is
                     introduced by constructing a measure $\mu(A, \Sigma, f)$, where $f$ maps sets
                     in $\Sigma$ to $\mathbb{R}$, satisfying measure axioms.
                 +tex(true).
@@ -58,7 +58,7 @@ block content
 
                 h2 Elimination
                 +tex.
-                    $\mathbf{Definition\ 2.3}$ ($\text{Measure}$-Elimination). A term of type
+                    $\mathbf{Definition\ 4.1.3}$ ($\text{Measure}$-Elimination). A term of type
                     $\text{Measure}(A, \Sigma)$ can be used to define integrals or evaluate sets,
                     typically via a $\mu$ constructor.
                 +tex(true).
@@ -72,7 +72,7 @@ block content
 
                 h2 Computation
                 +tex.
-                    $\mathbf{Definition\ 2.4}$ ($\text{Measure}$-Computation). The type
+                    $\mathbf{Definition\ 4.1.4}$ ($\text{Measure}$-Computation). The type
                     $\text{Measure}(A, \Sigma)$ reduces to its constituent parts when constructing
                     specific measures, with no direct term-level reduction.
                 +tex(true).
@@ -85,7 +85,7 @@ block content
 
                 h2 Uniqueness
                 +tex.
-                    $\mathbf{Definition\ 2.5}$ ($\text{Measure}$-Uniqueness). Two measure types
+                    $\mathbf{Definition\ 4.1.5}$ ($\text{Measure}$-Uniqueness). Two measure types
                     $\text{Measure}(A, \Sigma)$ and $\text{Measure}(A', \Sigma')$ are equal if
                     $A = A'$ and $\Sigma = \Sigma'$, ensuring unique measurable spaces.
                 +tex(true).
@@ -98,14 +98,14 @@ block content
 
                 h2 Theorems
                 +tex.
-                    $\mathbf{Theorem\ 2.6}$ (Measurable Space). $\text{Measure}(A, \Sigma)$ defines
+                    $\mathbf{Theorem\ 4.1.6}$ (Measurable Space). $\text{Measure}(A, \Sigma)$ defines
                     a measurable space if $\Sigma$ is a $\sigma$-algebra over $A$, supporting integration.
                 +tex(true).
                     $$
                         \text{is_sigma_algebra}(\Sigma) \implies \text{Measure}(A, \Sigma) \text{ is valid}.
                     $$
                 +tex.
-                    $\mathbf{Theorem\ 2.7}$ (Lebesgue Measure Typing). The Lebesgue measure over
+                    $\mathbf{Theorem\ 4.1.7}$ (Lebesgue Measure Typing). The Lebesgue measure over
                     $\mathbb{R}$ is typed as $\text{Measure}(\mathbb{R}, \text{Power}(\text{Set}(\mathbb{R})))$.
                 +code.
                     let lebesgue_type = Measure (Real, Power (Set Real))

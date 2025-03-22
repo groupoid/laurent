@@ -32,7 +32,7 @@ block content
 
                 h2 Formation
                 +tex.
-                    $\mathbf{Definition\ 1.1}$ ($\text{Limit}$-Formation). A limit is a proposition
+                    $\mathbf{Definition\ 5.4.1}$ ($\text{Limit}$-Formation). A limit is a proposition
                     asserting that a sequence $a : \text{Seq}(A)$ converges to a value $l : A$
                     as the index approaches infinity or another point.
                 +tex(true).
@@ -45,7 +45,7 @@ block content
 
                 h2 Introduction
                 +tex.
-                    $\mathbf{Definition\ 1.2}$ ($\text{Limit}$-Introduction). A limit is introduced
+                    $\mathbf{Definition\ 5.4.2}$ ($\text{Limit}$-Introduction). A limit is introduced
                     by proving that for all $\varepsilon > 0$, there exists an $N : \mathbb{N}$ such
                     that for all $n > N$, $|a_n - l| < \varepsilon$, forming a propositional term.
                 +tex(true).
@@ -64,7 +64,7 @@ block content
 
                 h2 Elimination
                 +tex.
-                    $\mathbf{Definition\ 1.3}$ ($\text{Limit}$-Elimination). If $\lim_{n \to \infty} a_n = l$,
+                    $\mathbf{Definition\ 5.4.3}$ ($\text{Limit}$-Elimination). If $\lim_{n \to \infty} a_n = l$,
                     then $l$ can be used as the limiting value in further propositions or computations.
                 +tex(true).
                     $$
@@ -76,7 +76,7 @@ block content
 
                 h2 Computation
                 +tex.
-                    $\mathbf{Definition\ 1.4}$ ($\text{Limit}$-Computation). The limit proposition
+                    $\mathbf{Definition\ 5.4.4}$ ($\text{Limit}$-Computation). The limit proposition
                     is verified by Z3, reducing to $\text{True}$ if the $\varepsilon$-$N$ condition holds,
                     otherwise $\text{False}$.
                 +tex(true).
@@ -89,7 +89,7 @@ block content
 
                 h2 Uniqueness
                 +tex.
-                    $\mathbf{Definition\ 1.5}$ ($\text{Limit}$-Uniqueness). The limit of a sequence
+                    $\mathbf{Definition\ 5.4.5}$ ($\text{Limit}$-Uniqueness). The limit of a sequence
                     $a : \text{Seq}(A)$ is unique in $A$ (e.g., $\mathbb{R}$), as any two limits must be equal.
                 +tex(true).
                     $$
@@ -101,7 +101,7 @@ block content
 
                 h2 Theorems
                 +tex.
-                    $\mathbf{Theorem\ 1.6}$ (Cauchy Criterion). A sequence $a : \text{Seq}(\mathbb{R})$
+                    $\mathbf{Theorem\ 5.4.6}$ (Cauchy Criterion). A sequence $a : \text{Seq}(\mathbb{R})$
                     converges if and only if it is Cauchy, i.e., $\forall \varepsilon > 0, \exists N,
                     \forall m, n > N, |a_m - a_n| < \varepsilon$.
                 +tex(true).
@@ -109,7 +109,7 @@ block content
                         \exists l, \lim_{n \to \infty} a_n = l \iff \forall \varepsilon > 0, \exists N, \forall m, n > N, |a_m - a_n| < \varepsilon.
                     $$
                 +tex.
-                    $\mathbf{Theorem\ 1.7}$ (Limit of Bounded Monotone). Every bounded, monotone sequence
+                    $\mathbf{Theorem\ 5.4.7}$ (Limit of Bounded Monotone). Every bounded, monotone sequence
                     in $\mathbb{R}$ has a limit, by completeness.
                 +code.
                     let monotone_limit (a : exp) (l : exp) =
