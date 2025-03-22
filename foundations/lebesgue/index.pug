@@ -65,7 +65,13 @@ block content
                     $\int_S f \, d\mu$ yields a real number, usable in inequalities or further computations.
                 +tex(true).
                     $$
-                        \int_S f \, d\mu : \mathbb{R} \text{ satisfies properties like } \int_S f \, d\mu \geq 0 \text{ if } f \geq 0.
+                        \int_S f \, d\mu : \mathbb{R}
+                    $$
+                +tex.
+                    satisfies properties like
+                +tex(true).
+                    $$
+                        \int_S f \, d\mu \geq 0 \text{ if } f \geq 0.
                     $$
                 +code.
                     let infer env ctx (Lebesgue (f, mu, s)) = Real
