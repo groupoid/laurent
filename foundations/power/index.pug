@@ -85,7 +85,10 @@ block content
                     $\forall S : \text{Set}(A), S \in \mathcal{P}(A) \iff S \in P$.
                 +tex(true).
                     $$
-                        \mathcal{P}(A) =_{\text{Set}(\text{Set}(A))} P \iff \forall S, (S \subseteq A \iff S \in P).
+                        \mathcal{P}(A) =_{\text{Set}(\text{Set}(A))} P 
+                    $$
+                    $$
+                        \iff \forall S, (S \subseteq A \iff S \in P).
                     $$
                 +code.
                     let equal env ctx (Power a1) (Power a2) =
