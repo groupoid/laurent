@@ -103,6 +103,9 @@ block content
                     where $-S = \{ -x \mid x : S \}$, linking $\text{Inf}$ and $\text{Sup}$.
                 +code.
                     let inf_sup_dual (s : exp) =
-                      RealOps (Neg, Sup (Set (Lam ("x", Real, Exists ("y", Real, And (App (s, Var "y"), RealIneq (Eq, Var "x", RealOps (Neg, Var "y", Zero))))))))
+                      RealOps (Neg, Sup (Set (Lam ("x", Real,
+                        Exists ("y", Real, And (App (s, Var "y"),
+                          RealIneq (Eq, Var "x",
+                            RealOps (Neg, Var "y", Zero))))))))
 
 include ../../footer
