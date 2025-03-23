@@ -49,4 +49,9 @@ let () =
   let p5 = [] in
   let p6 = [{ coeff = 0; vars = [] }] in
   Printf.printf "[] = 0: %b (%s = %s)\n"
-    (equal p5 p6) (poly_to_string (normalize p5)) (poly_to_string (normalize p6))
+    (equal p5 p6) (poly_to_string (normalize p5)) (poly_to_string (normalize p6));
+
+  let p7 = [{ coeff = 34; vars = []}; {coeff=2; vars = [("x", 1)] }; { coeff = -1; vars = [] }; { coeff = 12; vars = [] };] in
+  let p8 = [{ coeff = 1; vars = [("x", 1)] }; { coeff = 46; vars = [] }] in
+  Printf.printf "34 + 2 * x − x + 12: %b (%s = %s)\n"
+    (equal p1 p2) (poly_to_string (normalize p7)) (poly_to_string (normalize p8))
