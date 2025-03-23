@@ -1,4 +1,7 @@
-(* ring.ml *)
+(* Copyright (c) 2025 Groupoid Infinity
+
+   $ ocamlopt -o ring ring.ml
+*)
 
 type monomial = { coeff : int; vars : (string * int) list }
 type poly = monomial list

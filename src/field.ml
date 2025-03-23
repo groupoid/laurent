@@ -1,8 +1,16 @@
+(* Copyright (c) 2025 Groupoid Infinity
+
+   $ ocamlfind ocamlc -o field -package num -linkpkg field.ml
+*)
+
 open Num
 
 type monomial = { coeff : num; vars : (string * int) list }
 type poly = monomial list
 type expr = Poly of poly | Frac of poly * poly
+
+
+let (//) n d : num = Num.div_num n d
 
 (* Multiply two monomials *)
 let mul_monomial m1 m2 =
@@ -56,7 +64,7 @@ let simplify = function
       else
         match n', d' with
         | [m1], [m2] ->
-            let coeff = Num.quo_num m1.coeff m2.coeff in
+            let coeff = m1.coeff // m2.coeff in
             let vars = all_vars m1 m2 in
             let exps = List.map (fun v -> (v, get_exp v m1.vars - get_exp v m2.vars)) vars in
             let num_vars = List.filter (fun (v, e) -> e > 0) exps in
@@ -126,4 +134,36 @@ let () =
   let e8 = Frac ([{ coeff = num_of_int 1; vars = [("x", 2)] }], [{ coeff = num_of_int 1; vars = [("y", 1)] }]) in
   let e9 = Frac ([{ coeff = num_of_int 1; vars = [("x", 1)] }; { coeff = num_of_int 1; vars = [] }],
                  [{ coeff = num_of_int 1; vars = [("y", 2)] }]) in
-  Printf.printf "x^2/y + (x + 1)/y^2 = %s\n" (string_of_expr (add_expr e8 e9))
+  Printf.printf "x^2/y + (x + 1)/y^2 = %s\n" (string_of_expr (add_expr e8 e9));
+
+  let p1 = Poly [{coeff=num_of_int 1; vars=[("x",1)]}; {coeff=num_of_int 1; vars=[("y",1)]}] in
+  let p2 = Poly [{coeff=num_of_int 2; vars=[("x",1)]}; {coeff=num_of_int 3; vars=[("y",1)]}] in
+  Printf.printf "x + y + (2x + 3y) = %s\n" (string_of_expr (add_expr p1 p2));
+
+  let p = Poly [{coeff=num_of_int 1; vars=[("x",1)]}] in
+  let f = Frac ([{coeff=num_of_int 1; vars=[]}], [{coeff=num_of_int 1; vars=[("y",1)]}]) in
+  Printf.printf "x + 1/y = %s\n" (string_of_expr (add_expr p f));
+
+  let f1 = Frac ([{coeff=num_of_int 1; vars=[]}], [{coeff=num_of_int 1; vars=[("x",1)]}]) in
+  let f2 = Frac ([{coeff=num_of_int (-1); vars=[]}], [{coeff=num_of_int 1; vars=[("x",1)]}]) in
+  Printf.printf "1/x + (-1/x) = %s\n" (string_of_expr (add_expr f1 f2));
+
+  let f = Frac ([], [{coeff=num_of_int 1; vars=[("x",1)]}]) in
+  Printf.printf "0/x = %s\n" (string_of_expr (simplify f));
+
+  let f1 = Frac ([{coeff=num_of_int 2; vars=[]}], [{coeff=num_of_int 3; vars=[]}]) in
+  let f2 = Frac ([{coeff=num_of_int 1; vars=[]}], [{coeff=num_of_int 2; vars=[]}]) in
+  Printf.printf "2/3 + 1/2 = %s\n" (string_of_expr (add_expr f1 f2));
+
+  let f = Frac ([{coeff=num_of_int 3; vars=[("x",1); ("y",1)]}],
+                [{coeff=num_of_int 6; vars=[("x",2); ("y",2)]}]) in
+  Printf.printf "3xy / (6x^2 y^2) = %s\n" (string_of_expr (simplify f));
+
+  let f1 = Frac ([{coeff=num_of_int (-1); vars=[("x",1)]}], [{coeff=num_of_int 1; vars=[("y",1)]}]) in
+  let f2 = Frac ([{coeff=num_of_int 1; vars=[("x",1)]}], [{coeff=num_of_int (-1); vars=[("y",1)]}]) in
+  Printf.printf "-x/y + x/(-y) = %s\n" (string_of_expr (add_expr f1 f2));
+
+  let f = Frac ([{coeff=num_of_int 2; vars=[("x",2); ("y",1)]}],
+              [{coeff=num_of_int 2; vars=[("x",2); ("y",1)]}]) in
+  Printf.printf "2x^2 y / (2x^2 y) = %s\n" (string_of_expr (simplify f));
+
