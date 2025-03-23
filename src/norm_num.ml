@@ -51,7 +51,7 @@ let rec norm_num (e : expr) : result =
       | Div ->
           (match r1, r2 with
            | RNum n1, RNum n2 ->
-               if eq_num n2 (num_of_int 0) then failwith "Division by zero"
+               if eq_num n2 (num_of_int 0) then raise (Failure "Division by zero")
                else RNum (n1 // n2)
            | _ -> RExpr (Op (Div, expr_of_result r1, expr_of_result r2)))
       | Pow ->
@@ -71,7 +71,7 @@ let rec norm_num (e : expr) : result =
       | Ln ->
           (match r1 with
            | RNum n1 ->
-               if le_num n1 (num_of_int 0) then failwith "Log of non-positive number"
+               if le_num n1 (num_of_int 0) then raise (Failure "Log of non-positive number")
                else RNum (num_of_string (Printf.sprintf "%.0f" (log (float_of_num n1))))
            | _ -> RExpr (Op (Ln, expr_of_result r1, Num (num_of_int 1))))
       | Sin ->
@@ -124,12 +124,10 @@ let () =
     Op (Exp, Num (num_of_int 0), Num (num_of_int 1));
     Op (Plus, Var "x", Num (num_of_int 1));
     Op (Ln, Var "x", Num (num_of_int 1));
-(*    (try norm_num (Op (Div, Num (num_of_int 1), Num (num_of_int 0))) |> string_of_result
-     with Failure msg -> "Error: " ^ msg);
-    (try norm_num (Op (Ln, Num (num_of_int 0), Num (num_of_int 1))) |> string_of_result
-     with Failure msg -> "Error: " ^ msg) *)
+    Op (Ln, Num (num_of_int 0), Num (num_of_int 1));
+    Op (Div, Num (num_of_int 1), Num (num_of_int 0));
   ] in
   List.iter (fun e ->
-    let result = norm_num e in
-    Printf.printf "%s = %s\n" (string_of_expr e) (string_of_result result))
+    try Printf.printf "%s = %s\n" (string_of_expr e) (string_of_result (norm_num e))
+    with Failure x -> Printf.printf "Error: %s\n" x)
     tests
