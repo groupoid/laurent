@@ -23,30 +23,30 @@ block content
         .exe
             section
                 +tex.
-                    The $\text{Quotient}$ type constructs a type from a base type and an equivalence
+                    The $\mathbf{-/\hspace{-1mm}\sim}$ type constructs a type from a base type and an equivalence
                     relation, quotienting the base type by the relation. It is a fundamental construct
                     in type theory for defining types modulo equivalence, supporting applications like
                     setoids and modular arithmetic.
                 +tex.
-                    Following Lean’s quotient module, this type is formed via $\text{Quotient}$,
+                    Following Lean’s quotient module, this type is formed via $\mathbf{-/\hspace{-1mm}\sim}$,
                     introduced via $\text{Quot}$, and eliminated via the dependent eliminator
-                    $\text{QuotInd}$, ensuring computational and logical consistency.
+                    $\text{Ind}_Q$, ensuring computational and logical consistency.
                 +tex.
                     This system assumes the quotient type is built into the core, matching Lean’s
-                    design, where $\text{Quotient}$ defines the type, $\text{Quot}$ maps elements to
-                    equivalence classes, and $\text{QuotInd}$ provides the dependent elimination
-                    principle. The non-dependent eliminator $\text{QuotLift}$ is derivable from
-                    $\text{QuotInd}$.
+                    design, where $\mathbf{-/\hspace{-1mm}\sim}$ defines the type, $\text{Quot}$ maps elements to
+                    equivalence classes, and $\text{Ind}_Q$ provides the dependent elimination
+                    principle. The non-dependent eliminator $\text{Lift}_Q$ is derivable from
+                    $\text{Ind}_Q$.
 
                 h2 Formation
                 +tex.
-                    $\mathbf{Definition\ 3.7.1}$ ($\text{Quotient}$-Formation). The quotient type is
+                    $\mathbf{Definition\ 3.7.1}$ ($\mathbf{-/\hspace{-1mm}\sim}$-Formation). The quotient type is
                     formed over a base type $\alpha : U$ and a relation
                     $r : \alpha \to \alpha \to \text{Prop}$, yielding a new type
-                    $\text{Quotient}\ \alpha\ r : U$.
+                    $\mathbf{\alpha/r} : U$.
                 +tex(true).
                     $$
-                        \text{Quotient} :
+                        \mathbf{-/\hspace{-1mm}\sim} :
                     $$
                     $$
                         \prod_{\alpha : U} \prod_{r : \alpha \to \alpha \to \text{Prop}} U.
@@ -60,8 +60,8 @@ block content
 
                 h2 Introduction
                 +tex.
-                    $\mathbf{Definition\ 3.7.2}$ ($\text{Quotient}$-Introduction). A term of type
-                    $\text{Quotient}\ \alpha\ r$ is introduced by the constructor $\text{Quot}$, which
+                    $\mathbf{Definition\ 3.7.2}$ ($\text{Quot}$-Introduction). A term of type
+                    $\mathbf{\alpha/r}$ is introduced by the constructor $\text{Quot}$, which
                     maps an element $a : \alpha$ to its equivalence class under $r$.
                 +tex(true).
                     $$
@@ -69,7 +69,7 @@ block content
                     $$
                     $$
                         \prod_{\alpha : U} \prod_{r : \alpha \to \alpha \to \text{Prop}}
-                        \prod_{a : \alpha} \text{Quotient}\ \alpha\ r.
+                        \prod_{a : \alpha} \mathbf{\alpha/r}
                     $$
                 +code.
                     let quot_intro (alpha : exp)
@@ -78,10 +78,10 @@ block content
 
                 h2 Elimination
                 +tex.
-                    $\mathbf{Definition\ 3.7.3}$ ($\text{Quotient}$-Elimination). The dependent
-                    eliminator $\text{QuotInd}$ allows proving a property
-                    $\beta : \text{Quotient}\ \alpha\ r \to \text{Prop}$ for all
-                    $q : \text{Quotient}\ \alpha\ r$, given it holds for all
+                    $\mathbf{Definition\ 3.7.3}$ ($\text{Ind}_Q$-Elimination). The dependent
+                    eliminator $\text{Ind}_Q$ allows proving a property
+                    $\beta : \mathbf{\alpha/r} \to \text{Prop}$ for all
+                    $q : \mathbf{\alpha/r}$, given it holds for all
                     $\text{Quot}\ \alpha\ r\ a$.
                 +tex(true).
                     $$
@@ -89,11 +89,11 @@ block content
                     $$
                     $$
                         \prod_{\alpha : U} \prod_{r : \alpha \to \alpha \to \text{Prop}}
-                        \prod_{\beta : \text{Quotient}\ \alpha\ r \to \text{Prop}}
+                        \prod_{\beta : \mathbf{\alpha/r} \to \text{Prop}}
                     $$
                     $$
                         \left( \prod_{a : \alpha} \beta\ (\text{Quot}\ \alpha\ r\ a) \right) \to
-                        \prod_{q : \text{Quotient}\ \alpha\ r} \beta\ q.
+                        \prod_{q : \mathbf{\alpha/r}} \beta\ q.
                     $$
                 +code.
                     let quot_ind (alpha : exp) (r : exp)
@@ -107,7 +107,7 @@ block content
                     of the hypothesis $h$ to $a$, ensuring computational soundness.
                 +tex(true).
                     $$
-                        \text{QuotInd}\ \alpha\ r\ \beta\ h\ (\text{Quot}\ \alpha\ r\ a)
+                        \text{Ind}_Q\ \alpha\ r\ \beta\ h\ (\text{Quot}\ \alpha\ r\ a)
                     $$
                     $$
                         =_{\beta\ (\text{Quot}\ \alpha\ r\ a)}\ h\ a.
@@ -120,11 +120,11 @@ block content
                 h2 Uniqueness
                 +tex.
                     $\mathbf{Definition\ 3.7.5}$ ($\text{Quotient}$-Uniqueness). Two quotient types
-                    $\text{Quotient}\ \alpha\ r$ and $\text{Quotient}\ \alpha'\ r'$ are equal if
+                    $\mathbf{\alpha/r}$ and $\mathbf{\alpha'/r'}$ are equal if
                     $\alpha = \alpha'$ and $r = r'$.
                 +tex(true).
                     $$
-                        \text{Quotient}\ \alpha\ r =_U \text{Quotient}\ \alpha'\ r'
+                        \mathbf{\alpha/r} =_U \mathbf{\alpha'/r'}
                     $$
                     $$
                         \iff \alpha =_U \alpha' \land r =_{\alpha \to \alpha \to \text{Prop}} r'.
@@ -134,7 +134,7 @@ block content
                     holds, reflecting the quotient’s identification.
                 +tex(true).
                     $$
-                        \text{Quot}\ \alpha\ r\ a =_{\text{Quotient}\ \alpha\ r} \text{Quot}\ \alpha\ r\ b
+                        \text{Quot}\ \alpha\ r\ a =_{\mathbf{\alpha/r}} \text{Quot}\ \alpha\ r\ b
                     $$
                     $$
                         \iff r\ a\ b.
@@ -147,9 +147,9 @@ block content
                 h2 Theorems
                 +tex.
                     $\mathbf{Theorem\ 3.7.6}$ (Non-Dependent Elimination). The non-dependent eliminator
-                    $\text{QuotLift}$ lifts a function $f : \alpha \to \beta$ to a function
-                    $\text{Quotient}\ \alpha\ r \to \beta$, provided $f$ respects the relation $r$, and
-                    is derivable from $\text{QuotInd}$.
+                    $\text{Lift}_Q$ lifts a function $f : \alpha \to \beta$ to a function
+                    $\mathbf{\alpha/r} \to \beta$, provided $f$ respects the relation $r$, and
+                    is derivable from $\text{Ind}_Q$.
 
                 +tex(true).
                     $$
@@ -163,7 +163,7 @@ block content
                         \left( \prod_{a : \alpha} \prod_{b : \alpha} r\ a\ b \to f\ a = f\ b \right) \to
                     $$
                     $$
-                        \text{Quotient}\ \alpha\ r \to \beta.
+                        \mathbf{\alpha/r} \to \beta.
                     $$
 
                 +code.
@@ -173,16 +173,16 @@ block content
 
                 +tex.
                     $\mathbf{Theorem\ 3.7.7}$ (Non-Dependent Elimination Derivability). The non-dependent eliminator
-                    $\text{QuotLift}$ lifts a function $f : \alpha \to \beta$ to a function
-                    $\text{Quotient}\ \alpha\ r \to \beta$, provided $f$ respects the relation $r$, and
-                    is derivable from $\text{QuotInd}$ as follows:
+                    $\text{Lift}_Q$ lifts a function $f : \alpha \to \beta$ to a function
+                    $\mathbf{\alpha/r} \to \beta$, provided $f$ respects the relation $r$, and
+                    is derivable from $\text{Ind}_Q$ as follows:
 
                 +tex(true).
                     $$
-                        \text{QuotLift}\ \alpha\ r\ \beta\ f\ h =
+                        \text{Lift}_Q\ \alpha\ r\ \beta\ f\ h =
                     $$
                     $$
-                        \text{QuotInd}\ \alpha\ r\ (\lambda q.\ \beta)\ (\lambda a.\ f\ a).
+                        \text{Ind}_Q\ \alpha\ r\ (\lambda q.\ \beta)\ (\lambda a.\ f\ a).
                     $$
 
                 +code.
@@ -196,10 +196,10 @@ block content
                     equivalence relation: if $r\ a\ b$, then
                 +tex(true).
                     $$
-                        \text{QuotLift}\ f\ h\ (\text{Quot}\ a) =
+                        \text{Lift}_Q\ f\ h\ (\text{Quot}\ a) =
                     $$
                     $$
-                        \text{QuotLift}\ f\ h\ (\text{Quot}\ b).
+                        \text{Lift}_Q\ f\ h\ (\text{Quot}\ b).
                     $$
 
                 +tex(true).
@@ -207,10 +207,10 @@ block content
                         r\ a\ b \implies
                     $$
                     $$
-                        \text{QuotLift}\ \alpha\ r\ \beta\ f\ h\ (\text{Quot}\ \alpha\ r\ a) =_{\beta}
+                        \text{Lift}_Q\ \alpha\ r\ \beta\ f\ h\ (\text{Quot}\ \alpha\ r\ a) =_{\beta}
                     $$
                     $$
-                        \text{QuotLift}\ \alpha\ r\ \beta\ f\ h\ (\text{Quot}\ \alpha\ r\ b).
+                        \text{Lift}_Q\ \alpha\ r\ \beta\ f\ h\ (\text{Quot}\ \alpha\ r\ b).
                     $$
 
 include ../../footer
