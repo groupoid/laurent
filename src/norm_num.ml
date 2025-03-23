@@ -3,8 +3,6 @@ open Num
 (* Operator types *)
 type op = Plus | Minus | Times | Div | Neg | Pow | Abs | Ln | Sin | Cos | Exp
 
-let (//) n d : num = Num.div_num n d
-
 (* Expression type *)
 type expr =
   | Num of num          (* Rational number, e.g., 2/3 *)
@@ -21,11 +19,24 @@ let expr_of_result = function
   | RNum n -> Num n
   | RExpr e -> e
 
-(* Convert float to num for approximations *)
-let num_of_float f =
-  let rat = approx_num_fix 10 f in  (* 10 decimal places precision *)
-  if eq_num (num_of_string rat) (num_of_int 0) && f <> (num_of_string "0.0") then num_of_int 1 // num_of_int 10000  (* Small non-zero value *)
+(* Approximate Num *)
+let num_of_float (f: Num.num) : Num.num =
+  let rat = approx_num_fix 10 f in
+  if eq_num (num_of_string rat) (num_of_int 0) && f <> (num_of_string "0.0") then num_of_int 1 // num_of_int 10000
   else (num_of_string rat)
+
+(* Convert float string to Num *)
+let num_of_dec s =
+  let parts = String.split_on_char '.' s in
+  match parts with
+  | [whole; frac] ->
+      let whole_num = num_of_string whole in
+      let frac_len = String.length frac in
+      let frac_num = num_of_string frac in
+      let denominator = power_num (num_of_int 10) (num_of_int frac_len) in
+      let frac_part = div_num frac_num denominator in
+      add_num whole_num frac_part
+  | _ -> raise (Failure "Invalid decimal string format")
 
 (* Main normalization function *)
 let rec norm_num (e : expr) : result =
@@ -52,13 +63,15 @@ let rec norm_num (e : expr) : result =
           (match r1, r2 with
            | RNum n1, RNum n2 ->
                if eq_num n2 (num_of_int 0) then raise (Failure "Division by zero")
-               else RNum (n1 // n2)
+               else RNum (Num.div_num n1 n2)
            | _ -> RExpr (Op (Div, expr_of_result r1, expr_of_result r2)))
       | Pow ->
           (match r1, r2 with
            | RNum n1, RNum n2 ->
+               let x = float_of_num n1 in
+               let y = float_of_num n2 in
                if is_integer_num n2 then RNum (power_num n1 n2)
-               else RNum (num_of_string (Printf.sprintf "%.0f" (float_of_num n1 ** float_of_num n2)))
+               else RNum (num_of_dec (Printf.sprintf "%.9f" (exp (y *. log x))))
            | _ -> RExpr (Op (Pow, expr_of_result r1, expr_of_result r2)))
       | Neg ->
           (match r1 with
@@ -72,19 +85,19 @@ let rec norm_num (e : expr) : result =
           (match r1 with
            | RNum n1 ->
                if le_num n1 (num_of_int 0) then raise (Failure "Log of non-positive number")
-               else RNum (num_of_string (Printf.sprintf "%.0f" (log (float_of_num n1))))
+               else RNum (num_of_dec (Printf.sprintf "%.20f" (log (float_of_num n1))))
            | _ -> RExpr (Op (Ln, expr_of_result r1, Num (num_of_int 1))))
       | Sin ->
           (match r1 with
-           | RNum n1 -> RNum (num_of_string (Printf.sprintf "%.0f" (sin (float_of_num n1))))
+           | RNum n1 -> RNum (num_of_dec (Printf.sprintf "%.20f" (sin (float_of_num n1))))
            | _ -> RExpr (Op (Sin, expr_of_result r1, Num (num_of_int 1))))
       | Cos ->
           (match r1 with
-           | RNum n1 -> RNum (num_of_string (Printf.sprintf "%.0f" (cos (float_of_num n1))))
+           | RNum n1 -> RNum (num_of_dec (Printf.sprintf "%.20f" (cos (float_of_num n1))))
            | _ -> RExpr (Op (Cos, expr_of_result r1, Num (num_of_int 1))))
       | Exp ->
           (match r1 with
-           | RNum n1 -> RNum (num_of_string (Printf.sprintf "%.0f" (exp (float_of_num n1))))
+           | RNum n1 -> RNum (num_of_dec (Printf.sprintf "%.20f" (exp (float_of_num n1))))
            | _ -> RExpr (Op (Exp, expr_of_result r1, Num (num_of_int 1))))
 
 (* String representation *)
