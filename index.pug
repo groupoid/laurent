@@ -90,18 +90,18 @@ block content
                     $$
                     \begin{array}{c} \\
                        \mathrm{Laurent} := \mathrm{MLTT}\ |\ \mathrm{CALC} \\
-                       \mathrm{MLTT} := \mathrm{cosmos}\ |\ \mathrm{var}\ |\ \mathrm{forall}\ |\ \mathrm{exists}\ \\
+                       \mathrm{MLTT} := \mathrm{Cosmos}\ |\ \mathrm{Var}\ |\ \mathrm{Forall}\ |\ \mathrm{Exists}\ \\
                        \mathrm{CALC} := \mathrm{Base}\ |\ \mathrm{Set}\ |\ \mathrm{Q}\ |\ \mathrm{Mu}\ |\ \mathrm{Lim} \\
-                       \mathrm{cosmos} := \mathbf{Prop}\ :\ \mathbf{U_0}\ :\ \mathbf{U_1} \\
-                       \mathrm{var} := \mathbf{var}\ \mathrm{ident}\ |\ \mathbf{hole} \\
-                       \mathrm{forall} := \forall\ \mathrm{ident}\ \mathrm{E}\ \mathrm{E}\ |\ \lambda\ \mathrm{ident}\ \mathrm{E}\ \mathrm{E}\ |\ \mathrm{E}\ \mathrm{E} \\
-                       \mathrm{exists} := \exists\ \mathrm{ident}\ \mathrm{E}\ \mathrm{E}\ |\ (\mathrm{E}, \mathrm{E})\ |\ \mathrm{E}\mathbf{.1}\ |\ \mathrm{E}\mathbf{.2} \\
+                       \mathrm{Cosmos} := \mathbf{Prop}\ :\ \mathbf{U_0}\ :\ \mathbf{U_1} \\
+                       \mathrm{Var} := \mathbf{var}\ \mathrm{ident}\ |\ \mathbf{hole} \\
+                       \mathrm{Forall} := \forall\ \mathrm{ident}\ \mathrm{E}\ \mathrm{E}\ |\ \lambda\ \mathrm{ident}\ \mathrm{E}\ \mathrm{E}\ |\ \mathrm{E}\ \mathrm{E} \\
+                       \mathrm{Exists} := \exists\ \mathrm{ident}\ \mathrm{E}\ \mathrm{E}\ |\ (\mathrm{E}, \mathrm{E})\ |\ \mathrm{E}\mathbf{.1}\ |\ \mathrm{E}\mathbf{.2} \\
                        \mathrm{Base} := \mathbf{ℕ}\ |\ \mathrm{ℤ}\ |\ \mathrm{ℚ}\ |\ \mathrm{ℝ}\ |\ \mathrm{ℂ}\ |\ \mathrm{ℍ}\ |\ \mathrm{𝕆}\ |\ \mathrm{𝕍}\ \\
                        \mathrm{Set} := \mathbf{Set}\ |\ \mathbf{SeqEq}\ |\ \mathbf{And}\ |\ \mathbf{Or}\ \\
                                |\ \mathbf{Complement}\ |\ \mathbf{Intersect}\ \\
                                |\ \mathbf{Power}\ |\ \mathbf{Closure}\ |\ \mathbf{Cardinal}\ \\
                        \mathrm{Q} := \mathbf{-/\hspace{-1mm}\sim}\ |\ \mathbf{Quot}\ |\ \mathbf{Lift_Q}\ |\ \mathbf{Ind_Q} \\
-                       \mathrm{Mu} := \mathbf{Mu}\ |\ \mathbf{Measure}\ \\
+                       \mathrm{Mu} := \mathbf{mu}\ |\ \mathbf{Measure}\ \\
                                |\ \mathbf{Lebesgue}\ |\ \mathbf{Bochner}\ \\
                        \mathrm{Lim} := \mathbf{Seq}\ |\ \mathbf{Sup}\ |\ \mathbf{Inf}\ \\
                                |\ \mathbf{Limit}\ |\ \mathbf{Sum}\ |\ \mathbf{Union}\ \\
