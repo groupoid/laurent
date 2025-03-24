@@ -1,3 +1,5 @@
+(* $ ocamlfind ocamlc -o norm_num -package num -linkpkg norm_num.ml *)
+
 open Num
 
 (* Operator types *)
