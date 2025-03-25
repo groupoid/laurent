@@ -25,10 +25,11 @@ block content
                 +tex.
                     $\text{SetEq}$-type defines propositional equality between sets, leveraging
                     the Z3 SMT solver to enforce equivalence of predicates over real numbers,
-                    including equations and inequalities. It ensures rigorous set identity in analysis.
+                    including only inequalities. It ensures rigorous set identity in analysis.
+                    For complex equalities SeqEq computes syntactically.
                 +tex.
                     In this system, $\text{SetEq}$ connects type theory to classical mathematics by
-                    reducing set equality to logical equivalence, validated mechanically via Z3.
+                    reducing set inequality to logical equivalence, validated mechanically via Z3.
 
                 h2 Formation
                 +tex.
@@ -73,7 +74,7 @@ block content
                 +tex.
                     $\mathbf{Definition\ 3.2.4}$ ($\text{SetEq}$-Computation). The Z3 solver reduces
                     $\text{SetEq}(S, T)$ to $\text{True}$ if $\forall x, P(x) \iff Q(x)$ is unsatisfiable
-                    when negated, otherwise $\text{False}$.
+                    when negated, otherwise $\text{False}$, only for $\text{RealIneq}$ case.
                 +tex(true).
                     $$
                         S =_{\text{Set}(A)} T =_{\text{Prop}} \text{Z3}(\forall x, P(x) \iff Q(x)).
