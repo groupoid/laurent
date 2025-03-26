@@ -1,6 +1,6 @@
 opam-version: "2.0"
 name: "laurent"
-version: "1.4.0"
+version: "1.3.0"
 maintainer: "Namdak Tonpa <maxim@synrc.com>"
 authors: [ "Groupoid Infinity" ]
 homepage: "https://laurent.groupoid.space/"
@@ -11,6 +11,8 @@ license: "ISC"
 depends: [
   "dune" {>= "2.9"}
   "zarith" {>= "1.12"}
+  "z3" {>= "4.14"}
+  "num" {>= "1.5"}
   "ocaml" {>= "4.14"}
   "menhir" {>= "20220210"}
 ]

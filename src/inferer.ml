@@ -1,32 +1,6 @@
-(* 1967 (c) Laurent Schwartz. Analyse Mathematique
-   Copyright (c) 2025 Groupoid Infinity, Максим Сохацький
-
-   Type Theory for mechanical formalization of Théorie des
-   Distributions and Analyse Mathematique by Laurent Schwartz.
-
-   Type systems in mathematics and computer science provide
-   a structured way to formalize proofs and computations.
-   In this article, we present a minimal type system,
-   designed to encode classical and modern analysis with explicit core constructors.
-
-   We omit identity types `Id`, `idp`, `J` (HoTT, MLTT-80, MLTT-75) to
-   keep the system lean with Pi and Set truncated Sigma relying instead on `Prop` predicates.
-   Also we have explicitly built in Set theory with Open Sets and Topology to have more classical core.
-   Built-in inequalities propositional resolution by reduction is handled by Z3 SMT solver.
-
-   We’ll explore this system through examples, starting with:
-   1) Classical Riemann sums, advancing to built-in
-   2) Lebesgue integration and
-   3) Custom Measures,
-   4) Bishop’s constructive analysis,
-   5) L₂ spaces, and culminating in
-   6) Schwartz’s theory of distributions.
-
-   Single file distribution:
-   $ ocamlfind ocamlc -o laurent -package z3 -linkpkg laurent.ml
-*)
-
 open Z3
+
+(* LAURENT (INNER) LANGUAGE ∮ *)
 
 let ctx_z3 = mk_context []
 

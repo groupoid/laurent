@@ -1,8 +1,8 @@
-(* ocamlfind ocamlc -o laurent -package z3 -linkpkg laurent.ml tactics.ml *)
-
 open Inferer
 open Suite
 open Tactics
+
+(* LAURENT MATHEMATICS 💡 *)
 
 let initial_state target = {
   goals = [{ ctx = []; target; id = 1 }];

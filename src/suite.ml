@@ -1,7 +1,7 @@
 open Z3
 open Inferer
 
-(* canonical examples *)
+(* LAURENT FOUNDATIONS ⚡ *)
 
 let universal  : exp = Power Prop
 let set_a      : exp = Set (Lam ("x", Real, RealIneq (Gt, Var "x", Zero)))

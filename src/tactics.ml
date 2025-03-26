@@ -1,6 +1,6 @@
-(* ocamlfind ocamlc -o laurent -package z3 -linkpkg laurent.ml tactics.ml *)
-
 open Inferer
+
+(* LAURENT TACTICS (META) LANGUAGE 🖥️ *)
 
 type goal = {
   ctx : context;          (* Current context *)
