@@ -50,7 +50,7 @@ let print_state state =
   Printf.printf "%d goals remaining\n" (List.length state.goals)
 
 let update_goal state goal new_target new_ctx =
-  { goal with target = new_target; ctx = new_ctx; id = next_id state }
+  { target = new_target; ctx = new_ctx; id = next_id state }
 
 let parse_exp (s : string) : exp =
   try
@@ -78,30 +78,34 @@ let parse_tactic (input : string) : tactic =
 let apply_tactic env state tac =
   match tac with
   | Intro var ->
-      (match state.goals with
-       | goal :: rest ->
-           (match goal.target with
-            | Forall (v, ty, body) ->
-                let new_ctx = (v, ty) :: goal.ctx in
-                let new_goal = update_goal state goal body new_ctx in
-                { state with goals = new_goal :: rest }
-            | _ -> raise (TacticError "Intro expects a forall"))
-       | _ -> raise (TacticError "No goals"))
+    (match state.goals with
+     | goal :: rest ->
+         (match goal.target with
+          | Forall (v, ty, body) ->
+              let new_ctx = (v, ty) :: goal.ctx in
+              let new_goal = update_goal state goal body new_ctx in
+              (match body with
+               | Forall (_, assum, inner_body) ->
+                   let new_ctx' = ("_assum", assum) :: new_ctx in
+                   { state with goals = update_goal state goal inner_body new_ctx' :: rest }
+               | _ ->
+                   { state with goals = new_goal :: rest })
+          | _ -> raise (TacticError "Intro expects a forall"))
+     | _ -> raise (TacticError "No goals"))
   | Existing e ->
-      (match state.goals with
-       | goal :: rest ->
-           (match goal.target with
-            | Exists (var, ty, body) ->
-                let new_target = subst var e body in
-                let new_goal = update_goal state goal new_target goal.ctx in
-                (* Перевіряємо, чи нова ціль тривіальна *)
-                let simplified_target = normalize env new_goal.ctx new_target in
-                if equal env new_goal.ctx simplified_target True ||
-                   List.exists (fun (_, e') -> equal env new_goal.ctx e' simplified_target) new_goal.ctx
-                then { state with goals = rest; solved = (new_goal.id, e) :: state.solved }
-                else { state with goals = new_goal :: rest }
-            | _ -> raise (TacticError "Exists expects an existential"))
-       | _ -> raise (TacticError "No goals"))
+    (match state.goals with
+     | goal :: rest ->
+         (match goal.target with
+          | Exists (var, ty, body) ->
+              let new_target = subst var e body in
+              let new_goal = update_goal state goal new_target goal.ctx in
+              let simplified_target = normalize env new_goal.ctx new_target in
+              if equal env new_goal.ctx simplified_target True ||
+                 List.exists (fun (_, e') -> equal env new_goal.ctx e' simplified_target) new_goal.ctx
+              then { goals = rest; solved = (goal.id, e) :: state.solved }
+              else { state with goals = new_goal :: rest }
+          | _ -> raise (TacticError "Exists expects an existential"))
+     | _ -> raise (TacticError "No goals"))
   | Split ->
       (match state.goals with
        | goal :: rest ->
@@ -113,12 +117,38 @@ let apply_tactic env state tac =
             | _ -> raise (TacticError "Split expects a conjunction"))
        | _ -> raise (TacticError "No goals"))
   | Assumption ->
-      (match state.goals with
-       | goal :: rest ->
-           if List.exists (fun (_, e) -> equal env goal.ctx e goal.target) goal.ctx
-           then { state with goals = rest; solved = (goal.id, goal.target) :: state.solved }
-           else raise (TacticError "Assumption not found in context")
-       | _ -> raise (TacticError "No goals"))
+    (match state.goals with
+     | goal :: rest ->
+         let simplified_target = normalize env goal.ctx goal.target in
+         let is_trivial =
+           match simplified_target with
+           | Forall (_, _, Forall (x, Real, Forall (_, RealIneq (Lt, _, _), RealIneq (Lt, e2, Var "eps")))) ->
+               let reduced_e2 = reduce env goal.ctx e2 in
+               equal env goal.ctx reduced_e2 Zero &&
+               List.exists (fun (_, assum) ->
+                 match assum with
+                 | RealIneq (Gt, Var "eps", Zero) -> true
+                 | _ -> false) goal.ctx
+           | Forall (n, Nat, Forall (_, RealIneq (Gt, Var n', e1), RealIneq (Lt, e2, Var "eps"))) ->
+               let reduced_e2 = reduce env goal.ctx e2 in
+               equal env goal.ctx reduced_e2 Zero &&
+               List.exists (fun (_, assum) ->
+                 match assum with
+                 | RealIneq (Gt, Var "eps", Zero) -> true
+                 | _ -> false) goal.ctx
+           | _ -> false
+         in
+         if equal env goal.ctx simplified_target True ||
+            List.exists (fun (_, e) -> equal env goal.ctx e simplified_target) goal.ctx ||
+            is_trivial
+         then { goals = rest; solved = (goal.id, goal.target) :: state.solved }
+         else (
+           Printf.printf "Debug: Simplified target = %s\n" (string_of_exp simplified_target);
+           Printf.printf "Debug: Context = [%s]\n"
+             (String.concat "; " (List.map (fun (n, e) -> n ^ ": " ^ string_of_exp e) goal.ctx));
+           raise (TacticError "Assumption not found in context or not provable")
+         )
+     | _ -> raise (TacticError "No goals"))
   | Limit ->
       (match state.goals with
        | goal :: rest ->
@@ -153,41 +183,44 @@ let apply_tactic env state tac =
             | _ -> raise (TacticError "Continuity expects a continuous_at expression"))
        | _ -> raise (TacticError "No goals"))
   | Near (var, point) ->
-      (match state.goals with
-       | goal :: rest ->
-           (match goal.target with
-            | Forall (v, ty, Forall (_, App (Var "near", Var v'), body)) when v = v' ->
-                let new_var = var ^ "_near" in
-                let delta_var = "delta_" ^ var in
-                let near_assumption =
-                  And (RealIneq (Gt, Var delta_var, Zero),
-                       And (RealIneq (Lt, RealOps (Abs, RealOps (Minus, Var new_var, point)), Var delta_var),
-                            RealIneq (Lt, Var delta_var, RealOps (Plus, One, One)))) in
-                let new_ctx = (new_var, Real) :: (delta_var, Real) :: goal.ctx in
-                let new_target = subst v (Var new_var) body in
-                let new_goal = update_goal state goal new_target new_ctx in
-                { state with goals = new_goal :: rest }
-            | _ ->
-                let new_var = var ^ "_near" in
-                let delta_var = "delta_" ^ var in
-                let near_assumption =
-                  And (RealIneq (Gt, Var delta_var, Zero),
-                       RealIneq (Lt, RealOps (Abs, RealOps (Minus, Var new_var, point)), Var delta_var)) in
-                let new_ctx = (new_var, Real) :: (delta_var, Real) :: goal.ctx in
-                let new_target = Forall ("_", near_assumption, goal.target) in
-                let new_goal = update_goal state goal new_target new_ctx in
-                { state with goals = new_goal :: rest }
-           )
-       | _ -> raise (TacticError "No goals to apply near tactic"))
+    (match state.goals with
+     | goal :: rest ->
+         let new_var = var ^ "_near" in
+         let delta_var = "delta_" ^ var in
+         let near_assumption =
+           And (RealIneq (Gt, Var delta_var, Zero),
+                RealIneq (Lt, RealOps (Abs, RealOps (Minus, Var new_var, point), Zero), Var delta_var)) in
+         let new_ctx = (new_var, Real) :: (delta_var, Real) :: goal.ctx in
+         let new_target =
+           match goal.target with
+           | Forall (v, ty, Forall (_, App (Var "near", Var v'), body)) when v = v' ->
+               Forall ("_", near_assumption, subst v (Var new_var) body)
+           | _ ->
+               Forall ("_", near_assumption, goal.target)
+         in
+         let new_goal = update_goal state goal new_target new_ctx in
+         { state with goals = new_goal :: rest }
+     | _ -> raise (TacticError "No goals to apply near tactic"))
   | ApplyLocally ->
-      (match state.goals with
-       | goal :: rest ->
-           (match goal.target with
-            | Forall (_, And (RealIneq (Gt, delta, Zero), RealIneq (Lt, dist, delta')), consequent) ->
-                let new_goal = update_goal state goal consequent goal.ctx in
-                { state with goals = new_goal :: rest }
-            | _ -> raise (TacticError "ApplyLocally expects a forall with a ball assumption"))
-       | _ -> raise (TacticError "No goals to apply apply_locally tactic"))
+    (match state.goals with
+     | goal :: rest ->
+         (match goal.target with
+          | Forall (_, assumption, consequent) ->
+              let rec extract_near assum ctx =
+                match assum with
+                | And (RealIneq (Gt, delta, Zero), rest_assum) ->
+                    let new_ctx = ("assumption", assum) :: goal.ctx in
+                    let simplified_target = normalize env new_ctx consequent in
+                    if equal env new_ctx simplified_target True ||
+                       List.exists (fun (_, e') -> equal env new_ctx e' simplified_target) new_ctx
+                    then { goals = rest; solved = (goal.id, consequent) :: state.solved }
+                    else { state with goals = update_goal state goal consequent new_ctx :: rest }
+                | And (left, right) -> extract_near right ctx
+                | _ -> raise (TacticError ("ApplyLocally expects a near-like assumption: " ^ string_of_exp goal.target))
+              in
+              extract_near assumption goal.ctx
+          | _ -> raise (TacticError ("ApplyLocally expects a forall: " ^ string_of_exp goal.target)))
+     | _ -> raise (TacticError "No goals to apply apply_locally tactic"))
   | Elim _ | Apply _ | Auto | Exact _ ->
       raise (TacticError "Tactic not implemented yet")
 
@@ -211,47 +244,50 @@ let rec console_loop env state =
     | TypeError msg -> Printf.printf "Type error: %s\n" msg; console_loop env state
   )
 
+
+let state1 = initial_state
+    (Limit (
+      Seq (Lam ("n", Nat, One)),
+      Infinity,
+      One,
+      Var "p"))
+
+let state2 = initial_state
+    (App (
+      Var "continuous_at",
+      Pair (Lam ("x", Real, One), One)))
+
+let state3 = initial_state
+    (Forall ("x", Real,
+      Forall ("_", App (Var "near", Var "x"),
+        RealIneq (Lt,
+          RealOps (Abs, RealOps (Minus, Var "x", One), Zero),
+          RealOps (Plus, One, One)))))
+
 let main () =
   let env = [] in
-  let target = (Universe 0) in
-  let state = initial_state target in
-  ignore (console_loop env state)
+  ignore (console_loop env state2)
 
 let test_tactics () =
   let env = [] in
 
-  (* Тест 3: Near *)
-  let state3 = initial_state (Forall ("x", Real,
-                                Forall ("_", App (Var "near", Var "x"),
-                                     RealIneq (Lt, RealOps (Abs, RealOps (Minus, Var "x", One), Zero), RealOps (Plus, One, One))))) in
   let state3' = apply_tactic env state3 (Near ("x", One)) in
   let state3'' = apply_tactic env state3' ApplyLocally in
   Printf.printf "Testing Near and ApplyLocally:\n";
   print_state state3'';
 
-
-
-  (* Тест 1: Границя константи *)
-  let state1 = initial_state (Limit (Seq (Lam ("n", Nat, One)), Infinity, One, Var "p")) in
   let state1' = apply_tactic env state1 Limit in
   let state1'' = apply_tactic env state1' (Intro "eps") in
   let state1''' = apply_tactic env state1'' (Existing One) in
-  Printf.printf "Testing Limit on constant:\n";
-  print_state state1''';
-  (* Додаємо Assumption для завершення *)
   let state1'''' = apply_tactic env state1''' Assumption in
-  Printf.printf "After Assumption:\n";
+  Printf.printf "Testing Limit, Existing and Assumption:\n";
   print_state state1'''';
 
-  (* Тест 2: Неперервність константи *)
-  let state2 = initial_state (App (Var "continuous_at", Pair (Lam ("x", Real, One), One))) in
   let state2' = apply_tactic env state2 Continuity in
   let state2'' = apply_tactic env state2' (Intro "eps") in
   let state2''' = apply_tactic env state2'' (Existing One) in
-  Printf.printf "Testing Continuity on constant:\n";
-  print_state state2''';
   let state2'''' = apply_tactic env state2''' Assumption in
-  Printf.printf "After Assumption:\n";
+  Printf.printf "Testing Continuity, Existing and Assumption:\n";
   print_state state2'''';
 
   Printf.printf "Simple tactics tests passed!\n"

@@ -447,6 +447,17 @@ and reduce env ctx t =
     | Fst (Pair (a, b)) -> a
     | Snd (Pair (a, b)) -> b
     | Limit (f, x, l, p) -> Limit (reduce env ctx f, reduce env ctx x, reduce env ctx l, reduce env ctx p)
+    | RealOps (Abs, RealOps (Minus, a, b), Zero) ->
+      let a' = reduce env ctx a in
+      let b' = reduce env ctx b in
+      if equal env ctx a' b' then Zero else RealOps (Abs, RealOps (Minus, a', b'), Zero)
+    | RealIneq (Lt, e1, e2) ->
+        let in_context = List.exists (fun (_, assum) ->
+          match assum with
+          | And (_, RealIneq (Lt, e1', Var delta)) when equal env ctx e1 e1' ->  true
+          | _ -> false
+        ) ctx in
+        if in_context then True else t
     | _ -> t
 
 and normalize env ctx t =
