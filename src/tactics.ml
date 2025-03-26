@@ -1,6 +1,6 @@
 (* ocamlfind ocamlc -o laurent -package z3 -linkpkg laurent.ml tactics.ml *)
 
-open Laurent
+open Inferer
 
 type goal = {
   ctx : context;          (* Current context *)
@@ -20,22 +20,22 @@ let initial_state target = {
 
 let next_id state = 1 + List.fold_left (fun m g -> max m g.id) 0 state.goals
 
-let ball x delta y = And (RealIneq (Gt, Var delta, Zero),
-                         RealIneq (Lt, RealOps (Minus, Var y, Var x), Var delta))
+let ball x delta y =
+  And (RealIneq (Gt, Var delta, Zero),
+    RealIneq (Lt, RealOps (Minus, Var y, Var x), Var delta))
 
 type tactic =
-  | Intro of string           (* Introduce a variable *)
-  | Elim of exp               (* Eliminate a term *)
-  | Apply of exp              (* Apply a term or hypothesis *)
-  | Existing of exp           (* Apply a term or hypothesis *)
-  | Assumption                (* Use a hypothesis from context *)
-  | Auto                      (* Simple automation *)
-  | Split                      (* Simple automation *)
-  | Exact of exp              (* Provide an exact term *)
-  | Limit                     (* Apply limit definition *)
-  | Continuity                (* Apply continuity definition *)
-  | Near of string * exp      (* Додаємо near *)
-  | ApplyLocally              (* Додаємо apply_locally *)
+  | Intro of string
+  | Elim of exp
+  | Apply of exp
+  | Existing of exp
+  | Assumption
+  | Auto
+  | Split
+  | Limit
+  | Continuity
+  | Near of string * exp
+  | ApplyLocally
 
 exception TacticError of string
 
@@ -58,7 +58,7 @@ let parse_exp (s : string) : exp =
     | "0" -> Zero
     | "1" -> One
     | "2" -> RealOps (Plus, One, One)
-    | s when String.length s > 0 && s.[0] = 'x' -> Var s
+    | s when String.length s > 0 -> Var s
     | s -> RealOps (Plus, One, Zero) (* Замість RealNum, підставляємо константу 1 для простоти *)
   with _ -> Var s
 
@@ -165,6 +165,21 @@ let apply_tactic env state tac =
                 { state with goals = new_goal :: rest }
             | _ -> raise (TacticError "Limit expects a limit expression"))
        | _ -> raise (TacticError "No goals"))
+  | Auto ->
+     (match state.goals with
+     | goal :: rest ->
+        let rec try_assumptions ctx =
+            match ctx with
+            | (n, ty) :: rest ->
+                if equal env goal.ctx ty goal.target then
+                  Some (Var n)
+                else try_assumptions rest
+            | [] -> None
+          in
+          (match try_assumptions goal.ctx with
+           | Some t -> { goals = rest; solved = (goal.id, t) :: state.solved }
+           | None -> state)
+       | _ -> raise (TacticError "No goals"))
   | Continuity ->
       (match state.goals with
        | goal :: rest ->
@@ -221,7 +236,7 @@ let apply_tactic env state tac =
               extract_near assumption goal.ctx
           | _ -> raise (TacticError ("ApplyLocally expects a forall: " ^ string_of_exp goal.target)))
      | _ -> raise (TacticError "No goals to apply apply_locally tactic"))
-  | Elim _ | Apply _ | Auto | Exact _ ->
+  | Elim _ | Apply _ ->
       raise (TacticError "Tactic not implemented yet")
 
 
@@ -245,58 +260,3 @@ let rec console_loop env state =
   )
 
 
-let state1 = initial_state
-    (Limit (
-      Seq (Lam ("n", Nat, One)),
-      Infinity,
-      One,
-      Var "p"))
-
-let state2 = initial_state
-    (App (
-      Var "continuous_at",
-      Pair (Lam ("x", Real, One), One)))
-
-let state3 = initial_state
-    (Forall ("x", Real,
-      Forall ("_", App (Var "near", Var "x"),
-        RealIneq (Lt,
-          RealOps (Abs, RealOps (Minus, Var "x", One), Zero),
-          RealOps (Plus, One, One)))))
-
-let main () =
-  let env = [] in
-  ignore (console_loop env state2)
-
-let test_tactics () =
-  let env = [] in
-
-  let state3' = apply_tactic env state3 (Near ("x", One)) in
-  let state3'' = apply_tactic env state3' ApplyLocally in
-  Printf.printf "Testing Near and ApplyLocally:\n";
-  print_state state3'';
-
-  let state1' = apply_tactic env state1 Limit in
-  let state1'' = apply_tactic env state1' (Intro "eps") in
-  let state1''' = apply_tactic env state1'' (Existing One) in
-  let state1'''' = apply_tactic env state1''' Assumption in
-  Printf.printf "Testing Limit, Existing and Assumption:\n";
-  print_state state1'''';
-
-  let state2' = apply_tactic env state2 Continuity in
-  let state2'' = apply_tactic env state2' (Intro "eps") in
-  let state2''' = apply_tactic env state2'' (Existing One) in
-  let state2'''' = apply_tactic env state2''' Assumption in
-  Printf.printf "Testing Continuity, Existing and Assumption:\n";
-  print_state state2'''';
-
-  Printf.printf "Simple tactics tests passed!\n"
-
-let banner =
-"https://laurent.groupoid.space/
-
-  🧊 Laurent Theorem Prover version 0.5 (c) 2025 Groupoїd Infinity
-
-For help type `help`."
-
-let () = test_tactics (); print_endline banner; main ()

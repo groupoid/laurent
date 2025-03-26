@@ -1,0 +1,4 @@
+(executable
+ (name laurent)
+ (public_name laurent)
+ (libraries z3 num zarith))

@@ -1,0 +1,6 @@
+(env (dev (flags (:standard -warn-error -A))))
+
+(install (files lib/foundations/limit.laurent)
+         (section share) (package laurent))
+
+
