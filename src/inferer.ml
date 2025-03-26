@@ -1,6 +1,6 @@
 open Z3
 
-(* LAURENT (INNER) LANGUAGE ∮ *)
+(* LAURENT INNER TOPOS LANGUAGE ∮ *)
 
 let ctx_z3 = mk_context []
 

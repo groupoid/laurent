@@ -1,6 +1,6 @@
 open Inferer
 
-(* LAURENT TACTICS LANGUAGE 🖥️ *)
+(* LAURENT TACTICS PROOF SEARCH LANGUAGE 🖥️ *)
 
 type goal = {
   ctx : context;          (* Current context *)
@@ -54,7 +54,7 @@ let parse_exp (s : string) : exp =
     | "1" -> One
     | "2" -> RealOps (Plus, One, One)
     | s when String.length s > 0 -> Var s
-    | s -> RealConst (float_of_string s) (* Замість RealNum, підставляємо константу 1 для простоти *)
+    | s -> RealConst (float_of_string s)
   with _ -> Var s
 
 let parse_tactic (input : string) : tactic =
