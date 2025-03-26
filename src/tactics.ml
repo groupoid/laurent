@@ -155,15 +155,29 @@ let apply_tactic env state tac =
   | Near (var, point) ->
       (match state.goals with
        | goal :: rest ->
-           let new_var = var ^ "_near" in
-           let delta_var = "delta_" ^ var in
-           let near_assumption =
-             And (RealIneq (Gt, Var delta_var, Zero),
-                  RealIneq (Lt, RealOps (Abs, RealOps (Minus, Var new_var, point), Zero), Var delta_var)) in
-           let new_ctx = (new_var, Real) :: (delta_var, Real) :: goal.ctx in
-           let new_target = Forall ("_", near_assumption, goal.target) in
-           let new_goal = update_goal state goal new_target new_ctx in
-           { state with goals = new_goal :: rest }
+           (match goal.target with
+            | Forall (v, ty, Forall (_, App (Var "near", Var v'), body)) when v = v' ->
+                let new_var = var ^ "_near" in
+                let delta_var = "delta_" ^ var in
+                let near_assumption =
+                  And (RealIneq (Gt, Var delta_var, Zero),
+                       And (RealIneq (Lt, RealOps (Abs, RealOps (Minus, Var new_var, point)), Var delta_var),
+                            RealIneq (Lt, Var delta_var, RealOps (Plus, One, One)))) in
+                let new_ctx = (new_var, Real) :: (delta_var, Real) :: goal.ctx in
+                let new_target = subst v (Var new_var) body in
+                let new_goal = update_goal state goal new_target new_ctx in
+                { state with goals = new_goal :: rest }
+            | _ ->
+                let new_var = var ^ "_near" in
+                let delta_var = "delta_" ^ var in
+                let near_assumption =
+                  And (RealIneq (Gt, Var delta_var, Zero),
+                       RealIneq (Lt, RealOps (Abs, RealOps (Minus, Var new_var, point)), Var delta_var)) in
+                let new_ctx = (new_var, Real) :: (delta_var, Real) :: goal.ctx in
+                let new_target = Forall ("_", near_assumption, goal.target) in
+                let new_goal = update_goal state goal new_target new_ctx in
+                { state with goals = new_goal :: rest }
+           )
        | _ -> raise (TacticError "No goals to apply near tactic"))
   | ApplyLocally ->
       (match state.goals with
