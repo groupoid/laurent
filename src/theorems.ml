@@ -28,7 +28,7 @@ let state3 = initial_state
           RealOps (Abs, RealOps (Minus, Var "x", One), Zero),
           RealOps (Plus, One, One)))))
 
-let test_tactics () =
+let test_mathematics () =
   let env = [] in
 
   let state1' = apply_tactic env state1 Limit in

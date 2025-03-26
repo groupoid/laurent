@@ -143,7 +143,7 @@ let test_z3 () =
     test_term env ctx prop2 True "D ⇔ x = 1";
     Printf.printf "Z3 tests passed!\n"
 
-let test_all () =
+let test_foundations () =
     let ctx = add_var ctx "f" (Forall ("x", Real, Real)) in
     test_type env ctx integral_sig (Universe 0) "integral_sig";
     test_type env ctx sequence_a (Forall ("n", Nat, Real)) "sequence_a";
@@ -167,4 +167,3 @@ let test_all () =
     test_z3();
     Printf.printf "All tests passed!\n"
 
-let () = test_all ()

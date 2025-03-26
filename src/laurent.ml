@@ -5,9 +5,7 @@ open Suite
 
 (* LAURENT LAUNCHER 🚀 *)
 
-let main () =
-  let env = [] in
-  ignore (console_loop env state3)
+let usage = "laurent [ repl | banner ]"
 
 let banner =
 "https://laurent.groupoid.space/
@@ -16,4 +14,14 @@ let banner =
 
 For help type `help`."
 
-let () = test_tactics (); print_endline banner; main ()
+let () =
+    let args = Array.to_list Sys.argv in
+    match args with
+    | [_; "repl"] ->   print_endline "Starting REPL...";
+                       print_endline banner;
+                       ignore (console_loop [] state3)
+    | [_; "banner"] -> test_foundations ();
+                       test_mathematics ();
+                       print_endline banner
+    | _ ->             print_endline usage
+
