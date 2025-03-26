@@ -228,6 +228,13 @@ and lookup_var ctx x =
 
 and infer env (ctx : context) (e : exp) : exp =
     match e with
+    | Set a ->
+      let a_ty = infer env ctx a in
+      (match a_ty with
+      | Forall (x, domain, body) when equal env ctx domain Real && equal env ctx body Prop -> Set Real
+      | Universe i -> Universe 0
+      | Set b -> Set b
+      | _ -> raise (TypeError ("Set expects a predicate or type, got " ^ string_of_exp a_ty)))
     | SetEq (s1, s2) ->
       let s1_ty = infer env ctx s1 in
       let s2_ty = infer env ctx s2 in
@@ -303,13 +310,6 @@ and infer env (ctx : context) (e : exp) : exp =
          | Abs | Ln | Sin | Cos | Exp | Neg  -> Real)
     | ComplexOps (op, a, b) -> let _ = check env ctx a Complex in let _ = check env ctx b Complex in Complex
     | Closure s -> let _ = check env ctx s (Set Real) in Set Real
-    | Set a ->
-      let a_ty = infer env ctx a in
-      (match a_ty with
-      | Forall (x, domain, body) when equal env ctx domain Real && equal env ctx body Prop -> Set Real
-      | Universe i -> Universe 0
-      | Set b -> Set b
-      | _ -> raise (TypeError ("Set expects a predicate or type, got " ^ string_of_exp a_ty)))
     | Union a -> let _ = check env ctx a (Forall ("n", Nat, Set Real)) in Set Real
     | Complement a ->
       let _ = check env ctx a (Set Real) in
