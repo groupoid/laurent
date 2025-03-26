@@ -1,6 +1,6 @@
 open Inferer
 
-(* LAURENT TACTICS (META) LANGUAGE 🖥️ *)
+(* LAURENT TACTICS LANGUAGE 🖥️ *)
 
 type goal = {
   ctx : context;          (* Current context *)
