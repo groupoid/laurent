@@ -30,8 +30,8 @@ open Z3
 
 let ctx_z3 = mk_context []
 
-let verbose: bool = true
-let trace: bool = true
+let verbose: bool = false
+let trace: bool = false
 let tests: bool = true
 
 type real_ineq = Lt | Gt | Lte | Gte | Eq | Neq
