@@ -4,6 +4,11 @@ open Inferer
 open Suite
 open Tactics
 
+let initial_state target = {
+  goals = [{ ctx = []; target; id = 1 }];
+  solved = [];
+}
+
 let state1 = initial_state
     (Limit (
       Seq (Lam ("n", Nat, One)),

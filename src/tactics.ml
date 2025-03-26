@@ -13,11 +13,6 @@ type proof_state = {
   solved : (int * exp) list; (* Solved goals with their terms *)
 }
 
-let initial_state target = {
-  goals = [{ ctx = []; target; id = 1 }];
-  solved = [];
-}
-
 let next_id state = 1 + List.fold_left (fun m g -> max m g.id) 0 state.goals
 
 let ball x delta y =
