@@ -35,6 +35,7 @@ type exp =                         (* MLTT-72 Vibe Check                     *)
   | Vec of int * exp * exp * exp   (*   𝕍   *)
   | Zero                           (*  0.0  *)
   | One                            (*  1.0  *)
+  | RealConst of float             (*  1.0  *)
   | Infinity                       (*   ∞   *)
   | S of exp                       (*   1+  *)
   | Z                              (*   0   *)
@@ -125,6 +126,7 @@ let rec string_of_exp = function
   | Octanionic -> "𝕆"
   | Quaternionic -> "ℍ"
   | NatToReal e -> "ℝ(" ^ string_of_exp e ^ ")"
+  | RealConst e -> "ℝ(" ^ string_of_float e ^ ")"
   | Complex -> "ℂ"
   | If (c, t, f) -> "If (" ^ string_of_exp c ^ ", " ^ string_of_exp t ^ ", " ^ string_of_exp f ^ ")"
   | Vec (n, f, a, b) -> "𝕍 (" ^ string_of_int n ^ ", " ^ string_of_exp f ^ ", " ^ string_of_exp a ^ ", " ^ string_of_exp b ^ ")"
@@ -264,6 +266,7 @@ and infer env (ctx : context) (e : exp) : exp =
     | NatToReal e -> let _ = check env ctx e Nat in Real
     | Zero -> Real
     | One -> Real
+    | RealConst _ -> Real
     | Infinity -> Real
     | Complex -> Universe 0
     | Quaternionic -> Universe 0
@@ -403,6 +406,7 @@ and equal' env ctx t1 t2 =
     | Infinity, Infinity -> true
     | Zero, Zero -> true
     | One, One -> true
+    | RealConst i, RealConst j -> i = j
     | Z, Z -> true
     | S e1, S e2 -> equal' env ctx e1 e2
     | NatToReal e1, NatToReal e2 -> equal' env ctx e1 e2
@@ -449,6 +453,7 @@ and z3_of_exp ctx = function
   | Or (e1, e2) -> Boolean.mk_or ctx [z3_of_exp ctx e1; z3_of_exp ctx e2]
   | One -> Arithmetic.Real.mk_numeral_i ctx 1
   | Zero -> Arithmetic.Real.mk_numeral_i ctx 0
+  | RealConst i -> Arithmetic.Real.mk_numeral_i ctx (int_of_float i)
   | Set (Lam (_, Real, body)) -> z3_of_exp ctx body
   | RealOps (Plus, e1, e2) -> Arithmetic.mk_add ctx [z3_of_exp ctx e1; z3_of_exp ctx e2]
   | Intersect (Set (Lam (x1, Real, p1)), Set (Lam (x2, Real, p2))) -> Boolean.mk_and ctx [z3_of_exp ctx p1; z3_of_exp ctx p2]

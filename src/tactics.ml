@@ -54,7 +54,7 @@ let parse_exp (s : string) : exp =
     | "1" -> One
     | "2" -> RealOps (Plus, One, One)
     | s when String.length s > 0 -> Var s
-    | s -> RealOps (Plus, One, Zero) (* Замість RealNum, підставляємо константу 1 для простоти *)
+    | s -> RealConst (float_of_string s) (* Замість RealNum, підставляємо константу 1 для простоти *)
   with _ -> Var s
 
 let parse_tactic (input : string) : tactic =

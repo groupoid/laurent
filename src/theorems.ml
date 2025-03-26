@@ -31,11 +31,6 @@ let state3 = initial_state
 let test_tactics () =
   let env = [] in
 
-  let state3' = apply_tactic env state3 (Near ("x", One)) in
-  let state3'' = apply_tactic env state3' ApplyLocally in
-  Printf.printf "Testing Near and ApplyLocally:\n";
-  print_state state3'';
-
   let state1' = apply_tactic env state1 Limit in
   let state1'' = apply_tactic env state1' (Intro "eps") in
   let state1''' = apply_tactic env state1'' (Existing One) in
@@ -49,6 +44,11 @@ let test_tactics () =
   let state2'''' = apply_tactic env state2''' Assumption in
   Printf.printf "Testing Continuity, Existing and Assumption:\n";
   print_state state2'''';
+
+  let state3' = apply_tactic env state3 (Near ("x", One)) in
+  let state3'' = apply_tactic env state3' ApplyLocally in
+  Printf.printf "Testing Near and ApplyLocally:\n";
+  print_state state3'';
 
   Printf.printf "Simple tactics tests passed!\n"
 

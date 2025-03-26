@@ -7,7 +7,7 @@ open Suite
 
 let main () =
   let env = [] in
-  ignore (console_loop env state2)
+  ignore (console_loop env state3)
 
 let banner =
 "https://laurent.groupoid.space/
