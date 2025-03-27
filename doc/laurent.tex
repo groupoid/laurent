@@ -6,7 +6,7 @@
 \usepackage{verbatim}
 
 \makeatletter
-\renewcommand{\verbatim@font}{\ttfamily\small} % Change font here
+\renewcommand{\verbatim@font}{\ttfamily\small}
 \makeatother
 
 \newunicodechar{λ}{$\lambda$}
@@ -15,17 +15,15 @@
 \newunicodechar{ε}{$\epsilon$}
 \renewcommand{\quotesinglbase}{,}
 
-
 % Description of some options:
 % draft      - draft version of the document
-% bysec      - propositions, lemmas, definitions etc (not theorems)
-%              are numbered within each \section
+% bysec      - propositions, lemmas, definitions etc (not theorems) are numbered within each \section
 % thmbysec   - theorems are numbered within each \section
 % win        - CP-1251 encoding (Windows)
 % koi        - KOI8_U encoding (Unix)
 % utf8       - UTF-8 encoding (Unix)
 %
-%  The following packets already included by cmparticle class:
+% The following packets already included by cmparticle class:
 % amsmath,amsfonts,amsthm,amssymb,latexsym
 %
 % Theorem-like environments already defined by cmparticle class:
@@ -307,7 +305,7 @@ This uses Laurent’s norm and operator primitives, with near tactics simplifyin
 The de Rham Theorem relates differential forms and integrals over loops. For an open $\Omega \subset \mathbb{R}^n$ and a $C^1$ 1-form $\omega$, if $\int_\gamma \omega = 0$ for all loops $\gamma$, there exists $f$ such that $\omega = df$:
 \begin{verbatim}
 let de_rham_theorem =
-  Π (Nat, ("n",   
+  Π (Nat, ("n",
     Π (Set (Vec (n, Real, RealOps RPlus, RealOps RMult)), ("Omega",
       Π (one_form Omega n, ("omega",
         And (c1_form Omega n (Var "omega"),
@@ -322,7 +320,97 @@ This demonstrates Laurent’s capacity for topology and differential geometry, i
 
 These examples highlight Laurent’s versatility, from basic calculus to advanced functional analysis, leveraging its native primitives and tactics for intuitive yet rigorous mechanization.
 
+\section{Tactics in Laurent for Functional Analysis}
+Laurent’s proof assistant leverages a rich tactics language to mechanize theorems in functional analysis, blending classical intuition with constructive rigor. Unlike general-purpose systems like Lean and Coq, Laurent’s tactics are tailored to the domain-specific needs of analysis, incorporating explicit primitives for limits, measures, and algebraic structures. This section outlines key tactics used in Laurent, including specialized solvers for rings, fields, and linear arithmetic, and demonstrates their application to functional analysis proofs.
 
+\subsection{Core Tactics}
+Laurent’s foundational tactics manage logical structure and proof state:
+\begin{itemize}
+\item \texttt{Intro}: Introduces variables from universal quantifiers. For a goal $\forall x : \mathbb{R}, P(x)$, \texttt{intro x} yields a new goal $P(x)$ with $x$ in the context.
+\item \texttt{Elim}: Eliminates existential quantifiers or applies induction (not fully implemented in the current prototype).
+\item \texttt{Apply}: Applies a lemma or hypothesis to the current goal (pending full implementation).
+\item \texttt{Existing}: Provides a witness for an existential quantifier. For $\exists x : \mathbb{R}, P(x)$, \texttt{exists 0} substitutes $x = 0$ into $P(x)$.
+\item \texttt{Assumption}: Closes a goal if it matches a hypothesis or simplifies to a trivial truth (e.g., $0 < \varepsilon$ when $\varepsilon > 0$ is in context).
+\item \texttt{Auto}: Attempts to resolve goals using context hypotheses, ideal for trivial cases.
+\item \texttt{Split}: Splits conjunctive goals ($P \land Q$) into subgoals $P$ and $Q$.
+\end{itemize}
+These tactics form the backbone of proof construction, mirroring Coq’s logical framework but optimized for Laurent’s syntax.
+
+\subsection{Analysis-Specific Tactics}
+For functional analysis, Laurent introduces tactics that exploit its calculus and measure primitives:
+\begin{itemize}
+\item \texttt{Limit}: Expands limit definitions. For a goal $\lim_{n \to \infty} a_n = L$, it generates:
+\[
+\forall \varepsilon > 0, \exists N : \mathbb{N}, \forall n > N, |a_n - L| < \varepsilon,
+\]
+enabling step-by-step convergence proofs. This is crucial for sequences like $\frac{1}{n} \to 0$.
+\item \texttt{Continuity}: Unfolds continuity at a point. For \texttt{continuous\_at (f, a)}, it produces:
+\[
+\forall \varepsilon > 0, \exists \delta > 0, \forall x, |x - a| < \delta \implies |f(x) - f(a)| < \varepsilon,
+\]
+streamlining proofs of the Fundamental Theorem of Calculus.
+\item \texttt{Near}: Introduces a neighborhood assumption. Given a goal involving a point $a$, \texttt{near x a} adds $x_{\text{near}} : \mathbb{R}$ and $\delta_x > 0$ with $|x_{\text{near}} - a| < \delta_x$, facilitating local analysis as in Taylor’s Theorem.
+\item \texttt{ApplyLocally}: Applies a local property (e.g., from a \texttt{near} assumption) to simplify the goal, automating steps in proofs like the Schwartz Kernel Theorem.
+\end{itemize}
+These tactics leverage Laurent’s \texttt{Limit}, \texttt{Lebesgue}, and \texttt{RealIneq} primitives, reducing manual effort in limit and integration proofs compared to Lean’s library-based approach.
+
+\subsection{Algebraic Solvers}
+To handle the algebraic manipulations ubiquitous in functional analysis (e.g., norms, integrals), Laurent incorporates solvers inspired by Lean and Coq:
+\begin{itemize}
+\item \texttt{ring}: Solves equalities in commutative rings. For example, it verifies:
+\[
+(f(x) + g(x))^2 = f(x)^2 + 2 f(x) g(x) + g(x)^2,
+\]
+using $\mathbb{R}$’s ring structure. This is implemented via normalization and equality checking in Laurent’s core.
+\item \texttt{field}: Resolves field equalities and inequalities involving division. For $\int_0^\infty |f(x)|^2 \, d\mu < \infty$, \texttt{field} simplifies expressions like:
+\[
+\frac{f(x)^2}{g(x)^2} = \left( \frac{f(x)}{g(x)} \right)^2 \quad (g(x) \neq 0),
+\]
+crucial for quotient manipulations in Banach spaces.
+
+\item \texttt{linarith}: Handles linear arithmetic inequalities. In the Banach-Steinhaus Theorem, it proves:
+\[
+\| T_\alpha x \|_Y \leq M \| x \|_X,
+\]
+by resolving linear constraints over $\mathbb{R}$, integrating seamlessly with \texttt{RealIneq}.
+\end{itemize}
+These solvers, built into Laurent’s inference engine, automate routine algebraic steps, allowing focus on analysis-specific reasoning.
+
+\subsection{Proof Search and Automation}
+Laurent’s proof state is managed as a list of goals, each with a context
+and target type, updated dynamically by tactics. The \texttt{Near} tactic,
+inspired by INRIA’s work \cite{af18}, enhances automation by contextualizing
+proofs around points, as seen in:
+
+\begin{verbatim}
+let limit_a : exp =
+  Limit (Seq sequence_a, Infinity, Zero,
+    Lam ("ε", Real, Lam ("p", RealIneq (Gt, Var "ε", Zero),
+      Pair (RealOps (Div, One, Var "ε"),
+        Lam ("n", Nat, Lam ("q", RealIneq (Gt, Var "n", Var "N"),
+          RealIneq (Lt, RealOps (Abs,
+          RealOps (Minus, App (sequence_a, Var "n"), Zero), Zero),
+            Var "ε")))))))
+\end{verbatim}
+
+Here, \texttt{limit} unfolds the definition, \texttt{intro ε} and \texttt{intro p}
+build the context, and \texttt{linarith} confirms $|1/n| < \varepsilon$ for
+large $n$. Similarly, in the Lebesgue Dominated Convergence Theorem,
+\texttt{limit} and \texttt{field} ensure $\int f_n \to \int f$.
+
+For complex theorems like de Rham, \texttt{continuity} and \texttt{ring}
+collaborate to verify differential form properties, while \texttt{auto}
+closes trivial subgoals. This hybrid approach—combining domain-specific
+tactics with algebraic solvers—positions Laurent as a powerful tool for
+functional analysts, balancing automation with mathematical insight.
+
+\subsection{Comparison with Lean and Coq}
+Lean’s \texttt{ring} and \texttt{linarith} rely on \texttt{mathlib},
+while Coq’s \texttt{field} uses library-defined fields. Laurent embeds
+these solvers in its core, alongside analysis tactics, reducing dependency
+on external definitions. This design accelerates proofs in $L^2$ spaces,
+Banach duality, and distribution theory, aligning with the needs of a
+mathematical audience exploring frontier research in computational analysis.
 
 \section{Discussion and Future Directions}
 Laurent has built-in primitives for streamline proofs in measure theory, integration, and $L^2$ spaces,
@@ -363,9 +451,6 @@ Mathematical Structures in Computer Science, 2016, 26 (7), pp.1196-1233. doi:10.
 
 % *** A PhD THESIS (in English)
 \bibitem[6]{booij2020} Booij, A. \emph{Analysis in Univalent Type Theory}, PhD thesis, University of Birmingham, 2020. Available at: \url{https://etheses.bham.ac.uk/id/eprint/10411/7/Booij2020PhD.pdf}
-
-% *** A PREPRINT (in English)
-\bibitem[7]{murray2023} Murray, Z. \emph{Constructive Real Numbers in the Agda Proof Assistant}, 2023. Available at: \url{https://arxiv.org/pdf/2205.08354}
 
 % *** A BOOK (in English)
 \bibitem[8]{ziemer2017} Ziemer, W. P., Torres, M. \emph{Modern Real Analysis}, Springer, New York, 2017. Available at: \url{https://www.math.purdue.edu/~torresm/pubs/Modern-real-analysis.pdf}
