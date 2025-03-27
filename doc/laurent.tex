@@ -239,15 +239,6 @@ let limit_a : exp =
 \end{verbatim}
 This proves $\lim_{n \to \infty} \frac{1}{n} = 0$, with $\forall \varepsilon > 0$, $\exists N = \frac{1}{\varepsilon}$ such that $n > N$ implies $\left| \frac{1}{n} \right| < \varepsilon$.
 
-\section{Near Tactics and Constructive Reasoning}
-Laurent adopts a tactics language inspired by Lean and Coq, enhanced by INRIA’s
-near tactics \cite{af18}. These tactics prioritize contextual proof search,
-enabling efficient automation of analysis-specific steps (e.g., limit computations
-or integral bounds). Unlike Lean’s \texttt{limit} or Coq’s \texttt{auto}, \texttt{near}
-tactics adapt to the mathematical structure, reducing user effort while preserving
-constructive rigor. Combined with Laurent’s classical core, this facilitates a
-hybrid approach, mechanizing theorems both classically and constructively.
-
 \section{Examples of Theorem Mechanization}
 Laurent’s design excels in mechanizing foundational theorems across differential calculus, integral calculus, and functional analysis. Below, we present a selection of classical results formalized in Laurent, showcasing its explicit primitives and constructive capabilities.
 
@@ -320,61 +311,119 @@ This demonstrates Laurent’s capacity for topology and differential geometry, i
 
 These examples highlight Laurent’s versatility, from basic calculus to advanced functional analysis, leveraging its native primitives and tactics for intuitive yet rigorous mechanization.
 
-\section{Tactics in Laurent for Functional Analysis}
-Laurent’s proof assistant leverages a rich tactics language to mechanize theorems in functional analysis, blending classical intuition with constructive rigor. Unlike general-purpose systems like Lean and Coq, Laurent’s tactics are tailored to the domain-specific needs of analysis, incorporating explicit primitives for limits, measures, and algebraic structures. This section outlines key tactics used in Laurent, including specialized solvers for rings, fields, and linear arithmetic, and demonstrates their application to functional analysis proofs.
+\section{Core Tactics of General Proof Assistant}
+Laurent’s proof assistant leverages a rich tactics language
+to mechanize theorems in functional analysis, blending classical
+intuition with constructive rigor. Unlike general-purpose systems
+like Lean and Coq, Laurent’s tactics are tailored to the domain-specific
+needs of analysis, incorporating explicit primitives for limits,
+measures, and algebraic structures. This section outlines key
+tactics used in Laurent, including specialized solvers for rings,
+fields, and linear arithmetic, and demonstrates their application
+to functional analysis proofs.
 
-\subsection{Core Tactics}
-Laurent’s foundational tactics manage logical structure and proof state:
-\begin{itemize}
-\item \texttt{Intro}: Introduces variables from universal quantifiers. For a goal $\forall x : \mathbb{R}, P(x)$, \texttt{intro x} yields a new goal $P(x)$ with $x$ in the context.
-\item \texttt{Elim}: Eliminates existential quantifiers or applies induction (not fully implemented in the current prototype).
-\item \texttt{Apply}: Applies a lemma or hypothesis to the current goal (pending full implementation).
-\item \texttt{Existing}: Provides a witness for an existential quantifier. For $\exists x : \mathbb{R}, P(x)$, \texttt{exists 0} substitutes $x = 0$ into $P(x)$.
-\item \texttt{Assumption}: Closes a goal if it matches a hypothesis or simplifies to a trivial truth (e.g., $0 < \varepsilon$ when $\varepsilon > 0$ is in context).
-\item \texttt{Auto}: Attempts to resolve goals using context hypotheses, ideal for trivial cases.
-\item \texttt{Split}: Splits conjunctive goals ($P \land Q$) into subgoals $P$ and $Q$.
-\end{itemize}
-These tactics form the backbone of proof construction, mirroring Coq’s logical framework but optimized for Laurent’s syntax.
+These tactics form the backbone of proof construction,
+ mirroring Coq’s logical framework but optimized for Laurent’s syntax.
 
-\subsection{Analysis-Specific Tactics}
-For functional analysis, Laurent introduces tactics that exploit its calculus and measure primitives:
-\begin{itemize}
-\item \texttt{Limit}: Expands limit definitions. For a goal $\lim_{n \to \infty} a_n = L$, it generates:
+\subsection{Intro}
+Introduces variables from universal quantifiers. For a goal $\forall x : \mathbb{R}, P(x)$, \texttt{intro x} yields a new goal $P(x)$ with $x$ in the context.
+
+\subsection{Elim}
+Eliminates existential quantifiers or applies induction (not fully implemented in the current prototype).
+
+\subsection{Apply}
+Applies a lemma or hypothesis to the current goal (pending full implementation).
+
+\subsection{Exists}
+Provides a witness for an existential quantifier. For $\exists x : \mathbb{R}, P(x)$, \texttt{exists 0} substitutes $x = 0$ into $P(x)$.
+
+\subsection{Assumption}
+Closes a goal if it matches a hypothesis or simplifies to a trivial truth (e.g., $0 < \varepsilon$ when $\varepsilon > 0$ is in context).
+
+\subsection{Auto}
+Attempts to resolve goals using context hypotheses, ideal for trivial cases.
+
+\subsection{Split}
+Splits conjunctive goals ($P \land Q$) into subgoals $P$ and $Q$.
+
+\section{Analysis-Specific Tactics of Laurent}
+For functional analysis, Laurent introduces tactics that exploit its calculus and measure primitives.
+These tactics leverage Laurent’s \texttt{Limit}, \texttt{Lebesgue}, and \texttt{RealIneq} primitives,
+reducing manual effort in limit and integration proofs compared to Lean’s library-based approach.
+
+\subsection{Limit}
+Expands limit definitions. For a goal $\lim_{n \to \infty} a_n = L$, it generates:
 \[
 \forall \varepsilon > 0, \exists N : \mathbb{N}, \forall n > N, |a_n - L| < \varepsilon,
 \]
 enabling step-by-step convergence proofs. This is crucial for sequences like $\frac{1}{n} \to 0$.
-\item \texttt{Continuity}: Unfolds continuity at a point. For \texttt{continuous\_at (f, a)}, it produces:
+
+\subsection{Continuity}
+Unfolds continuity definitions at a point. For a goal \( \texttt{continuous\_at (f, a)} \), it generates:
 \[
 \forall \varepsilon > 0, \exists \delta > 0, \forall x, |x - a| < \delta \implies |f(x) - f(a)| < \varepsilon,
 \]
-streamlining proofs of the Fundamental Theorem of Calculus.
-\item \texttt{Near}: Introduces a neighborhood assumption. Given a goal involving a point $a$, \texttt{near x a} adds $x_{\text{near}} : \mathbb{R}$ and $\delta_x > 0$ with $|x_{\text{near}} - a| < \delta_x$, facilitating local analysis as in Taylor’s Theorem.
-\item \texttt{ApplyLocally}: Applies a local property (e.g., from a \texttt{near} assumption) to simplify the goal, automating steps in proofs like the Schwartz Kernel Theorem.
-\end{itemize}
-These tactics leverage Laurent’s \texttt{Limit}, \texttt{Lebesgue}, and \texttt{RealIneq} primitives, reducing manual effort in limit and integration proofs compared to Lean’s library-based approach.
+transforming the target into an \(\varepsilon\)-$\delta$ formulation
+using Laurent’s \texttt{RealIneq} primitives for inequalities and
+\texttt{RealOps} for arithmetic operations (e.g., absolute value,
+subtraction). This facilitates step-by-step proofs of continuity,
+such as for the Fundamental Theorem of Calculus, by exposing the
+logical structure directly in the prover’s core, contrasting with
+Lean’s reliance on library theorems.
 
-\subsection{Algebraic Solvers}
-To handle the algebraic manipulations ubiquitous in functional analysis (e.g., norms, integrals), Laurent incorporates solvers inspired by Lean and Coq:
-\begin{itemize}
-\item \texttt{ring}: Solves equalities in commutative rings. For example, it verifies:
-\[
-(f(x) + g(x))^2 = f(x)^2 + 2 f(x) g(x) + g(x)^2,
-\]
-using $\mathbb{R}$’s ring structure. This is implemented via normalization and equality checking in Laurent’s core.
-\item \texttt{field}: Resolves field equalities and inequalities involving division. For $\int_0^\infty |f(x)|^2 \, d\mu < \infty$, \texttt{field} simplifies expressions like:
-\[
-\frac{f(x)^2}{g(x)^2} = \left( \frac{f(x)}{g(x)} \right)^2 \quad (g(x) \neq 0),
-\]
+\subsection{Near}
+Introduces a neighborhood assumption. Given a goal involving a
+point $a$, \texttt{near x a} adds $x_{\text{near}} : \mathbb{R}$
+and $\delta_x > 0$ with $|x_{\text{near}} - a| < \delta_x$,
+facilitating local analysis as in Taylor’s Theorem.
+
+\subsection{ApplyLocally}
+Applies a local property (e.g., from a \texttt{near} assumption) to
+simplify the goal, automating steps in proofs like the Schwartz Kernel Theorem.
+
+To handle the algebraic manipulations ubiquitous in functional analysis (e.g., norms, integrals),
+Laurent incorporates solvers inspired by Lean and Coq:
+
+
+\section{Algebraic Solvers}
+
+To handle the algebraic manipulations ubiquitous in functional
+analysis (e.g., norms, integrals), Laurent incorporates solvers
+inspired by Lean and Coq:
+
+
+\subsection{Ring}
+
+Solves equalities in commutative rings. For example, it verifies:
+
+\[ (f(x) + g(x))^2 = f(x)^2 + 2 f(x) g(x) + g(x)^2, \]
+using $\mathbb{R}$’s ring structure. This is implemented via
+normalization and equality checking in Laurent’s core.
+
+\subsection{Field}
+
+Resolves field equalities and inequalities
+involving division. For $\int_0^\infty |f(x)|^2 \, d\mu < \infty$,
+\texttt{field} simplifies expressions like:
+
+\[ \frac{f(x)^2}{g(x)^2} = \left( \frac{f(x)}{g(x)} \right)^2 \quad (g(x) \neq 0), \]
+
 crucial for quotient manipulations in Banach spaces.
 
-\item \texttt{linarith}: Handles linear arithmetic inequalities. In the Banach-Steinhaus Theorem, it proves:
+\subsection{Big Number Normalization}
+Automates numerical simplification and equality checking for expressions involving rational numbers and basic functions. For a goal like \( 2 + 3 = 5 \) or \( |\sin(0)| = 0 \), it evaluates:
+\[
+\texttt{norm\_num} : e \mapsto r,
+\]
+where \( e \) is an expression (e.g., \( 2/3 + 1/2 \), \( \ln(1) \)), and \( r \) is either a rational number (via OCaml's \texttt{Num} library) or an unevaluated symbolic form. It supports operations including addition, subtraction, multiplication, division, exponentiation, absolute value, logarithms, and trigonometric functions, approximating transcendental results to high precision (e.g., 20 decimal places for \( \sin \), \( \cos \)). This tactic is essential for verifying norm computations, such as \( \|f\|_2^2 = \int |f(x)|^2 \, dx \), by reducing concrete numerical subgoals in Banach space proofs.
+
+\subsection{Inequality Set Predicates}
+
+Handles linear arithmetic inequalities. In the Banach-Steinhaus Theorem, it proves:
 \[
 \| T_\alpha x \|_Y \leq M \| x \|_X,
 \]
 by resolving linear constraints over $\mathbb{R}$, integrating seamlessly with \texttt{RealIneq} backed by Z3 SMT solver (morally correct for inequalities).
-\end{itemize}
-These solvers, built into Laurent’s inference engine, automate routine algebraic steps, allowing focus on analysis-specific reasoning.
 
 \subsection{Proof Search and Automation}
 Laurent’s proof state is managed as a list of goals, each with a context
@@ -428,7 +477,6 @@ complementing the broader capabilities of Lean and Coq. This work underscores th
 proof assistants in advancing computational mathematics.
 
 \begin{thebibliography}{999}
-
 
 % *** AN ARTICLE (in English)
 \bibitem[1]{af18} Affeldt R., Cohen C., Mahboubi A., Rouhling D.,  Strub P-Y. \emph{Classical Analysis with Coq},
