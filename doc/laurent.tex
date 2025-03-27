@@ -15,87 +15,80 @@
 \newunicodechar{ε}{$\epsilon$}
 \renewcommand{\quotesinglbase}{,}
 
-% Description of some options:
-% draft      - draft version of the document
-% bysec      - propositions, lemmas, definitions etc (not theorems) are numbered within each \section
-% thmbysec   - theorems are numbered within each \section
-% win        - CP-1251 encoding (Windows)
-% koi        - KOI8_U encoding (Unix)
-% utf8       - UTF-8 encoding (Unix)
-%
-% The following packets already included by cmparticle class:
-% amsmath,amsfonts,amsthm,amssymb,latexsym
-%
-% Theorem-like environments already defined by cmparticle class:
-% {theorem}     - Theorem
-% {proposition} - Proposition
-% {lemma}       - Lemma
-% {corollary}   - Corollary
-% {remark}      - Remark
-% {definition}  - Definition
-% {example}     - Example
-% {examples}    - Examples
-% as well as their analogs with star (for unnumbered environments):
-% {theorem*}, {proposition*} and so on.
+\author{ Sokhatskyi M.E. }
+\title{ Laurent Schwartz: Analytical Type System \\ \vspace{-0.3cm}
+        for Theorems Mechanization \\ \vspace{-0.3cm}
+        of Functional Analysis \\ }
 
-% YOUR DEFINITIONS HERE ------------------------------
+\shorttitle{ Laurent: Syntentic Analysis }
 
-% ----------------------------------------------------
+\institute{ Groupoid Infinity, Laboratory of National Technical University of Ukraine,
+            м. Київ, Україна, 03056, Політехнічна вул. 14-А, корпус 14 (прикладної математики) }
 
-\author{Sokhatskyi M.E.}
-\title{Laurent: Syntentic Analysis}
+\email{ cmp@5ht.co (Sokhatskyi M.E.) }
 
-\shorttitle{}
+\enabstract{ Sokhatskyi M.E. }
+{ Laurent: Syntentic Analysis }
+{ The formalization of mathematical analysis in proof assistants has
+  advanced significantly with systems like Lean and Coq, which have
+  mechanized key results in functional analysis, such as Bochner
+  integration, $L^2$ spaces, and the theory of distributions. This
+  article introduces Laurent, a novel proof assistant built on MLTT-72,
+  a minimal Martin-Löf Type Theory with Pi and Sigma types, omitting
+  identity types (e.g., \texttt{Id}, \texttt{J}) in favor of
+  \texttt{Prop} predicates and truncated Sigma types. Laurent
+  embeds explicit primitives for calculus, measure theory, and set
+  theory with open sets and topology directly into its core,
+  complemented by a tactics language inspired by Lean, Coq, and
+  recent near tactics. Designed to unify classical and constructive
+  analysis, it targets the mechanization of Laurent Schwartz’s Théorie
+  des Distributions and Analyse Mathématique alongside Errett Bishop’s
+  Foundations of Constructive Analysis. We present its foundational
+  constructs and demonstrate its application to theorems in sequences,
+  Lebesgue integration, $L^2$ spaces, and distributions, arguing that
+  its design offers an intuitive yet rigorous approach to analysis,
+  appealing to classical analysts while preserving constructive
+  precision. Laurent emerges as a specialized tool for computational
+  mathematics, advancing the mechanization of functional analysis.}
+{Type Theory, Functional Analisys, Computational Mathematics}
 
-\institute{Groupoid Infinity, Laboratory of National Technical University of Ukraine, м. Київ, Україна, 03056,
-  Політехнічна вул. 14-А, корпус 14 (прикладної математики)}
+\uaabstract{ Sokhatskyi M.E. }
+{ Система доведення теорем Laurent }
+{ Формалізація математичного аналізу в системах доведення теорем досягла
+  значного прогресу завдяки таким системам, як Lean і Coq, які механізували
+  ключові результати функціонального аналізу, зокрема інтеграл Бохнера,
+  простори $L^2$ та теорію розподілів. У цій статті представлено Laurent —
+  нову систему доведення теорем, побудовану на MLTT-72, мінімальній
+  теорії типів Мартіна-Льофа з типами Пі та Сигма, що виключає типи
+  ідентичності (наприклад, Id, J) на користь предикатів Prop і
+  урізаних типів Сигма. Laurent вбудовує явні примітиви для числення,
+  теорії міри та теорії множин з відкритими множинами й топологією
+  безпосередньо в своє ядро, доповнене мовою тактик, натхненною Lean,
+  Coq та нещодавніми тактиками околів. Розроблена для об’єднання
+  класичного та конструктивного аналізу, система націлена на механізацію
+  теорії розподілів і аналізу Лорана Шварца поряд із
+  основами конструктивного аналізу Ерретта Бішопа.
 
-\email{cmp@5ht.co (Sokhatskyi M.E.)}
+  Ми описуємо базові конструкції мови та показуємо їх застосування
+  до теорем аналізу про інтеграцію Лебега, простори $L^2$ і розподіли,
+  стверджуючи, що її дизайн пропонує інтуїтивний, але строгий підхід
+  до аналізу, дотримуючись конструктивної точності.
 
-\enabstract{Sokhatskyi M.E.}
-{Laurent proof assistant}
-{The formalization of mathematical analysis in proof assistants has seen significant
- advancements with systems like Lean and Coq, which have successfully mechanized key
- results in functional analysis, including Bochner integration, $L^2$ spaces, theory of distributions.
- This article introduces Laurent, a novel proof assistant designed to bridge
- classical and constructive analysis through a unique architecture. Unlike
- general-purpose systems, Laurent embeds explicit primitives for calculus
- and measure theory directly into its core, complemented by a tactics language
- inspired by Lean, Coq, and its recent near tactics. We present its foundational
- constructs, demonstrate its application to theorems in sequences, integration,
- and $L^2$ spaces, and argue that its design offers a more intuitive mechanization
- of analysis, aligning with the mathematical reasoning of classical analysts while
- retaining constructive rigor. This work positions Laurent as a specialized tool
- for functional analysis within the growing domain of computational mathematics.}
-{Type Theory, Functional Analysis, Computational Mathematics}
-
-\uaabstract{Sokhatskyi M.E.}
-{Система доведення теорем Laurent}
-{Формалізація математичного аналізу в системах доведення теорем досягла значних успіхів завдяки таким системам,
- як Lean і Coq, які успішно механізували результати аналізу, таків як інтеграл Соломона Бохнера, простори $L^2$, теорія розподілів Лорана Шварца.
-У цій статті представлено Laurent — нова система доведення теорем, розроблена для поєднання класичного та конструктивного
-аналізу. На відміну від систем загального призначення,
-Laurent вбудовує явні примітиви для теорії міри, теорії множин та аналізу в своє ядро,
-доповнене мовою тактик, натхненною Lean, Coq та його спеціалізованими тактиками для околів.
-Ми описуємо її базові конструкції, демонструємо їх застосування до теорем про послідовності,
-інтеграцію та простори $L^2$ і стверджуємо, що його дизайн пропонує більш інтуїтивну механізацію
-аналізу, узгоджену з математичним мисленням класичних аналітиків, зберігаючи при цьому конструктивну
-строгість в дусі Ерретта Бішопа (його формулювання теж виражаються).}
+  Система доведення Laurent постає як спеціалізований інструмент для обчислювальної
+  математики, що просуває механізацію функціонального аналізу.}
 {Теорія типів, функціональний аналіз, обчислювальна математика}
 
-\thanks{Sokhatskyi M.E. would like to acknowledge support by the Ministry of Health of Ukraine.}
+\thanks{ Sokhatskyi M.E. would like to acknowledge support by Ministry of Health of Ukraine. }
 
-\subjclass{26E40, 68T15, 68Q45,  }
-\UDC{510.6, 519.68}
-\received{08.05.2024}
+\subjclass{ 26E40, 68T15, 68Q45 }
+\UDC{ 510.6, 519.68 }
+\received{ 27.03.2025 }
 
-\def\baselinestretch{1.1}
+\def\baselinestretch{ 1.1 }
 
 \begin{document}
 
 \maketitle
-
-%%% ----------------------------------------------------------------------
 
 \section{Introduction}
 The mechanization of mathematical theorems has transformed modern mathematics,
