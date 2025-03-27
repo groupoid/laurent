@@ -1,0 +1,285 @@
+\documentclass[12pt,twoside,draft]{cmpart}
+\usepackage[T1,T2A]{fontenc}
+
+\renewcommand{\quotesinglbase}{,}
+
+% Description of some options:
+% draft      - draft version of the document
+% bysec      - propositions, lemmas, definitions etc (not theorems)
+%              are numbered within each \section
+% thmbysec   - theorems are numbered within each \section
+% win        - CP-1251 encoding (Windows)
+% koi        - KOI8_U encoding (Unix)
+%
+%  The following packets already included by cmparticle class:
+% amsmath,amsfonts,amsthm,amssymb,latexsym
+%
+% Theorem-like environments already defined by cmparticle class:
+% {theorem}     - Theorem
+% {proposition} - Proposition
+% {lemma}       - Lemma
+% {corollary}   - Corollary
+% {remark}      - Remark
+% {definition}  - Definition
+% {example}     - Example
+% {examples}    - Examples
+% as well as their analogs with star (for unnumbered environments):
+% {theorem*}, {proposition*} and so on.
+
+
+% YOUR DEFINITIONS HERE ------------------------------
+
+% ----------------------------------------------------
+
+
+\author{Author1 A.A., Author2 B.B.}
+\title{Title of the article in English}
+
+% The following command should be used ONLY if
+% title of the article is too long for colontitles
+\shorttitle{Short title of the article}
+
+\institute{Univeristy, Address, City, Country (Author1 A.A.)\\
+Univeristy, Address, City, Country (Author2 B.B.)}
+
+\email{mail1@domain.ua (Author1 A.A.), mail2@domain.ua (Author2 B.B.)}
+
+\enabstract{Author1 A.A., Author2 B.B.}%
+{Title of the article in English}%
+{An abstract in English. An abstract in English. An abstract in English.
+An abstract in English. An abstract in English. An abstract in English.
+
+An abstract in English. An abstract in English. An abstract in English.
+An abstract in English. An abstract in English. An abstract in English.}
+{keyword1, keyword2, phrase1, phrase2}
+
+\uaabstract{Автор1 А.А., Автор2 Б.Б.}%
+{Назва статті українською}%
+{Анотація українською мовою. Анотація українською мовою. Анотація українською мовою.
+Анотація українською мовою. Анотація українською мовою.}
+{слово1, слово2, фраза1, фраза2}
+
+\thanks{Authors want to thanks \dots}
+
+\subjclass{26E40, 68T15, 971Ixx, 97N60, 97N80, 97P40, 97R20}
+% 2010 Mathematics Subject Classification
+% According to http://www.ams.org/msc/msc2010.html
+
+
+\UDC{004.4, 004.6, 004.9, 510.21, 510.24, 510.25, 510.6, 519.68}
+% Universal Decimal Classification (УДК)
+% It will be indicated by Editorial Team
+% (for those authors, who don't understand what is it)
+
+\received{04.02.2021}  % article received date
+% \revised{05.02.2021} % article revised date
+
+\def\baselinestretch{1.1}
+
+\begin{document}
+
+\maketitle
+
+%%% ----------------------------------------------------------------------
+
+\section*{Introduction}
+Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor 
+incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, 
+quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. 
+Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. 
+Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+
+\section{First section}
+Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor 
+incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, 
+quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. 
+Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. 
+Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+
+\subsection{Subsection of the First Section}
+Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor 
+incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, 
+quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. 
+Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. 
+Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+
+\subsubsection{Subsubsection of the subsection of the First Section}
+Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor 
+incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, 
+quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. 
+Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. 
+Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+
+\paragraph{Some paragraph may start like this one.}
+Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor 
+incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, 
+quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. 
+Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. 
+Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+
+\begin{definition}
+Definition of something.
+\end{definition}
+
+\begin{proposition*}
+Unnumbered proposition.
+\end{proposition*}
+
+In analogous way an author can produce another environments like
+Theorem, Lemma, Definition etc.
+
+To cite some publication(s) an author should use the command 
+\verb"\cite{k1,k2,k3}" to produce this \cite{k1,k2,k3}.
+Using the direct numbers in square brackets is prohibited!
+
+\begin{theorem}
+This is a numbered theorem with inline formula $E=mc^2$.
+\end{theorem}
+\begin{proof}
+We are proving the theorem. We are proving the theorem. We are proving the theorem.
+We are proving the theorem. We are proving the theorem. We are proving the theorem.
+
+We are proving the theorem. We are proving the theorem. We are proving the theorem. 
+Thus, the theorem is proved. 
+\end{proof}
+
+The displayed equations may be presented in two versions: numbered and unnumbered.
+Note, that an unreferenced equation should be unnumbered!
+
+The numbered equation is the following
+\begin{equation}\label{eq1}
+ e^x=\sum_{n=0}^\infty \frac{x^n}{n!},
+\end{equation}
+and unnumbered one is
+\[
+ \int_a^b f(x)\,dx=F(b)-F(a).
+\]
+
+To cite a numbered equation an author should use the command \verb"\eqref" to 
+produce this \eqref{eq1}. Using the direct numbers in round brackets is prohibited!
+
+In multiline equations, signs like 
+$=$, $\le$, $<$, $+$, $-$ etc should be in next row, see the example:
+\[
+\begin{split}
+\iint\limits_{R_1\le x^2+y^2\le R_2} e^{-x^2-y^2}\,dx\,dy
+=&\int_0^{2\pi} d\varphi\int_{R_1}^{R_2} e^{-r^2} r\,dr\\
+=&\pi\big(-e^{-r^2}\big)\big\vert_{R_1}^{R_2}=\pi\big(e^{-R_1^2}-e^{-R_2^2}\big).
+\end{split}
+\]
+
+\begin{corollary}
+The text of a corollary.
+\end{corollary}
+
+\begin{lemma}
+The text of a lemma.
+\end{lemma}
+
+\begin{proposition}
+The text of a proposition.
+\end{proposition}
+
+\begin{remark}
+The Text of a remark.
+\end{remark}
+
+\begin{example}
+Some example is presented here.
+\end{example}
+
+\section{Formatting of the reference list}
+
+All references should be cited within the text; 
+otherwise, these references should be removed from the reference list
+(see position 8 in reference list).
+
+References must be listed in alphabetical order. 
+The titles of journals should be abbreviated to the style used by AMS 
+(http://www.ams.org/msnhtml/serials.pdf).
+
+If the referred paper has a Digital Object Identifier (DOI)
+it should be indicated.
+
+The following reference style should be used
+(positions \cite{k1,k2,k3,k4,k5,k6,k7} are some abstract examples,
+and concrete examples are presented in positions \cite{ke1,ke2,ke3,ke4,ke5,ke6,ke7}).
+
+\begin{thebibliography}{999}
+
+% *** A BOOK (in English)
+\bibitem{k1} Author1 A.A., Author2 B.B., Author3 C.C. Title of the book. PublishingHouse, City, Year.
+
+% *** A BOOK as a part of Series (in English)
+\bibitem{k2} Author1 A.A., Author2 B.B., Author3 C.C. Title of the book. In: Editor1 A.A.,
+Editor2 B.B. (Eds.)
+SeriesTitle, Number. PublishingHouse, City, Year.
+
+% *** A BOOK (in other language)
+\bibitem{k3} Author1 A.A., Author2 B.B., Author3 C.C. English translation of title of the
+book.
+PublishingHouse, City, Year. (in Language)
+
+% *** AN ARTICLE (in English)
+\bibitem{k4} Author1 A.A., Author2 B.B., Author3 C.C. \emph{Title of the article}.
+Title of the Journal Year, \textbf{Volume} (Number), PageF--PageL.
+doi: N/A
+
+% *** AN ARTICLE (in other language)
+\bibitem{k5} Author1 A.A., Author2 B.B., Author3 C.C. \emph{English translation of title
+of the article}. Title of the Journal Year, \textbf{Volume} (Number), PageF--PageL.
+doi: N/A (in Language)
+
+% *** A BOOK OF ABSTRACTS
+\bibitem{k6} Author1 A.A., Author2 B.B. Title of abstract. In: Editor1 A.A., Editor2 B.B.
+(Eds.) Proc. of the Intern. Conf.
+``Title of the Conference'', City, Country, Month DateF--DateL, Year, PublishingHouse, City, Year, PageF--PageL.
+
+% *** AN ARTICLE, translated in English from other language
+\bibitem{k7} Author1 A.A., Author2 B.B., Author3 C.C. \emph {Title of the article}.
+Title of the Journal Year, \textbf{Volume} (Number), PageF--PageL. doi: N/A
+(translation of Title of the Journal Year, \textbf{Volume} (Number),
+PageF--PageL. doi: N/A (in Language))
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\bibitem{ke8} Author A.A. \textit{En example of uncited article}. Journal 2021, \textbf{1} (1), 1--2.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% *** A BOOK (in English)
+\bibitem{ke1} Dineen S. Complex analysis on infinite-dimensional spaces.
+ Springer-Verlag, London, 1999.
+
+% *** A BOOK as a part of Series (in English)
+\bibitem{ke2} Defant A., Floret K. Tensor norms and operator ideals.
+In: Nachbin L. (Ed.) Mathematics Studies, 176.
+North-Holland, Amsterdam, 1993.
+
+% *** A BOOK (in other language)
+\bibitem{ke3} Kadets V.M. A course of functional analysis and measure theory.
+Chyslo, Lviv, 2012. (in Ukrainian)
+
+% *** AN ARTICLE (in English)
+\bibitem{ke4} Lopushansky O., Zagorodnyuk A. \emph{Representing measures
+and infinite-dimensional holomorphy}. J. Math. Anal. \& App. 2007, \textbf{333} (2), 614--625.
+doi:10.1016/j.jmaa.2006.09.035
+
+% *** AN ARTICLE (in other language)
+\bibitem{ke5} Malytska G.P. \emph{Systems of equations of Kolmogorov type.}
+Ukr. Math. J. 2009, \textbf{12} (3), 1650--1563. (in Ukrainian)
+
+% *** A BOOK OF ABSTRACTS
+\bibitem{ke6} Sharyn S.V. Generalized Fourier transformation of
+polynomial ultradistributions. In: Proc. of the Intern. Sci. Conf. ``Infinite
+Dimensional Analysis and Topology'', Ivano-Frankivsk, Ukraine,
+May 27--June 1, 2009. Ter. Druku, Ivano-Frankivsk, 2009, 134--135.
+
+% *** AN ARTICLE, translated in English from other language
+\bibitem{ke7} Zagorodnuyk A.V., Mitrofanov M.A. \emph {An analog of Wiener’s theorem for
+infinite-dimensional Banach spaces}. Math. Notes 2015, \textbf{97} (1-2), 179--189.
+doi:10.1134/S0001434615010204 (translation of Mat. Zametki 2015, 97 (2), 191--202.
+
+\end{thebibliography}
+
+\end{document}
