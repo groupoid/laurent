@@ -1,5 +1,7 @@
 \documentclass[12pt,twoside,draft]{cmpart}
 \usepackage[T1,T2A]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{mathpazo}
 
 \renewcommand{\quotesinglbase}{,}
 
@@ -10,6 +12,7 @@
 % thmbysec   - theorems are numbered within each \section
 % win        - CP-1251 encoding (Windows)
 % koi        - KOI8_U encoding (Unix)
+% utf8       - UTF-8 encoding (Unix)
 %
 %  The following packets already included by cmparticle class:
 % amsmath,amsfonts,amsthm,amssymb,latexsym
@@ -26,11 +29,9 @@
 % as well as their analogs with star (for unnumbered environments):
 % {theorem*}, {proposition*} and so on.
 
-
 % YOUR DEFINITIONS HERE ------------------------------
 
 % ----------------------------------------------------
-
 
 \author{Author1 A.A., Author2 B.B.}
 \title{Title of the article in English}
@@ -39,40 +40,31 @@
 % title of the article is too long for colontitles
 \shorttitle{Short title of the article}
 
-\institute{Univeristy, Address, City, Country (Author1 A.A.)\\
-Univeristy, Address, City, Country (Author2 B.B.)}
+\institute{Institute of Mathematics, National Academy of Sciences of Ukraine, 3 Tereschenkivska str., 03024, Kyiv, Ukraine (Pozharska K.V., Romanyuk A.S., Romanyuk V.S.)\\
+Chemnitz University of Technology, 39 Reichenhainer str., 09126, Chemnitz, Germany (Pozharska K.V.)}
 
-\email{mail1@domain.ua (Author1 A.A.), mail2@domain.ua (Author2 B.B.)}
+\email{pozharska.k@gmail.com (Pozharska K.V.), romanyuk@imath.kiev.ua (Romanyuk A.S.), vsromanyuk@imath.kiev.ua (Romanyuk V.S.)}
 
-\enabstract{Author1 A.A., Author2 B.B.}%
-{Title of the article in English}%
-{An abstract in English. An abstract in English. An abstract in English.
-An abstract in English. An abstract in English. An abstract in English.
+\enabstract{Pozharska K.V., Romanyuk A.S., Romanyuk V.S.}
+{Widths and entropy numbers of the classes of periodic functions of one and several variables in the space $B_{q,1}$}
+{Exact-order estimates are obtained for the entropy numbers and several types of widths (Kolmogorov, linear, trigonometric and orthowidth) for the Sobolev and Nikol'skii-Besov classes of one and several variables in the space $B_{q,1}$, $1<q<\infty$. It is shown, that in the multivariate case, in contrast to the univariate, the obtained estimates differ in order from the corresponding estimates in the space $L_q$.}
+{Sobolev class, Nikol'skii-Besov class, entropy number, width}
 
-An abstract in English. An abstract in English. An abstract in English.
-An abstract in English. An abstract in English. An abstract in English.}
-{keyword1, keyword2, phrase1, phrase2}
+\uaabstract{Пожарська К.В., Романюк А.С., Романюк В.С.}
+{Поперечники і ентропійні числа класів періодичних функцій однієї та багатьох змінних у просторі $B_{q,1}$}
+{Одержано точні за порядком оцінки ентропійних чисел і низки поперечників
+  лінійний, тригонометричний та ортопоперечник) класів
+  Соболева та Нікольського-Бесова однієї та багатьох
+  змінних у просторі $B_{q,1}$, $1<q<\infty$. Виявлено, що у багатовимірному
+  випадку, на противагу одновимірному, встановлені оцінки за
+  порядком від відповідних оцінок у $L_q$-просторі.}
+{клас Соболева, клас Нікольського-Бесова, ентропійне число, поперечник}
 
-\uaabstract{Автор1 А.А., Автор2 Б.Б.}%
-{Назва статті українською}%
-{Анотація українською мовою. Анотація українською мовою. Анотація українською мовою.
-Анотація українською мовою. Анотація українською мовою.}
-{слово1, слово2, фраза1, фраза2}
+\thanks{Pozharska K.V. would like to acknowledge support by the Philipp Schwartz Fellowship of the Alexander von Humboldt Foundation.}
 
-\thanks{Authors want to thanks \dots}
-
-\subjclass{26E40, 68T15, 971Ixx, 97N60, 97N80, 97P40, 97R20}
-% 2010 Mathematics Subject Classification
-% According to http://www.ams.org/msc/msc2010.html
-
-
-\UDC{004.4, 004.6, 004.9, 510.21, 510.24, 510.25, 510.6, 519.68}
-% Universal Decimal Classification (УДК)
-% It will be indicated by Editorial Team
-% (for those authors, who don't understand what is it)
-
-\received{04.02.2021}  % article received date
-% \revised{05.02.2021} % article revised date
+\subjclass{41A46}
+\UDC{517.5}
+\received{08.05.2024}
 
 \def\baselinestretch{1.1}
 
@@ -97,24 +89,24 @@ Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu 
 Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 
 \subsection{Subsection of the First Section}
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor 
-incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, 
-quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. 
-Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. 
+Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusod tempor
+incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
 Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 
 \subsubsection{Subsubsection of the subsection of the First Section}
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor 
-incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, 
-quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. 
-Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. 
+Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
+incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
 Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 
 \paragraph{Some paragraph may start like this one.}
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor 
-incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, 
-quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. 
-Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. 
+Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
+incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
 Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 
 \begin{definition}
@@ -139,8 +131,8 @@ This is a numbered theorem with inline formula $E=mc^2$.
 We are proving the theorem. We are proving the theorem. We are proving the theorem.
 We are proving the theorem. We are proving the theorem. We are proving the theorem.
 
-We are proving the theorem. We are proving the theorem. We are proving the theorem. 
-Thus, the theorem is proved. 
+We are proving the theorem. We are proving the theorem. We are proving the theorem.
+Thus, the theorem is proved.
 \end{proof}
 
 The displayed equations may be presented in two versions: numbered and unnumbered.
@@ -155,7 +147,7 @@ and unnumbered one is
  \int_a^b f(x)\,dx=F(b)-F(a).
 \]
 
-To cite a numbered equation an author should use the command \verb"\eqref" to 
+To cite a numbered equation an author should use the command \verb"\eqref" to
 produce this \eqref{eq1}. Using the direct numbers in round brackets is prohibited!
 
 In multiline equations, signs like 
@@ -190,12 +182,12 @@ Some example is presented here.
 
 \section{Formatting of the reference list}
 
-All references should be cited within the text; 
+All references should be cited within the text;
 otherwise, these references should be removed from the reference list
 (see position 8 in reference list).
 
-References must be listed in alphabetical order. 
-The titles of journals should be abbreviated to the style used by AMS 
+References must be listed in alphabetical order.
+The titles of journals should be abbreviated to the style used by AMS
 (http://www.ams.org/msnhtml/serials.pdf).
 
 If the referred paper has a Digital Object Identifier (DOI)

@@ -51,7 +51,8 @@
 %
 \DeclareOption{win}{\PassOptionsToPackage{cp1251}{inputenc}}
 \DeclareOption{koi}{\PassOptionsToPackage{koi8-u}{inputenc}}
-\PassOptionsToPackage{cp1251}{inputenc}
+\DeclareOption{utf8}{\PassOptionsToPackage{utf8}{inputenc}}
+\PassOptionsToPackage{utf8}{inputenc} % Default to UTF-8 for modern systems
 %
 \let\ifpj@draft\iffalse
 \let\ifpj@othsec\iffalse
@@ -188,18 +189,18 @@
 %
 \long\def\maketitle{%
     \ifpj@draft
-       \ifx\@author\empty  \def\@author{\textbf{Maksym Sokhatskyi}}\fi
-       \ifx\@title\empty  \def\@title{\textbf{Laurent Proof Assistant}}\fi
+       \ifx\@author\empty  \def\@author{\textbf{???}}\fi
+       \ifx\@title\empty  \def\@title{\textbf{???}}\fi
        \ifx\pj@UDC\empty  \def\pj@UDC{\textbf{???}}\fi
-       \ifx\pj@subjclass\empty  \def\pj@subjclass{\textbf{dfat}}\fi
-       \ifx\pj@received\empty  \def\pj@received{\textbf{sadfasdfasdf}}\fi
+       \ifx\pj@subjclass\empty  \def\pj@subjclass{\textbf{???}}\fi
+       \ifx\pj@received\empty  \def\pj@received{\textbf{???}}\fi
        \ifx\pj@enauthtitle\empty
          \def\pj@enauthtitle{\@author. {\it \@title}}%
          \def\pj@enabstract{This paper \dots}%
        \fi
        \ifx\pj@uaauthtitle\empty
          \def\pj@uaauthtitle{\@author. {\it \@title}}%
-         \def\pj@uaabstract{Стаття \dots}%
+         \def\pj@uaabstract{\CYRS\cyrt\cyra\cyrt\cyrt\cyrya\ \cyrp\cyrr\cyro\ \dots}%
        \fi
     \fi
     \ifx\pj@shorttitle\empty  \let\pj@shorttitle\@title \fi
@@ -228,15 +229,15 @@
 %
     \ifx\@title\empty \else
         \let\@tempa\@title
-        \begin{center} 
+        \begin{center}
           \renewcommand{\baselinestretch}{1.3}%
-          \textbf{\Large\@tempa} 
+          \textbf{\Large\@tempa}
         \end{center}%
     \fi
-%    
+%
     \ifx\@author\empty \else
-        \begin{center} 
-          \textbf {\@author} 
+        \begin{center}
+          \textbf {\@author}
         \end{center}%
     \fi
 %% English abstract
@@ -267,7 +268,9 @@
          \ifx\pj@uaauthtitle\empty \else
            \par\bigskip
            \noindent \pj@uaauthtitle\ {/\kern-2pt/ }
-             Привіт
+           \CYRK\cyra\cyrr\-\cyrp\cyra\cyrt\-\cyrs\cyrsftsn\cyrk\cyrii\
+           \cyrm\cyra\-\cyrt\cyre\cyrm.\
+           \cyrp\cyru\cyrb\cyrl.\
            \par\vspace{3pt}%
            \pj@uaabstract
          \fi
