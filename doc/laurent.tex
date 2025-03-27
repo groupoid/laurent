@@ -389,8 +389,14 @@ Laurent incorporates solvers inspired by Lean and Coq:
 
 To handle the algebraic manipulations ubiquitous in functional
 analysis (e.g., norms, integrals), Laurent incorporates solvers
-inspired by Lean and Coq:
+inspired by Lean and Coq.
 
+Lean’s \texttt{ring} and \texttt{linarith} rely on \texttt{mathlib},
+while Coq’s \texttt{field} uses library-defined fields. Laurent embeds
+these solvers in its core, alongside analysis tactics, reducing dependency
+on external definitions. This design accelerates proofs in $L^2$ spaces,
+Banach duality, and distribution theory, aligning with the needs of a
+mathematical audience exploring frontier research in computational analysis.
 
 \subsection{Ring}
 
@@ -425,40 +431,6 @@ Handles linear arithmetic inequalities. In the Banach-Steinhaus Theorem, it prov
 \]
 by resolving linear constraints over $\mathbb{R}$, integrating seamlessly with \texttt{RealIneq} backed by Z3 SMT solver (morally correct for inequalities).
 
-\subsection{Proof Search and Automation}
-Laurent’s proof state is managed as a list of goals, each with a context
-and target type, updated dynamically by tactics. The \texttt{Near} tactic,
-inspired by INRIA’s work \cite{af18}, enhances automation by contextualizing
-proofs around points, as seen in:
-
-\begin{verbatim}
-let limit_a : exp =
-  Limit (Seq sequence_a, Infinity, Zero,
-    Lam ("ε", Real, Lam ("p", RealIneq (Gt, Var "ε", Zero),
-      Pair (RealOps (Div, One, Var "ε"),
-        Lam ("n", Nat, Lam ("q", RealIneq (Gt, Var "n", Var "N"),
-          RealIneq (Lt, RealOps (Abs,
-          RealOps (Minus, App (sequence_a, Var "n"), Zero), Zero),
-            Var "ε")))))))
-\end{verbatim}
-
-Here, \texttt{limit} unfolds the definition, \texttt{intro ε} and \texttt{intro p}
-build the context, and \texttt{linarith} confirms $|1/n| < \varepsilon$ for
-large $n$. Similarly, in the Lebesgue Dominated Convergence Theorem,
-\texttt{limit} and \texttt{field} ensure $\int f_n \to \int f$.
-
-For complex theorems like de Rham, \texttt{continuity} and \texttt{ring}
-collaborate to verify differential form properties, while \texttt{auto}
-closes trivial subgoals.
-
-\subsection{Comparison with Lean and Coq}
-Lean’s \texttt{ring} and \texttt{linarith} rely on \texttt{mathlib},
-while Coq’s \texttt{field} uses library-defined fields. Laurent embeds
-these solvers in its core, alongside analysis tactics, reducing dependency
-on external definitions. This design accelerates proofs in $L^2$ spaces,
-Banach duality, and distribution theory, aligning with the needs of a
-mathematical audience exploring frontier research in computational analysis.
-
 \section{Discussion and Future Directions}
 Laurent has built-in primitives for streamline proofs in measure theory, integration, and $L^2$ spaces,
 while its tactics language ensures flexibility. Compared to Lean’s library-heavy approach
@@ -471,10 +443,13 @@ Hosted at \footnote{\url{https://github.com/groupoid/laurent}}, Laurent invites 
 contributions to refine its role in computational mathematics.
 
 \section{Conclusion}
-Laurent represents a specialized advancement in theorem mechanization, tailored for classical and constructive analysis.
-By embedding analysis primitives and leveraging near tactics, it offers a unique tool for functional analysts,
-complementing the broader capabilities of Lean and Coq. This work underscores the potential of domain-specific
-proof assistants in advancing computational mathematics.
+Laurent represents a specialized advancement in theorem mechanization,
+tailored for classical and constructive analysis. By embedding analysis
+primitives and leveraging topological tactics and algebraic solvers,
+it offers a unique tool for functional analysts, complementing the
+broader capabilities of Lean and Coq. This work underscores the
+potential of domain-specific proof assistants in advancing computational
+mathematics.
 
 \begin{thebibliography}{999}
 
