@@ -67,8 +67,15 @@ block content
                             li: a(href='https://laurent.groupoid.space/foundations/measure/') MEASURE
                             li: a(href='https://laurent.groupoid.space/foundations/lebesgue/') LEBESGUE
                             li: a(href='https://laurent.groupoid.space/foundations/bochner/') BOCHNER
+
                 br
                 br
+                div(style={"text-align": "center", "padding-top": "8px"}).
+                    <img src="https://anders.groupoid.space/images/pdf.jpg" width=35>
+                    <a href="https://groupoid.github.io/laurent/doc/laurent.pdf">LAURENT.PDF</a>
+                br
+                br
+
                 +tex.
                     $\mathbf{Installation}$.
                 +tex.
@@ -83,9 +90,6 @@ block content
                     $ ocamlfind ocamlc -o laurent \
                       -package z3 -linkpkg src/laurent.ml
 
-                div(style={"text-align": "center", "padding-top": "8px"}).
-                    <img src="https://anders.groupoid.space/images/pdf.jpg" width=35>
-                    <a href="https://groupoid.github.io/laurent/doc/laurent.pdf">LAURENT.PDF</a>
 
             section
                 h1 SYNTAX
