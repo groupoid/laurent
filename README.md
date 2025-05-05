@@ -595,6 +595,7 @@ let proof : de_rham_theorem =
 [4]. Auke Booij. <a href="https://etheses.bham.ac.uk/id/eprint/10411/7/Booij2020PhD.pdf">Analysis in Univalent Type Theory</a> (2020)<br>
 [5]. Zachary Murray. <a href="https://arxiv.org/pdf/2205.08354">Constructive Real Numbers in the Agda Proof Assistant</a> (2023)<br>
 [6]. William Ziemer, Monica Torres. <a href="https://www.math.purdue.edu/~torresm/pubs/Modern-real-analysis.pdf">Modern Real Analysis </a> (2017)<br>
+[7]. William Arveson. <a href="http://ndl.ethernet.edu.et/bitstream/123456789/25715/1/William%20Arveson.pdf">A Short Course on Spectral Theory</a><br>
 
 ## Author
 
