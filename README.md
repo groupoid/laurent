@@ -25,11 +25,19 @@ We’ll explore this system through examples, starting with:
 5) L₂ spaces, and culminating in
 6) Schwartz’s theory of distributions.
 
+Installation
+-----
+
+```
+opam install . --deps-only
+dune build
+```
+
 Usage
 -----
 
 ```
-$ ./laurent
+$ dune exec laurent banner
 TEST OK> integral_sig : Universe 0
 TEST OK> integral_term : Forall (f, Forall (x, ℝ, ℝ), Forall (a, ℝ, Forall (b, ℝ, ℝ)))
 TEST OK> sequence_a : Forall (n, ℕ, ℝ)
