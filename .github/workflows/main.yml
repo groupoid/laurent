@@ -25,17 +25,14 @@ jobs:
         with:
           ocaml-compiler: 5
 
+      - name: Pin Z3 to system version
+        run: opam pin add z3.system -k version 4.12.2 
+  
       - name: Set up opam environment
         run: opam install dune opam-depext z3 menhir zarith num --no-depexts
 
-      - name: Install dependencies
-        run: opam install . --deps-only --with-test
-
       - name: Build
         run: opam exec -- dune build
-
-      - name: Install
-        run: opam install .
 
       - name: Run program
         run: opam exec -- dune exec laurent banner
