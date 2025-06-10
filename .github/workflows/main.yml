@@ -26,7 +26,7 @@ jobs:
           ocaml-compiler: 5
 
       - name: Pin Z3 to system version
-        run: opam pin add z3.system -k version 4.12.2 
+        run: opam pin add z3.system -k version 4.12.2  --no-depexts
   
       - name: Set up opam environment
         run: opam install dune opam-depext z3 menhir zarith num --no-depexts
