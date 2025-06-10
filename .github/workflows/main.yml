@@ -29,5 +29,6 @@ jobs:
           ocaml-compiler: ${{ matrix.ocaml-version }}
 
       - run: eval $(opam env) 
+      - run: opam install .
       - run: opam exec -- dune build
       
