@@ -20,13 +20,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Use OCaml ${{ matrix.ocaml-version }}
-        uses: avsm/setup-ocaml@v1
-        with:
-          ocaml-version: ${{ matrix.ocaml-version }}
-      
       - name: Fix apt sources
         run: sudo apt-get update --fix-missing
+
+      - name: Use OCaml ${{ matrix.ocaml-version }}
+        uses: ocaml/setup-ocaml@v3
+        with:
+          ocaml-version: ${{ matrix.ocaml-version }}
 
       - run: eval $(opam env) 
       - run: opam exec -- dune build
