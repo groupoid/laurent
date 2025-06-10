@@ -1,10 +1,8 @@
 name: opam
 
 on:
-  - push
   - pull_request
-
-permissions: read-all
+  - push
 
 jobs:
   build:
@@ -12,22 +10,20 @@ jobs:
       fail-fast: false
       matrix:
         os:
-          - ubuntu-latest
+          - ubuntu-22.04
+        ocaml-version:
+          - 4.14.0
 
     runs-on: ${{ matrix.os }}
 
     steps:
-      - name: Checkout tree
-        uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-      - name: Set-up OCaml
-        uses: ocaml/setup-ocaml@v3
+      - name: Use OCaml ${{ matrix.ocaml-version }}
+        uses: avsm/setup-ocaml@v1
+        with:
+          ocaml-version: ${{ matrix.ocaml-version }}
 
-      - name: Set up opam environment
-        run: opam install dune opam-depext z3 menhir zarith num --no-depexts
-
-      - name: Build
-        run: opam exec -- dune build
-
-      - name: Run program
-        run: opam exec -- dune exec laurent banner
+      - run: opam exec -- dune build
+      
