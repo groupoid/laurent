@@ -1,18 +1,16 @@
 name: opam
 
 on:
-  - pull_request
-  - push
+  pull_request:
+  push:
 
 jobs:
   build:
     strategy:
       fail-fast: false
       matrix:
-        os:
-          - ubuntu-24.04
-        ocaml-version:
-          - 4.14.0
+        os: [ubuntu-24.04]
+        ocaml-version: [4.14.0]
 
     runs-on: ${{ matrix.os }}
 
@@ -20,12 +18,32 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Use OCaml ${{ matrix.ocaml-version }}
+      - name: Set up OCaml
         uses: avsm/setup-ocaml@v1
         with:
           ocaml-version: ${{ matrix.ocaml-version }}
 
-      - run: opam install . --deps-only
-      - run: opam exec -- dune build
-      - run: opam install .
-      - run: opam exec -- dune exec laurent banner
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            bubblewrap \
+            gcc-multilib \
+            g++-multilib \
+            mercurial \
+            musl-tools
+
+      - name: Set up opam environment
+        run: opam install dune opam-depext && opam depext . --yes --with-test
+
+      - name: Install dependencies
+        run: opam install . --deps-only --with-test
+
+      - name: Build
+        run: opam exec -- dune build
+
+      - name: Install
+        run: opam install .
+
+      - name: Run program
+        run: opam exec -- dune exec laurent banner
