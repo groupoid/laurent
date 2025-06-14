@@ -128,12 +128,14 @@ let test_term env ctx (term : exp) (expected_type : exp) (name : string) : test_
 let test_print_result (result : test_result) : unit =
   match result with
   | Result.Ok name     -> Printf.printf "Test %s : OK\n" name
-  | Result.Error error -> Printf.printf "Test %s : ERROR | expected: %s, got: %s\n" error.name (string_of_exp error.expected) (string_of_exp error.result)
+  | Result.Error error -> Printf.printf "\x1b[31mTest %s : ERROR | expected: %s, got: %s\x1b[0m\n" error.name (string_of_exp error.expected) (string_of_exp error.result)
 
 let test_print_results (results : test_result list) : unit =
   List.iter test_print_result results;
   let ok_count = List.length (List.filter Result.is_ok results) in
-  Printf.printf "%i / %i tests passed\n\n" ok_count (List.length results)
+  let all_count = List.length results in
+  let color = if ok_count == all_count then "\x1b[32m" else "\x1b[31m" in
+  Printf.printf "%s%i / %i tests passed\x1b[0m\n\n\n" color ok_count all_count
 
 let test_z3 () : test_result list =
   (
@@ -154,9 +156,9 @@ let test_z3 () : test_result list =
   )
 
 let test_foundations () =
-    print_endline "\n\nTesting foundations\n";
+    print_endline "\n\n\x1b[1mTesting foundations\x1b[0m\n";
     let ctx = add_var ctx "f" (Forall ("x", Real, Real)) in (
-      test_type env ctx sequence_a  (Universe 0) "integral_sig" ::
+      test_type env ctx integral_sig (Universe 0) "integral_sig" ::
       test_type env ctx sequence_a (Forall ("n", Nat, Real)) "sequence_a" ::
       test_type env ctx limit_a Prop "limit_a" ::
       test_type env ctx inf_a (Real) "inf_a" ::
