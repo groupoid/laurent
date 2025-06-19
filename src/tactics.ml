@@ -17,7 +17,7 @@ let next_id state = 1 + List.fold_left (fun m g -> max m g.id) 0 state.goals
 
 let ball x delta y =
   And (RealIneq (Gt, Var delta, Zero),
-    RealIneq (Lt, RealOps (Minus, Var y, Var x), Var delta))
+    RealIneq (Lt, RealOps (Abs, RealOps (Minus, Var y, x), Zero), Var delta))
 
 type tactic =
   | Intro of string
@@ -197,9 +197,7 @@ let apply_tactic env state tac =
      | goal :: rest ->
          let new_var = var ^ "_near" in
          let delta_var = "delta_" ^ var in
-         let near_assumption =
-           And (RealIneq (Gt, Var delta_var, Zero),
-                RealIneq (Lt, RealOps (Abs, RealOps (Minus, Var new_var, point), Zero), Var delta_var)) in
+         let near_assumption = ball point delta_var new_var in
          let new_ctx = (new_var, Real) :: (delta_var, Real) :: goal.ctx in
          let new_target =
            match goal.target with
