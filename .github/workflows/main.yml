@@ -1,7 +1,6 @@
 name: opam
 
 on:
-  - pull_request
   - push
 
 jobs:
