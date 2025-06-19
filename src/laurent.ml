@@ -1,5 +1,4 @@
 open Tactics
-open Inferer
 open Theorems
 open Suite
 
