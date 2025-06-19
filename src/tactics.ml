@@ -17,7 +17,7 @@ let next_id state = 1 + List.fold_left (fun m g -> max m g.id) 0 state.goals
 
 let ball x delta y =
   And (RealIneq (Gt, Var delta, Zero),
-    RealIneq (Lt, RealOps (Minus, Var y, Var x), Var delta))
+    RealIneq (Lt, RealOps (Abs, RealOps (Minus, Var y, x), Zero), Var delta))
 
 type tactic =
   | Intro of string
@@ -44,7 +44,7 @@ let print_state state =
   List.iter print_goal state.goals;
   Printf.printf "%d goals remaining\n" (List.length state.goals)
 
-let update_goal state goal new_target new_ctx =
+let create_goal state new_target new_ctx =
   { target = new_target; ctx = new_ctx; id = next_id state }
 
 let parse_exp (s : string) : exp =
@@ -72,17 +72,17 @@ let parse_tactic (input : string) : tactic =
 
 let apply_tactic env state tac =
   match tac with
-  | Intro var ->
+  | Intro _ ->
     (match state.goals with
      | goal :: rest ->
          (match goal.target with
           | Forall (v, ty, body) ->
               let new_ctx = (v, ty) :: goal.ctx in
-              let new_goal = update_goal state goal body new_ctx in
+              let new_goal = create_goal state body new_ctx in
               (match body with
                | Forall (_, assum, inner_body) ->
                    let new_ctx' = ("_assum", assum) :: new_ctx in
-                   { state with goals = update_goal state goal inner_body new_ctx' :: rest }
+                   { state with goals = create_goal state inner_body new_ctx' :: rest }
                | _ ->
                    { state with goals = new_goal :: rest })
           | _ -> raise (TacticError "Intro expects a forall"))
@@ -91,9 +91,9 @@ let apply_tactic env state tac =
     (match state.goals with
      | goal :: rest ->
          (match goal.target with
-          | Exists (var, ty, body) ->
+          | Exists (var, _, body) ->
               let new_target = subst var e body in
-              let new_goal = update_goal state goal new_target goal.ctx in
+              let new_goal = create_goal state new_target goal.ctx in
               let simplified_target = normalize env new_goal.ctx new_target in
               if equal env new_goal.ctx simplified_target True ||
                  List.exists (fun (_, e') -> equal env new_goal.ctx e' simplified_target) new_goal.ctx
@@ -106,8 +106,8 @@ let apply_tactic env state tac =
        | goal :: rest ->
            (match goal.target with
             | And (p, q) ->
-                let goal1 = update_goal state goal p goal.ctx in
-                let goal2 = update_goal state goal q goal.ctx in
+                let goal1 = create_goal state p goal.ctx in
+                let goal2 = create_goal state q goal.ctx in
                 { state with goals = goal1 :: goal2 :: rest }
             | _ -> raise (TacticError "Split expects a conjunction"))
        | _ -> raise (TacticError "No goals"))
@@ -117,14 +117,14 @@ let apply_tactic env state tac =
          let simplified_target = normalize env goal.ctx goal.target in
          let is_trivial =
            match simplified_target with
-           | Forall (_, _, Forall (x, Real, Forall (_, RealIneq (Lt, _, _), RealIneq (Lt, e2, Var "eps")))) ->
+           | Forall (_, _, Forall (_, Real, Forall (_, RealIneq (Lt, _, _), RealIneq (Lt, e2, Var "eps")))) ->
                let reduced_e2 = reduce env goal.ctx e2 in
                equal env goal.ctx reduced_e2 Zero &&
                List.exists (fun (_, assum) ->
                  match assum with
                  | RealIneq (Gt, Var "eps", Zero) -> true
                  | _ -> false) goal.ctx
-           | Forall (n, Nat, Forall (_, RealIneq (Gt, Var n', e1), RealIneq (Lt, e2, Var "eps"))) ->
+           | Forall (_, Nat, Forall (_, RealIneq (Gt, Var _, _), RealIneq (Lt, e2, Var "eps"))) ->
                let reduced_e2 = reduce env goal.ctx e2 in
                equal env goal.ctx reduced_e2 Zero &&
                List.exists (fun (_, assum) ->
@@ -148,7 +148,7 @@ let apply_tactic env state tac =
       (match state.goals with
        | goal :: rest ->
            (match goal.target with
-            | Limit (Seq f, x, l, p) ->
+            | Limit (Seq f, _, l, _) ->
                 let new_target =
                   Forall ("eps", Real,
                     Forall ("_", RealIneq (Gt, Var "eps", Zero),
@@ -156,7 +156,7 @@ let apply_tactic env state tac =
                         Forall ("n", Nat,
                           Forall ("_", RealIneq (Gt, Var "n", Var "N"),
                             RealIneq (Lt, RealOps (Abs, RealOps (Minus, App (f, Var "n"), l), Zero), Var "eps")))))) in
-                let new_goal = update_goal state goal new_target goal.ctx in
+                let new_goal = create_goal state new_target goal.ctx in
                 { state with goals = new_goal :: rest }
             | _ -> raise (TacticError "Limit expects a limit expression"))
        | _ -> raise (TacticError "No goals"))
@@ -188,7 +188,7 @@ let apply_tactic env state tac =
                           Forall ("x", Real,
                             Forall ("_", RealIneq (Lt, RealOps (Abs, RealOps (Minus, Var "x", a), Zero), Var "delta"),
                               RealIneq (Lt, RealOps (Abs, RealOps (Minus, App (f, Var "x"), App (f, a)), Zero), Var "eps"))))))) in
-                let new_goal = update_goal state goal new_target goal.ctx in
+                let new_goal = create_goal state new_target goal.ctx in
                 { state with goals = new_goal :: rest }
             | _ -> raise (TacticError "Continuity expects a continuous_at expression"))
        | _ -> raise (TacticError "No goals"))
@@ -197,18 +197,16 @@ let apply_tactic env state tac =
      | goal :: rest ->
          let new_var = var ^ "_near" in
          let delta_var = "delta_" ^ var in
-         let near_assumption =
-           And (RealIneq (Gt, Var delta_var, Zero),
-                RealIneq (Lt, RealOps (Abs, RealOps (Minus, Var new_var, point), Zero), Var delta_var)) in
+         let near_assumption = ball point delta_var new_var in
          let new_ctx = (new_var, Real) :: (delta_var, Real) :: goal.ctx in
          let new_target =
            match goal.target with
-           | Forall (v, ty, Forall (_, App (Var "near", Var v'), body)) when v = v' ->
+           | Forall (v, _, Forall (_, App (Var "near", Var v'), body)) when v = v' ->
                Forall ("_", near_assumption, subst v (Var new_var) body)
            | _ ->
                Forall ("_", near_assumption, goal.target)
          in
-         let new_goal = update_goal state goal new_target new_ctx in
+         let new_goal = create_goal state new_target new_ctx in
          { state with goals = new_goal :: rest }
      | _ -> raise (TacticError "No goals to apply near tactic"))
   | ApplyLocally ->
@@ -218,14 +216,14 @@ let apply_tactic env state tac =
           | Forall (_, assumption, consequent) ->
               let rec extract_near assum ctx =
                 match assum with
-                | And (RealIneq (Gt, delta, Zero), rest_assum) ->
+                | And (RealIneq (Gt, _, Zero), _) ->
                     let new_ctx = ("assumption", assum) :: goal.ctx in
                     let simplified_target = normalize env new_ctx consequent in
                     if equal env new_ctx simplified_target True ||
                        List.exists (fun (_, e') -> equal env new_ctx e' simplified_target) new_ctx
                     then { goals = rest; solved = (goal.id, consequent) :: state.solved }
-                    else { state with goals = update_goal state goal consequent new_ctx :: rest }
-                | And (left, right) -> extract_near right ctx
+                    else { state with goals = create_goal state consequent new_ctx :: rest }
+                | And (_, right) -> extract_near right ctx
                 | _ -> raise (TacticError ("ApplyLocally expects a near-like assumption: " ^ string_of_exp goal.target))
               in
               extract_near assumption goal.ctx

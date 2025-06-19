@@ -1,5 +1,4 @@
 open Inferer
-open Suite
 open Tactics
 
 (* LAURENT MATHEMATICS 💡 *)
