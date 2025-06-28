@@ -75,7 +75,7 @@ let e : exp =
     Limit (Seq sequence_e, Infinity, RealOps (Exp, One, One),
       Lam ("ε", Real,
         Lam ("p", RealIneq (Gt, Var "ε", Zero),
-          Pair (RealOps (Div, RealOps (Exp, One, Zero), RealOps (Times, RealOps (Plus, One, One), Var "ε")),
+          Pair (RealOps (Div, RealOps (Exp, One, Zero), RealOps (Mul, RealOps (Plus, One, One), Var "ε")),
             Lam ("n", Nat,
               Lam ("q", RealIneq (Gt, Var "n", Var "N"),
                 RealIneq (Lt, RealOps (Abs, RealOps (Minus, App (sequence_e, Var "n"), RealOps (Exp, One, One)), Zero), Var "ε")))))))))
