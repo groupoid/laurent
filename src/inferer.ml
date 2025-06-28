@@ -9,8 +9,8 @@ let trace: bool = false
 let tests: bool = true
 
 type real_ineq = Lt | Gt | Lte | Gte | Eq | Neq
-type real_op = Plus | Minus | Times | Div | Neg | Pow | Abs | Ln | Sin | Cos | Exp
-type complex_op = CPlus | CMinus | CTimes | CDiv
+type real_op = Plus | Minus | Mul | Div | Neg | Pow | Abs | Ln | Sin | Cos | Exp
+type complex_op = CPlus | CMinus | CMul | CDiv
 
 type exp =                         (* MLTT-72 Vibe Check                     *)
   | Prop                           (* Prop Universe, Prop : Universe 0       *)
@@ -133,10 +133,10 @@ let rec string_of_exp = function
   | RealIneq (op, a, b) -> "RealIneq (" ^ (match op with Lt -> "<" | Gt -> ">" | Lte -> "<=" | Gte -> ">=" | Eq -> "=" | Neq -> "Neq") ^ ", " ^ string_of_exp a ^ ", " ^ string_of_exp b ^ ")"
   | RealOps (op, a, b) ->
     let op_str = match op with
-      | Plus -> "+ℝ" | Minus -> "-ℝ" | Times -> "*ℝ" | Div -> "/ℝ" | Pow -> "^ℝ"
+      | Plus -> "+ℝ" | Minus -> "-ℝ" | Mul -> "*ℝ" | Div -> "/ℝ" | Pow -> "^ℝ"
       | Abs -> "Abs" | Ln -> "Ln" | Sin -> "Sin" | Cos -> "Cos" | Exp -> "Exp" | Neg -> "Neg"
     in "RealOps (" ^ op_str ^ ", " ^ string_of_exp a ^ ", " ^ string_of_exp b ^ ")"
-  | ComplexOps (op, a, b) -> "ComplexOps (" ^ (match op with CPlus -> "+C" | CMinus -> "-C" | CTimes -> "*C" | CDiv -> "/C") ^ ", " ^ string_of_exp a ^ ", " ^ string_of_exp b ^ ")"
+  | ComplexOps (op, a, b) -> "ComplexOps (" ^ (match op with CPlus -> "+C" | CMinus -> "-C" | CMul -> "*C" | CDiv -> "/C") ^ ", " ^ string_of_exp a ^ ", " ^ string_of_exp b ^ ")"
   | Closure s -> "Closure (" ^ string_of_exp s ^ ")"
   | Set a -> "Set (" ^ string_of_exp a ^ ")"
   | Complement a -> "Complement (" ^ string_of_exp a ^ ")"
@@ -284,7 +284,7 @@ and infer env (ctx : context) (e : exp) : exp =
     | RealOps (op, a, b) ->
         let _ = check env ctx a Real in
         (match op with
-         | Plus | Minus | Times | Div | Pow -> let _ = check env ctx b Real in Real
+         | Plus | Minus | Mul | Div | Pow -> let _ = check env ctx b Real in Real
          | Abs | Ln | Sin | Cos | Exp | Neg  -> Real)
     | ComplexOps (op, a, b) -> let _ = check env ctx a Complex in let _ = check env ctx b Complex in Complex
     | Closure s -> let _ = check env ctx s (Set Real) in Set Real

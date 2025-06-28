@@ -19,7 +19,7 @@ let () =
     match args with
     | [_; "repl"] ->   print_endline "Starting REPL...";
                        print_endline banner;
-                       ignore (console_loop [] state3)
+                       ignore (console_loop [] state1)
     | [_; "banner"] -> test_foundations ();
                        test_mathematics ();
                        print_endline banner
