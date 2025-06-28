@@ -153,7 +153,7 @@ let rec string_of_exp = function
   | Limit (f, x, l, p) -> "Limit (" ^ string_of_exp f ^ ", " ^ string_of_exp x ^ ", " ^ string_of_exp l ^ ", " ^ string_of_exp p ^ ")"
   | Sup s -> "Sup (" ^ string_of_exp s ^ ")"
   | Inf s -> "Inf (" ^ string_of_exp s ^ ")"
-  | Lebesgue (f, m, set) -> "Lebesgue (" ^ string_of_exp f ^ ", " ^ string_of_exp m ^ ")"
+  | Lebesgue (f, m, _) -> "Lebesgue (" ^ string_of_exp f ^ ", " ^ string_of_exp m ^ ")"
 
 let rec subst_many m t =
     match t with
@@ -208,8 +208,8 @@ and infer env (ctx : context) (e : exp) : exp =
     | Set a ->
       let a_ty = infer env ctx a in
       (match a_ty with
-      | Forall (x, domain, body) when equal env ctx domain Real && equal env ctx body Prop -> Set Real
-      | Universe i -> Universe 0
+      | Forall (_, domain, body) when equal env ctx domain Real && equal env ctx body Prop -> Set Real
+      | Universe _ -> Universe 0
       | Set b -> Set b
       | _ -> raise (TypeError ("Set expects a predicate or type, got " ^ string_of_exp a_ty)))
     | SetEq (s1, s2) ->
@@ -222,9 +222,9 @@ and infer env (ctx : context) (e : exp) : exp =
     | False -> Prop
     | Universe 0 -> Universe 1
     | Universe 1 -> Universe 1
-    | Universe i -> raise (TypeError "Invalid Universe (index should be less than 2)")
+    | Universe _ -> raise (TypeError "Invalid Universe (index should be less than 2)")
     | Var x -> (match lookup_var ctx x with | Some ty -> ty | None -> raise (TypeError ("Unbound variable: " ^ x)))
-    | Forall (x, Real, Pair (Lam (x1, p, q), Lam (y, q', p'))) when equal env ctx p p' && equal env ctx q q' -> Prop
+    | Forall (_, Real, Pair (Lam (_, p, q), Lam (_, q', p'))) when equal env ctx p p' && equal env ctx q q' -> Prop
     | Forall (x, domain, body) ->
       let _ = infer env ctx domain in
       let ctx' = add_var ctx x domain in
@@ -241,7 +241,7 @@ and infer env (ctx : context) (e : exp) : exp =
       | Forall (x, a, b) -> check env ctx arg a; subst x arg b
       | Set (Set a) -> check env ctx arg (Set a); Prop
       | Set Real -> check env ctx arg Real; Prop
-      | ty -> raise (TypeError "Application requires a Pi type"))
+      | _ -> raise (TypeError "Application requires a Pi type"))
     | Lam (x, domain, body) ->
       let ctx' = add_var ctx x domain in
       let body_ty = infer env ctx' body in
@@ -249,13 +249,13 @@ and infer env (ctx : context) (e : exp) : exp =
       (match domain, body with
       | Real, Prop -> Set Real
       | _ -> (match domain_ty with
-              | Universe i -> Forall (x, domain, body_ty) 
+              | Universe _ -> Forall (x, domain, body_ty)
               | Real -> if equal env ctx body_ty Prop then Set Real else Forall (x, domain, body_ty)
               | Prop -> Forall (x, domain, body_ty)
               | _ -> raise (TypeError "Lambda domain must be a type or proposition")))
     | Pair (a, b) -> let a_ty = infer env ctx a in let b_ty = infer env (add_var ctx "N" a_ty) b in Exists ("N", a_ty, b_ty)
-    | Fst p -> (match infer env ctx p with | Exists (x, a, b) -> a | ty -> raise (TypeError ("Fst expects a Sigma type")))
-    | Snd p -> (match infer env ctx p with | Exists (x, a, b) -> subst x (Fst p) b | ty -> raise (TypeError ("Snd expects a Sigma type")))
+    | Fst p -> (match infer env ctx p with | Exists (_, a, _) -> a | _ -> raise (TypeError ("Fst expects a Sigma type")))
+    | Snd p -> (match infer env ctx p with | Exists (x, _, b) -> subst x (Fst p) b | _ -> raise (TypeError ("Snd expects a Sigma type")))
     | Prop -> Universe 0
     | Bool -> Universe 0
     | Integer -> Universe 0
@@ -276,8 +276,8 @@ and infer env (ctx : context) (e : exp) : exp =
       let ct = infer env ctx cond in
       let _ = check env ctx ct (Universe 0) in
       let t_typ = infer env ctx f in let _ = check env ctx t t_typ in t_typ
-    | Vec (n, field, a, b) -> let _ = check env ctx field (Universe 0) in let _ = check env ctx a field in let _ = check env ctx b field in Universe 0
-    | RealIneq (op, a, b) ->
+    | Vec (_, field, a, b) -> let _ = check env ctx field (Universe 0) in let _ = check env ctx a field in let _ = check env ctx b field in Universe 0
+    | RealIneq (_, a, b) ->
       let _ = infer env ctx a in
       let _ = infer env ctx b in
       Prop
@@ -286,7 +286,7 @@ and infer env (ctx : context) (e : exp) : exp =
         (match op with
          | Plus | Minus | Mul | Div | Pow -> let _ = check env ctx b Real in Real
          | Abs | Ln | Sin | Cos | Exp | Neg  -> Real)
-    | ComplexOps (op, a, b) -> let _ = check env ctx a Complex in let _ = check env ctx b Complex in Complex
+    | ComplexOps (_, a, b) -> let _ = check env ctx a Complex in let _ = check env ctx b Complex in Complex
     | Closure s -> let _ = check env ctx s (Set Real) in Set Real
     | Union a -> let _ = check env ctx a (Forall ("n", Nat, Set Real)) in Set Real
     | Complement a ->
@@ -348,7 +348,7 @@ and infer env (ctx : context) (e : exp) : exp =
 and universe env ctx t =
     match infer env ctx t with
     | Universe i -> if i < 0 then raise (TypeError "Negative universe level"); i
-    | ty -> raise (TypeError (Printf.sprintf "Expected a universe"))
+    | _ -> raise (TypeError (Printf.sprintf "Expected a universe"))
 
 and check env (ctx : context) (term : exp) (expected : exp) : unit =
     if trace then Printf.printf "Check: %s Expected: %s\n" (string_of_exp term) (string_of_exp expected);
@@ -366,8 +366,8 @@ and equal' env ctx t1 t2 =
     | Universe i, Universe j -> i <= j
     | Forall (x, a, b), Forall (y, a', b') -> equal' env ctx a a' && equal' env (add_var ctx x a) b (subst y (Var x) b')
     | Lam (x, d, b), Lam (y, d', b') -> equal' env ctx d d' && equal' env (add_var ctx x d) b (subst y (Var x) b')
-    | Lam (x, d, b), t when not (is_lam t) -> let x_var = Var x in equal' env ctx b (App (t, x_var)) && (match infer env ctx t with | Forall (y, a, b') -> equal' env ctx d a | _ -> false)
-    | t, Lam (x, d, b) when not (is_lam t) -> let x_var = Var x in equal' env ctx (App (t, x_var)) b && (match infer env ctx t with | Forall (y, a, b') -> equal' env ctx a d | _ -> false)
+    | Lam (x, d, b), t when not (is_lam t) -> let x_var = Var x in equal' env ctx b (App (t, x_var)) && (match infer env ctx t with | Forall (_, a, _) -> equal' env ctx d a | _ -> false)
+    | t, Lam (x, d, b) when not (is_lam t) -> let x_var = Var x in equal' env ctx (App (t, x_var)) b && (match infer env ctx t with | Forall (_, a, _) -> equal' env ctx a d | _ -> false)
     | App (f, arg), App (f', arg') -> equal' env ctx f f' && equal' env ctx arg arg'
     | Exists (x, a, b), Exists (y, a', b') -> equal' env ctx a a' && let ctx' = add_var ctx x a in equal' env ctx' b (subst y (Var x) b')
     | Pair (a, b), Pair (a', b') -> equal' env ctx a a' && equal' env ctx b b'
@@ -415,25 +415,25 @@ and equal' env ctx t1 t2 =
 and reduce env ctx t =
     if verbose then Printf.printf "Reduce: %s\n" (string_of_exp t);
     match t with
-    | SetEq (Set (Lam (x1, Real, p1)), Set (Lam (x2, Real, p2))) -> smt_verify_iff ctx_z3 p1 p2
+    | SetEq (Set (Lam (_, Real, p1)), Set (Lam (_, Real, p2))) -> smt_verify_iff ctx_z3 p1 p2
     | SetEq (s, s') when equal env ctx s s' -> True
     | Intersect (Set (Lam (x1, Real, p1)), Set (Lam (x2, Real, p2))) ->
       Set (Lam ("x", Real, And (subst x1 (Var "x") p1, subst x2 (Var "x") p2)))
     | Intersect (a, b) -> Intersect (reduce env ctx a, reduce env ctx b)
-    | App (Lam (x, domain, body), arg) -> subst x arg body
-    | Set (Lam (x, domain, body)) -> True
+    | App (Lam (x, _, body), arg) -> subst x arg body
+    | Set (Lam _) -> True
     | App (f, arg) -> let f' = reduce env ctx f in let arg' = reduce env ctx arg in App (f', arg')
-    | Fst (Pair (a, b)) -> a
-    | Snd (Pair (a, b)) -> b
+    | Fst (Pair (a, _)) -> a
+    | Snd (Pair (_, b)) -> b
     | Limit (f, x, l, p) -> Limit (reduce env ctx f, reduce env ctx x, reduce env ctx l, reduce env ctx p)
     | RealOps (Abs, RealOps (Minus, a, b), Zero) ->
       let a' = reduce env ctx a in
       let b' = reduce env ctx b in
       if equal env ctx a' b' then Zero else RealOps (Abs, RealOps (Minus, a', b'), Zero)
-    | RealIneq (Lt, e1, e2) ->
+    | RealIneq (Lt, e1, _) ->
         let in_context = List.exists (fun (_, assum) ->
           match assum with
-          | And (_, RealIneq (Lt, e1', Var delta)) when equal env ctx e1 e1' ->  true
+          | And (_, RealIneq (Lt, e1', _)) when equal env ctx e1 e1' ->  true
           | _ -> false
         ) ctx in
         if in_context then True else t
@@ -456,7 +456,7 @@ and z3_of_exp ctx = function
   | RealConst i -> Arithmetic.Real.mk_numeral_i ctx (int_of_float i)
   | Set (Lam (_, Real, body)) -> z3_of_exp ctx body
   | RealOps (Plus, e1, e2) -> Arithmetic.mk_add ctx [z3_of_exp ctx e1; z3_of_exp ctx e2]
-  | Intersect (Set (Lam (x1, Real, p1)), Set (Lam (x2, Real, p2))) -> Boolean.mk_and ctx [z3_of_exp ctx p1; z3_of_exp ctx p2]
+  | Intersect (Set (Lam (_, Real, p1)), Set (Lam (_, Real, p2))) -> Boolean.mk_and ctx [z3_of_exp ctx p1; z3_of_exp ctx p2]
   | App (Set (Lam (x, Real, body)), arg) -> z3_of_exp ctx (subst x arg body)
   | x -> failwith ("Unsupported expression in Z3 conversion: " ^ (string_of_exp x))
 
