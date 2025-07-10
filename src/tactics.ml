@@ -15,9 +15,9 @@ type proof_state = {
 
 let next_id state = 1 + List.fold_left (fun m g -> max m g.id) 0 state.goals
 
-let ball x delta y =
-  And (RealIneq (Gt, Var delta, Zero),
-    RealIneq (Lt, RealOps (Abs, RealOps (Minus, Var y, x), Zero), Var delta))
+let ball point eps x =
+  And (RealIneq (Gt, eps, Zero),
+    RealIneq (Lt, RealOps (Abs, RealOps (Minus, x, point), Zero), eps))
 
 type tactic =
   | Intro of string
@@ -80,7 +80,7 @@ let apply_tactic env state tac =
               let new_ctx = (v, ty) :: goal.ctx in
               let new_goal = create_goal state body new_ctx in
               (match body with
-               | Forall (_, assum, inner_body) ->
+               | Forall ("_", assum, inner_body) ->
                    let new_ctx' = ("_assum", assum) :: new_ctx in
                    { state with goals = create_goal state inner_body new_ctx' :: rest }
                | _ ->
@@ -197,7 +197,7 @@ let apply_tactic env state tac =
      | goal :: rest ->
          let new_var = var ^ "_near" in
          let delta_var = "delta_" ^ var in
-         let near_assumption = ball point delta_var new_var in
+         let near_assumption = ball point (Var delta_var) (Var new_var) in
          let new_ctx = (new_var, Real) :: (delta_var, Real) :: goal.ctx in
          let new_target =
            match goal.target with

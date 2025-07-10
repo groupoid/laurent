@@ -1,3 +1,6 @@
+(ocamllex lexer)
+(menhir (modules parser))
+
 (executable
  (name laurent)
  (public_name laurent)
