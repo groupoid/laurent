@@ -1,1 +1,2 @@
-module limit where
+def limit_add : (f g : Nat -> Real) (L M : Real) (x_0 : Real),
+    lim f x_0 L -> lim g x_0 M -> lim (λ (n : Nat), f n + g n) x_0 (L + M)

@@ -14,7 +14,7 @@ depends: [
   "z3" {>= "4.14"}
   "num" {>= "1.5"}
   "ocaml" {>= "4.14"}
-  "menhir" {>= "20220210"}
+  "menhir" {>= "20240715"}
 ]
 build: [
   ["dune" "build" "-p" name "-j" jobs]

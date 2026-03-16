@@ -27,6 +27,35 @@ let state3 = initial_state
           RealOps (Abs, RealOps (Minus, Var "x", One), Zero),
           RealOps (Plus, One, One)))))
 
+let limit_proof f f_0 =
+  Forall ("eps", Real,
+    Forall("x", Real,
+      Forall ("_", (ball f_0 (Var "eps") (Var "x")),
+        RealIneq (Lt,
+          RealOps (Abs, RealOps (Minus, App (f, (Var "x")) , f_0), Zero),
+          Var "eps"))))
+
+let limit_add_state = {
+  goals = [
+    { ctx =
+        ("f", Seq (Lam("n", Nat, Real))) ::
+        ("g", Seq (Lam("n", Nat, Real))) ::
+        ("f_0", Real) ::
+        ("g_0", Real) ::
+        ("lim_f", limit_proof (Var "f") (Var "f_0")) ::
+        ("lim_g", limit_proof (Var "g") (Var "g_0")) ::
+        [];
+      target = Limit (Seq (Lam ("n", Nat,
+                                 RealOps (Plus, (App (Var "f", Var "n")),
+                                                (App (Var "g", Var "n"))))),
+                       Infinity,
+                       RealOps (Plus, Var "f_0", Var "g_0"),
+                       Var "pfg");
+      id = 1 }
+  ];
+  solved = [];
+}
+
 let test_mathematics () =
   let env = [] in
 
